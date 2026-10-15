@@ -1,0 +1,7 @@
+# Never upload local env files or build output from a CLI deploy.
+.env*
+!.env.example
+.next
+node_modules
+test-results
+playwright-report
