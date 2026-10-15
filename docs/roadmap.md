@@ -24,7 +24,7 @@ Mapped to the brief's milestones (S1 to S8).
 | Realtime: live refresh of workspace and portal screens, notification toasts | Done |
 | Scheduled demo reset (`/api/cron/reset-demo`) | Done (needs a scheduler on the host) |
 | E2E suite on Supabase (`pnpm test:e2e:supabase`), sign-up and onboarding checked on the hosted project | Done |
-| Stripe test mode: Checkout, customer portal, Stripe signatures on the existing processor | Next |
+| Stripe test mode: Checkout, plan switches, cancel and resume, customer portal, Stripe signatures on the existing processor | Done |
 | Transactional email (invites, review requests, digests) through a provider adapter | Next |
 | Deployment with the Supabase keys | Next |
 

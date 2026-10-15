@@ -70,14 +70,21 @@ async function Checkout({
       <Card className="overflow-hidden">
         <div className="flex items-center gap-2.5 border-b border-amber-500/25 bg-amber-500/[0.08] px-5 py-3 text-sm text-amber-100">
           <FlaskConical size={16} className="flex-none text-amber-300" aria-hidden="true" />
-          <span>
-            <strong className="font-semibold text-amber-200">Test mode.</strong> This checkout imitates the payment provider&apos;s hosted page. No card is
-            charged and no card details are collected.
-          </span>
+          {data.stripe ? (
+            <span>
+              <strong className="font-semibold text-amber-200">Stripe test mode.</strong> Payments run in Stripe&apos;s sandbox. Use the test card 4242 4242
+              4242 4242 with any future date and any CVC. No real money moves.
+            </span>
+          ) : (
+            <span>
+              <strong className="font-semibold text-amber-200">Test mode.</strong> This checkout imitates the payment provider&apos;s hosted page. No card is
+              charged and no card details are collected.
+            </span>
+          )}
         </div>
         <div className="grid lg:grid-cols-[1.1fr_.9fr]">
           <OrderSummary data={data} />
-          <Payment data={data} />
+          <Payment data={data} canceled={firstParam(query.canceled) === "1"} />
         </div>
       </Card>
     </>
@@ -118,11 +125,7 @@ function OrderSummary({ data }: { data: CheckoutSummary }) {
           <dd className="tabular-nums text-ink">{formatMoney(data.amountCents)}</dd>
         </div>
       </dl>
-      <p className="mt-3 text-xs text-ink-faint">
-        {free
-          ? "Starter is free. Your paid subscription ends now and no further invoices are issued."
-          : `A new billing period starts today and renews on ${formatDate(data.renewsOn)} at ${formatMoney(data.amountCents)}. Test mode doesn't prorate unused time. Cancel any time from Billing.`}
-      </p>
+      <p className="mt-3 text-xs text-ink-faint">{summaryNote(data)}</p>
 
       <ul className="mt-6 grid gap-2 text-sm text-ink-secondary sm:grid-cols-2">
         {data.plan.highlights.map((item) => (
@@ -136,8 +139,32 @@ function OrderSummary({ data }: { data: CheckoutSummary }) {
   );
 }
 
-function Payment({ data }: { data: CheckoutSummary }) {
+function summaryNote(data: CheckoutSummary) {
+  const flow = data.stripe?.flow;
+  if (flow === "change") return `Stripe charges the prorated difference for the rest of this period today, and ${data.plan.name} starts right away.`;
+  if (flow === "cancel") return `Your ${data.currentPlanName} plan stays until ${formatDate(data.stripe!.periodEnd)}. Then the workspace moves to Starter and no further invoices are issued.`;
+  if (flow === "checkout") return `Stripe bills ${formatMoney(data.amountCents)} today and renews on ${formatDate(data.renewsOn)}. Cancel any time from Billing.`;
+  if (data.amountCents === 0) return "Starter is free. Your paid subscription ends now and no further invoices are issued.";
+  return `A new billing period starts today and renews on ${formatDate(data.renewsOn)} at ${formatMoney(data.amountCents)}. Test mode doesn't prorate unused time. Cancel any time from Billing.`;
+}
+
+function payLabel(data: CheckoutSummary) {
+  const interval = data.interval === "year" ? "yearly" : "monthly";
+  switch (data.stripe?.flow) {
+    case "checkout":
+      return "Continue to Stripe checkout";
+    case "change":
+      return `Change to ${data.plan.name} (${interval})`;
+    case "cancel":
+      return "Move to Starter when the period ends";
+    default:
+      return data.amountCents === 0 ? `Switch to ${data.plan.name}` : `Pay ${formatMoney(data.amountCents)} with test card`;
+  }
+}
+
+function Payment({ data, canceled }: { data: CheckoutSummary; canceled: boolean }) {
   const free = data.amountCents === 0;
+  const flow = data.stripe?.flow;
   const blocked = data.relation === "downgrade" && data.blockers.length > 0;
   const current = data.relation === "current";
   return (
@@ -156,7 +183,21 @@ function Payment({ data }: { data: CheckoutSummary }) {
           <dt className="text-xs text-ink-faint">Email for receipts</dt>
           <dd className="mt-1 rounded-xl border border-line bg-white/[0.02] px-3.5 py-2.5 text-ink-secondary">{data.email}</dd>
         </div>
-        {!free && (
+        {flow === "checkout" && (
+          <div>
+            <dt className="text-xs text-ink-faint">Card</dt>
+            <dd className="mt-1 rounded-xl border border-line bg-white/[0.02] px-3.5 py-2.5 text-ink-secondary">
+              Entered on Stripe&apos;s secure page next. Use 4242 4242 4242 4242, any future date, any CVC.
+            </dd>
+          </div>
+        )}
+        {flow === "change" && (
+          <div>
+            <dt className="text-xs text-ink-faint">Card</dt>
+            <dd className="mt-1 rounded-xl border border-line bg-white/[0.02] px-3.5 py-2.5 text-ink-secondary">The test card saved in Stripe is charged.</dd>
+          </div>
+        )}
+        {!free && !flow && (
           <div>
             <dt className="text-xs text-ink-faint">Card (test card, read only)</dt>
             <dd className="mt-1 overflow-hidden rounded-xl border border-line bg-white/[0.02]">
@@ -175,6 +216,9 @@ function Payment({ data }: { data: CheckoutSummary }) {
       </dl>
 
       <div className="mt-6">
+        {canceled && (
+          <p className="mb-4 rounded-xl border border-line bg-white/[0.02] p-3.5 text-sm text-ink-muted">You left Stripe&apos;s checkout. Nothing was charged.</p>
+        )}
         {blocked ? (
           <div className="mb-4 space-y-1.5 rounded-xl border border-amber-500/25 bg-amber-500/[0.06] p-3.5 text-sm text-amber-100/90" role="alert">
             <p className="flex items-center gap-1.5 font-medium text-amber-200">
@@ -196,12 +240,14 @@ function Payment({ data }: { data: CheckoutSummary }) {
           plan={data.plan.key}
           interval={data.interval}
           disabled={blocked || current}
-          payLabel={free ? `Switch to ${data.plan.name}` : `Pay ${formatMoney(data.amountCents)} with test card`}
+          payLabel={payLabel(data)}
+          pendingLabel={flow === "checkout" ? "Opening Stripe…" : flow ? "Sending to Stripe…" : "Processing test payment…"}
         />
         <p className="mt-4 flex items-start gap-2 text-xs text-ink-faint">
           <ShieldCheck size={14} className="mt-0.5 flex-none text-cyan-300" aria-hidden="true" />
-          The price is set on the server from the plan catalogue. Completing this sends signed test webhooks through the same handler the live
-          provider uses.
+          {flow
+            ? "The price comes from the plan catalogue on the server. Your plan changes when Stripe's signed webhook reaches Atrium, usually within seconds."
+            : "The price is set on the server from the plan catalogue. Completing this sends signed test webhooks through the same handler the live provider uses."}
         </p>
       </div>
     </section>

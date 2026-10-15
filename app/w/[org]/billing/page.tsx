@@ -20,7 +20,7 @@ import { Card, CardHeader, IconBox } from "@/components/ui/card";
 import { FlashToast } from "@/components/ui/flash-toast";
 import { CardSkeleton, EmptyState, FormNote, PageHeader, ProgressBar, Skeleton, THead, Table, TableWrap, Td, Th, Tr } from "@/components/ui/misc";
 import { PlanComparison } from "@/components/billing/plan-comparison";
-import { CancelSubscriptionButton } from "@/components/billing/subscription-actions";
+import { CancelSubscriptionButton, ManageBillingButton } from "@/components/billing/subscription-actions";
 
 export const metadata: Metadata = { title: "Billing & plans" };
 
@@ -37,13 +37,20 @@ async function Billing({ params }: { params: Promise<{ org: string }> }) {
   const data = await getBillingOverview(org);
   return (
     <>
-      <FlashToast messages={{ upgraded: "Plan updated. The test payment and its invoice are recorded below." }} />
+      <FlashToast
+        messages={{
+          upgraded: "Plan updated. The test payment and its invoice are recorded below.",
+          checkout: "Payment received by Stripe (test mode). Your plan updates here in a few seconds.",
+          changing: "Plan change sent to Stripe. It shows here in a moment, with an invoice for the difference.",
+          scheduled: "Cancellation sent to Stripe. You keep every feature until the period ends.",
+        }}
+      />
       <PageHeader
         title="Billing & plans"
         description={`Plan, usage and invoices for ${data.orgName}.`}
         actions={
           <Badge tone="amber" className="py-1.5">
-            <FlaskConical size={13} aria-hidden="true" /> Test mode · no real charges
+            <FlaskConical size={13} aria-hidden="true" /> {data.stripe ? "Stripe test mode · no real charges" : "Test mode · no real charges"}
           </Badge>
         }
       />
@@ -130,6 +137,7 @@ function CurrentPlan({ data }: { data: BillingOverview }) {
           <a href="#plans" className={buttonClasses({ variant: "secondary", size: "sm" })}>
             Change plan
           </a>
+          {data.canManage && data.stripe?.portal && <ManageBillingButton orgSlug={data.orgSlug} />}
           {data.canManage && !sub.isFree && sub.status !== "canceled" && (
             <CancelSubscriptionButton
               orgSlug={data.orgSlug}

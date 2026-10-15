@@ -6,6 +6,7 @@ import type { AuditLog, Database, ID, Notification, Subscription, WebhookEvent }
 import { formatDate, formatMoney } from "@/lib/utils";
 import { getPlan } from "./plans";
 import { priceFromId } from "./prices";
+import { isRealStripeId } from "./stripe-flow";
 
 /**
  * Billing webhook processor.
@@ -24,7 +25,8 @@ import { priceFromId } from "./prices";
  *    event are acknowledged but ignored, so a late delivery can't roll the
  *    plan back.
  * 4. Trust: the plan comes from the price ID via the server-side catalogue,
- *    never from free-form metadata.
+ *    never from free-form metadata. Events for another subscription than the
+ *    stored one are rejected (see matchesStoredSubscription).
  */
 
 export const SIGNATURE_HEADER = "atrium-signature";
@@ -84,6 +86,12 @@ const eventBase = {
   created: z.number().int().positive(),
 };
 const currency = z.string().regex(/^[A-Z]{3}$/);
+const paymentMethod = z.object({
+  brand: z.string().min(2).max(20),
+  last4: z.string().regex(/^\d{4}$/),
+  expMonth: z.number().int().min(1).max(12),
+  expYear: z.number().int().min(2000).max(2100),
+});
 
 export const billingEventSchema = z.discriminatedUnion("type", [
   z.object({
@@ -96,16 +104,14 @@ export const billingEventSchema = z.discriminatedUnion("type", [
       priceId: id,
       amountCents: z.number().int().min(0),
       currency,
-      paymentMethod: z
-        .object({
-          brand: z.string().min(2).max(20),
-          last4: z.string().regex(/^\d{4}$/),
-          expMonth: z.number().int().min(1).max(12),
-          expYear: z.number().int().min(2000).max(2100),
-        })
-        .optional(),
+      paymentMethod: paymentMethod.optional(),
       /** Checkout metadata: the member who started the checkout. */
       initiatedByUserId: id.optional(),
+      /**
+       * Whether this checkout records the first invoice. Stripe sends its own
+       * invoice.paid for it, so events translated from Stripe set false.
+       */
+      recordInvoice: z.boolean().optional(),
     }),
   }),
   z.object({
@@ -120,6 +126,8 @@ export const billingEventSchema = z.discriminatedUnion("type", [
       cancelAtPeriodEnd: z.boolean(),
       trialEnd: z.number().int().positive().nullable().optional(),
       initiatedByUserId: id.optional(),
+      /** The card on the subscription, when the provider sends it (a card changed in Stripe's portal). */
+      paymentMethod: paymentMethod.optional(),
     }),
   }),
   z.object({
@@ -238,6 +246,17 @@ function describeSubscriptionChange(before: Subscription, after: Subscription, i
 }
 
 /**
+ * An event must be about the workspace's stored subscription. The one
+ * exception: a real Stripe subscription replaces a demo or simulated one
+ * ("_TEST_" IDs), so the first real subscription can arrive before its checkout.
+ */
+function matchesStoredSubscription(subscription: Subscription, subscriptionId: string) {
+  const stored = subscription.providerSubscriptionId;
+  if (!stored || stored === subscriptionId) return true;
+  return !isRealStripeId(stored) && isRealStripeId(subscriptionId);
+}
+
+/**
  * Applies one verified event to the database. Pure apart from writing to
  * `db`, so it can be unit tested with the seed.
  */
@@ -302,7 +321,7 @@ export function processBillingEvent(
       subscription.providerCustomerId = event.data.customerId;
       subscription.providerSubscriptionId = event.data.subscriptionId;
       if (event.data.paymentMethod) subscription.paymentMethod = { ...event.data.paymentMethod };
-      if (event.data.amountCents > 0) {
+      if (event.data.amountCents > 0 && event.data.recordInvoice !== false) {
         const start = new Date(event.created * 1000);
         const end = new Date(start);
         if (price.interval === "year") end.setUTCFullYear(end.getUTCFullYear() + 1);
@@ -327,13 +346,19 @@ export function processBillingEvent(
           href,
         });
       }
-      return finish("processed", "Checkout recorded: customer, payment method and invoice saved.", true);
+      return finish(
+        "processed",
+        event.data.recordInvoice === false
+          ? "Checkout recorded: customer and payment method saved. The invoice arrives with invoice.paid."
+          : "Checkout recorded: customer, payment method and invoice saved.",
+        true,
+      );
     }
 
     case "customer.subscription.updated": {
       const price = priceFromId(event.data.priceId);
       if (!price) return finish("failed", `Unknown price ${event.data.priceId}.`);
-      if (subscription.providerSubscriptionId && subscription.providerSubscriptionId !== event.data.subscriptionId) {
+      if (!matchesStoredSubscription(subscription, event.data.subscriptionId)) {
         return finish("failed", "Subscription ID does not match this workspace. Will succeed on retry once checkout is recorded.");
       }
       const before = { ...subscription };
@@ -344,6 +369,7 @@ export function processBillingEvent(
       subscription.currentPeriodEnd = new Date(event.data.currentPeriodEnd * 1000).toISOString();
       subscription.cancelAtPeriodEnd = event.data.cancelAtPeriodEnd;
       subscription.trialEndsAt = event.data.trialEnd ? new Date(event.data.trialEnd * 1000).toISOString() : undefined;
+      if (event.data.paymentMethod) subscription.paymentMethod = { ...event.data.paymentMethod };
 
       const intervalText = price.interval === "year" ? "yearly" : "monthly";
       const summary = describeSubscriptionChange(before, subscription, intervalText);
@@ -377,19 +403,31 @@ export function processBillingEvent(
     }
 
     case "customer.subscription.deleted": {
-      if (subscription.providerSubscriptionId && subscription.providerSubscriptionId !== event.data.subscriptionId) {
+      if (!matchesStoredSubscription(subscription, event.data.subscriptionId)) {
         return finish("failed", "Subscription ID does not match this workspace.");
       }
-      subscription.status = "canceled";
+      // The paid plan is over: the workspace goes back to the free plan and its limits.
+      const endedPlan = getPlan(subscription.planKey).name;
+      subscription.planKey = "starter";
+      subscription.interval = "month";
+      subscription.status = "active";
       subscription.cancelAtPeriodEnd = false;
+      subscription.trialEndsAt = undefined;
+      subscription.providerSubscriptionId = undefined;
       audit(fx, {
         action: "billing.plan_changed",
         entityType: "subscription",
         entityId: subscription.id,
-        summary: `Subscription to ${getPlan(subscription.planKey).name} ended`,
-        metadata: { event: event.id },
+        summary: `Subscription to ${endedPlan} ended; the workspace is back on Starter`,
+        metadata: { from: endedPlan, to: "starter", event: event.id },
       });
-      return finish("processed", "Subscription marked as canceled.", true);
+      notifyBilling(fx, {
+        type: "billing.invoice_paid",
+        title: `${org.name} is back on Starter`,
+        body: `The ${endedPlan} subscription ended. Starter limits apply from now on.`,
+        href,
+      });
+      return finish("processed", "Subscription ended; the workspace is back on Starter.", true);
     }
 
     case "invoice.paid": {

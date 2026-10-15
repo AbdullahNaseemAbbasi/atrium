@@ -1,9 +1,9 @@
 "use client";
 
 import * as React from "react";
-import { CalendarX2, RotateCcw } from "lucide-react";
+import { CalendarX2, ExternalLink, RotateCcw } from "lucide-react";
 import { toast } from "sonner";
-import { setCancelAtPeriodEnd } from "@/lib/actions/billing";
+import { openBillingPortal, setCancelAtPeriodEnd } from "@/lib/actions/billing";
 import { Button } from "@/components/ui/button";
 
 /** Cancel at period end / resume. Both go through the billing webhook processor on the server. */
@@ -37,6 +37,26 @@ export function CancelSubscriptionButton({
   ) : (
     <Button variant="ghost" size="sm" disabled={pending} onClick={() => run(true)} className="text-ink-muted hover:text-red-300">
       <CalendarX2 size={14} /> {pending ? "Cancelling…" : "Cancel at period end"}
+    </Button>
+  );
+}
+
+/** Opens Stripe's customer portal (cards, invoices, plan changes, cancelling). */
+export function ManageBillingButton({ orgSlug }: { orgSlug: string }) {
+  const [pending, startTransition] = React.useTransition();
+  return (
+    <Button
+      variant="outline"
+      size="sm"
+      disabled={pending}
+      onClick={() =>
+        startTransition(async () => {
+          const result = await openBillingPortal(orgSlug);
+          if (result && !result.ok) toast.error(result.message);
+        })
+      }
+    >
+      <ExternalLink size={14} /> {pending ? "Opening Stripe…" : "Manage billing in Stripe"}
     </Button>
   );
 }

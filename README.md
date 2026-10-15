@@ -12,8 +12,9 @@ who made it and when.
 > Storage and Realtime): uploads go straight to private storage, changes show
 > up live in other open tabs, and people have profile photos. AI drafts
 > (feedback summaries, replies, weekly client updates) run on Gemini's free
-> tier or Claude. Without Supabase keys it falls back to an in-memory store
-> with the same rules. Stripe test mode is next; see
+> tier or Claude, and plans are bought through Stripe Checkout in test mode.
+> Without Supabase keys it falls back to an in-memory store with the same
+> rules. Deployment is next; see
 > [docs/roadmap.md](docs/roadmap.md). All data is synthetic.
 
 ## Try the demo
@@ -148,10 +149,11 @@ With a Supabase project: fill in the Supabase variables, run
 | `pnpm build && pnpm start` | Production build and server (set `SESSION_SECRET`, or `ATRIUM_DEMO=true` for a demo deploy) |
 | `pnpm lint` | ESLint |
 | `pnpm typecheck` | Route type generation + `tsc --noEmit` |
-| `pnpm test` | Unit tests (102): tenant isolation, roles, client boundaries, review state machine, KPI formulas, billing webhooks, CSV escaping, reports, upload tickets, photo checks, open-redirect guard, what AI drafts may see |
+| `pnpm test` | Unit tests (114): tenant isolation, roles, client boundaries, review state machine, KPI formulas, billing webhooks, CSV escaping, reports, upload tickets, photo checks, open-redirect guard, what AI drafts may see, Stripe event translation |
 | `pnpm test:e2e` | Playwright against a production build in memory mode (30): sign-in, project and task creation, the client approval journey, cross-tenant and role checks, mobile layout |
 | `pnpm test:e2e:supabase` | The same 30 tests against a server on Supabase (real Auth and Postgres; reset the demo before and after) |
 | `pnpm seed` | Loads the demo users, photos and workspaces into Supabase |
+| `pnpm stripe:setup` | Creates the Stripe test products, prices and customer portal |
 
 On Supabase the demo resets with `pnpm seed`, from `/admin` → Reset demo
 data, or on a schedule through `/api/cron/reset-demo`. In memory mode it
@@ -184,6 +186,7 @@ docs/                architecture, data model, security, business rules, decisio
 - [Security and threat model](docs/security.md)
 - [Supabase setup and data layer](docs/supabase.md)
 - [AI drafts](docs/ai.md)
+- [Stripe test mode](docs/stripe.md)
 - [Decision records](docs/decisions/)
 - [Roadmap](docs/roadmap.md)
 - [Engineering conventions](docs/CONVENTIONS.md)

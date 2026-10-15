@@ -67,7 +67,7 @@ Next.js app (Node runtime)
 | Team app | `/w/[org]` dashboard, `projects` (+ overview, tasks, milestones, deliverables, files, activity, settings), `tasks`, `clients`, `team`, `approvals`, `activity`, `notifications`, `reports`, `billing`, `settings/*` |
 | Client portal | `/portal/[org]` overview, `projects`, `deliverables/[id]` review, `approvals`, `files`, `notifications` |
 | Platform | `/admin`, `/admin/workspaces`, `/admin/webhooks` |
-| API | `/api/files/download` (signed links, memory mode), CSV/JSON exports, `/api/webhooks/billing`, `/api/cron/reset-demo`, `/auth/callback` (email links) |
+| API | `/api/files/download` (signed links, memory mode), CSV/JSON exports, `/api/webhooks/billing` (simulated), `/api/webhooks/stripe`, `/api/cron/reset-demo`, `/auth/callback` (email links) |
 
 ## Why these choices
 

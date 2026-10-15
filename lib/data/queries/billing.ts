@@ -5,6 +5,8 @@ import { requireTeamContext } from "@/lib/auth/context";
 import { can } from "@/lib/auth/permissions";
 import { getPlan, PLAN_ORDER, PLANS } from "@/lib/billing/plans";
 import { isInterval, isPlanKey, trustedPrice } from "@/lib/billing/prices";
+import { stripeEnabled } from "@/lib/billing/stripe";
+import { isRealStripeId, stripeFlowFor, type StripeFlow } from "@/lib/billing/stripe-flow";
 import { computeUsage, downgradeBlockers, usageMeters, type DowngradeBlocker } from "@/lib/billing/usage";
 import type { TeamContext } from "../access";
 import { getDb } from "../store";
@@ -56,6 +58,8 @@ export async function getBillingOverview(orgSlug: string) {
     orgName: ctx.org.name,
     canManage: can(ctx.role, "billing.manage"),
     isBillingRole: ctx.role === "billing",
+    /** Stripe test mode is connected; the portal needs a Stripe customer from a first checkout. */
+    stripe: stripeEnabled() ? { portal: isRealStripeId(subscription.providerCustomerId) } : null,
     subscription: {
       planKey: subscription.planKey,
       planName: plan.name,
@@ -108,6 +112,8 @@ export interface CheckoutSummary {
   currentInterval: BillingInterval;
   renewsOn: string;
   blockers: DowngradeBlocker[];
+  /** With Stripe connected: how this change runs, and when the paid period ends. */
+  stripe: { flow: StripeFlow; periodEnd: string } | null;
 }
 
 /** Checkout requires `billing.manage`. The amount always comes from the server-side catalogue. */
@@ -136,5 +142,6 @@ export async function getCheckout(orgSlug: string, planParam: string | undefined
     currentInterval: subscription.interval,
     renewsOn: (effectiveInterval === "year" ? addYears(now, 1) : addMonths(now, 1)).toISOString(),
     blockers: downgradeBlockers(plan, computeUsage(db, ctx.org.id)),
+    stripe: stripeEnabled() ? { flow: stripeFlowFor(subscription, plan.key), periodEnd: subscription.currentPeriodEnd } : null,
   };
 }
