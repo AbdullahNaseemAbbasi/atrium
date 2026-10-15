@@ -11,7 +11,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: "Atrium: client sign-off for agencies and studios",
     description: "Send a version of the work. Your client approves it or asks for changes, and the decision stays with that version.",
-    images: [{ url: "/screenshots/portal-review.png", width: 1440, height: 900, alt: "A client reviewing version 3 of a homepage mockup in Atrium" }],
+    images: [{ url: "/screenshots/portal-review.png", width: 2880, height: 1800, alt: "A client reviewing version 3 of a homepage mockup in Atrium" }],
   },
 };
 
@@ -128,7 +128,7 @@ function ReviewStory() {
             src="/screenshots/review.png"
             alt="The agency's view of the same deliverable: version history, the client's comments and the approval trail"
             crop="aspect-[4/3]"
-            sizes="(min-width: 1024px) 560px, 100vw"
+            sizes="(min-width: 1760px) 820px, (min-width: 1024px) 50vw, 100vw"
             caption="The agency's side of the same file: every version, the discussion, and who decided what."
           />
         </div>

@@ -16,7 +16,7 @@ export default function ErrorPage({ error, retry }: { error: Error & { digest?: 
   return (
     <div className="relative flex min-h-dvh flex-col overflow-x-clip">
       <Backdrop />
-      <header className="relative mx-auto flex h-20 w-full max-w-[1200px] items-center px-4 sm:px-6 lg:px-8">
+      <header className="relative mx-auto flex h-20 w-full max-w-[1760px] items-center px-5 sm:px-8 xl:px-10">
         <Link href="/" aria-label="Atrium home">
           <Logo size={28} />
         </Link>

@@ -138,7 +138,7 @@ export default function FeaturesPage() {
               src="/screenshots/portal.png"
               alt="The client portal overview for Acme Co. with two deliverables waiting for review"
               crop="aspect-[4/3]"
-              sizes="(min-width: 1024px) 620px, 100vw"
+              sizes="(min-width: 1760px) 900px, (min-width: 1024px) 55vw, 100vw"
               caption="What Daniel at Acme Co. sees when he signs in."
             />
           </div>

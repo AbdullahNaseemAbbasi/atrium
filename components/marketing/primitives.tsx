@@ -14,7 +14,7 @@ import { buttonClasses } from "@/components/ui/button";
 /* ---------- Layout ---------- */
 
 export function Container({ className, ...props }: React.ComponentProps<"div">) {
-  return <div className={cn("mx-auto w-full max-w-[1180px] px-5 sm:px-8", className)} {...props} />;
+  return <div className={cn("mx-auto w-full max-w-[1760px] px-5 sm:px-8 xl:px-10", className)} {...props} />;
 }
 
 /** Flat call-to-action buttons for the public site (no gradient, no glow). */
@@ -100,7 +100,7 @@ export function ScreenshotFrame({
   alt,
   caption,
   priority = false,
-  sizes = "(min-width: 1180px) 1100px, 100vw",
+  sizes = "(min-width: 1760px) 1680px, 100vw",
   crop = "aspect-[1440/860]",
   focus = "object-left-top",
   className,
