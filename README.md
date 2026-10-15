@@ -6,6 +6,8 @@ portal where they review versioned deliverables, comment, and approve or
 request changes. Every decision is recorded against the exact version, with
 who made it and when.
 
+**Live demo: [atrium-olive.vercel.app](https://atrium-olive.vercel.app)** (sign in with any demo account below, password `atrium-demo`)
+
 ![Next.js 16](https://img.shields.io/badge/Next.js-16-000000?logo=nextdotjs) ![React 19](https://img.shields.io/badge/React-19-149eca?logo=react&logoColor=white) ![TypeScript strict](https://img.shields.io/badge/TypeScript-strict-3178c6?logo=typescript&logoColor=white) ![Supabase](https://img.shields.io/badge/Supabase-Postgres%20%2B%20RLS-3ecf8e?logo=supabase&logoColor=white) ![Stripe test mode](https://img.shields.io/badge/Stripe-test%20mode-635bff?logo=stripe&logoColor=white) ![AI drafts on Gemini or Claude](https://img.shields.io/badge/AI-Gemini%20%7C%20Claude-8e75b2) ![114 unit and 30 end-to-end tests](https://img.shields.io/badge/tests-114%20unit%20%C2%B7%2030%20e2e-2ea44f)
 
 ![Atrium dashboard: KPI tiles with 12-week trends, recent projects and the team's open tasks](docs/screenshots/dashboard.png)
@@ -16,7 +18,8 @@ who made it and when.
 > (feedback summaries, replies, weekly client updates) run on Gemini's free
 > tier or Claude, and plans are bought through Stripe Checkout in test mode.
 > Without Supabase keys it falls back to an in-memory store with the same
-> rules. Deployment is next; see
+> rules. It runs on Vercel in Mumbai, next to the Supabase project, and the
+> demo data resets every night. Transactional email is next; see
 > [docs/roadmap.md](docs/roadmap.md). All data is synthetic.
 
 ## Screenshots
@@ -81,8 +84,9 @@ older version.
 
 ## Try the demo
 
-Run it locally (below), open `/login` and either click a demo account or
-type its email with the password. Each account shows a different side of
+Open [the live demo](https://atrium-olive.vercel.app/login) (or run it
+locally, below), then either click a demo account or type its email with
+the password. Each account shows a different side of
 the permission model.
 
 **Password for every demo account: `atrium-demo`**

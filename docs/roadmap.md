@@ -11,7 +11,7 @@ Mapped to the brief's milestones (S1 to S8).
 | S5 | Plans, checkout test mode, webhook verification, usage enforcement | Done: Stripe in test mode (Checkout, plan switches, customer portal), with the simulated checkout kept for tests and the in-memory demo |
 | S6 | Client portal polish, dashboards, accessibility, responsive layouts | Done; accessibility pass to repeat after phase 2 |
 | S7 | Cross-tenant security tests, E2E tests, logging, performance review | Done: 114 unit tests, 30 Playwright tests run on both backends (security, approval journey, mobile layout); structured logging comes with deployment |
-| S8 | CI/CD, deployment, seed/demo accounts, screenshots, diagram, walkthrough | CI workflow, demo accounts and screenshots done; deployment and a recorded walkthrough next |
+| S8 | CI/CD, deployment, seed/demo accounts, screenshots, diagram, walkthrough | Done: CI workflow, Vercel deployment with auto-deploy from `main`, demo accounts, screenshots; a recorded walkthrough next |
 
 ## Phase 2: Supabase and Stripe
 
@@ -26,7 +26,7 @@ Mapped to the brief's milestones (S1 to S8).
 | E2E suite on Supabase (`pnpm test:e2e:supabase`), sign-up and onboarding checked on the hosted project | Done |
 | Stripe test mode: Checkout, plan switches, cancel and resume, customer portal, Stripe signatures on the existing processor | Done |
 | Transactional email (invites, review requests, digests) through a provider adapter | Next |
-| Deployment with the Supabase keys | Next |
+| Deployment on Vercel (Mumbai), Stripe webhook endpoint, nightly demo reset by Vercel Cron | Done |
 
 ## Phase 3: AI assistance
 
