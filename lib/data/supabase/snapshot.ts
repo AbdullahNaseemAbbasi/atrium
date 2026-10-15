@@ -1,5 +1,5 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
-import type { Database } from "../types";
+import type { Database, User } from "../types";
 import { REFERENCED_TABLES, TABLES, WRITE_ORDER, columnName, fromRow, rowKey, type CollectionName, type TableSpec } from "./tables";
 
 /**
@@ -32,7 +32,7 @@ async function selectAll(admin: SupabaseClient, spec: TableSpec, filter: Filter)
   if (filter && filter.values.length === 0) return [];
   const rows: Record<string, unknown>[] = [];
   for (let from = 0; ; from += PAGE) {
-    let query = admin.from(spec.table).select("*").range(from, from + PAGE - 1);
+    let query = admin.from(spec.table).select("*").order(columnName(spec.key[0])).range(from, from + PAGE - 1);
     if (filter) query = query.in(filter.column, filter.values);
     const { data, error } = await query;
     if (error) throw new Error(`Loading ${spec.table} failed: ${error.message}`);
@@ -42,15 +42,24 @@ async function selectAll(admin: SupabaseClient, spec: TableSpec, filter: Filter)
   return rows.map((row) => fromRow<Record<string, unknown>>(row));
 }
 
-/** Organizations a profile belongs to, as a team member or a client user. */
-export async function organizationsFor(admin: SupabaseClient, profileId: string) {
-  const [memberships, clientMemberships] = await Promise.all([
-    admin.from("memberships").select("organization_id").eq("user_id", profileId),
-    admin.from("client_memberships").select("organization_id").eq("user_id", profileId),
-  ]);
-  if (memberships.error) throw new Error(`Loading memberships failed: ${memberships.error.message}`);
-  if (clientMemberships.error) throw new Error(`Loading client memberships failed: ${clientMemberships.error.message}`);
-  return [...new Set([...(memberships.data ?? []), ...(clientMemberships.data ?? [])].map((row) => row.organization_id as string))];
+/**
+ * The profile of a signed-in Auth user plus every organization they belong to
+ * (as a team member or a client user), in one query.
+ */
+export async function viewerWithOrganizations(admin: SupabaseClient, authUserId: string): Promise<{ user: User; orgIds: string[] } | null> {
+  const { data, error } = await admin
+    .from("profiles")
+    .select("*, memberships(organization_id), client_memberships(organization_id)")
+    .eq("auth_user_id", authUserId)
+    .maybeSingle();
+  if (error) throw new Error(`Loading your profile failed: ${error.message}`);
+  if (!data) return null;
+  const { memberships, client_memberships: clientMemberships, ...profile } = data as Record<string, unknown> & {
+    memberships: { organization_id: string }[];
+    client_memberships: { organization_id: string }[];
+  };
+  const orgIds = [...new Set([...memberships, ...clientMemberships].map((row) => row.organization_id))];
+  return { user: fromRow<User>(profile), orgIds };
 }
 
 /**
@@ -59,11 +68,11 @@ export async function organizationsFor(admin: SupabaseClient, profileId: string)
  */
 export async function loadSnapshot(
   admin: SupabaseClient,
-  opts: { orgIds: string[]; everything?: boolean; viewerId?: string | null },
+  opts: { orgIds: string[]; everything?: boolean; viewer?: User | null },
 ): Promise<Snapshot> {
   const db = emptyDatabase();
   const orgIds = [...new Set(opts.orgIds)];
-  await fillOrganizations(admin, db, orgIds, Boolean(opts.everything), opts.viewerId ?? null);
+  await fillOrganizations(admin, db, orgIds, Boolean(opts.everything), opts.viewer ?? null);
   return { db, original: structuredClone(db), orgIds: new Set(orgIds), everything: Boolean(opts.everything) };
 }
 
@@ -83,13 +92,42 @@ export async function extendSnapshot(admin: SupabaseClient, snapshot: Snapshot, 
   for (const id of missing) snapshot.orgIds.add(id);
 }
 
-async function fillOrganizations(admin: SupabaseClient, db: Database, orgIds: string[], everything: boolean, viewerId: string | null) {
+/**
+ * Profiles of everyone with a team or client membership in `orgIds` (any
+ * status). Loaded in the same round trip as the tenant tables; that covers
+ * almost every profile the rows refer to.
+ */
+async function memberProfiles(admin: SupabaseClient, relation: "memberships" | "client_memberships", orgIds: string[]) {
+  if (orgIds.length === 0) return [];
+  const rows: Record<string, unknown>[] = [];
+  for (let from = 0; ; from += PAGE) {
+    const { data, error } = await admin
+      .from("profiles")
+      .select(`*, ${relation}!inner(organization_id)`)
+      .in(`${relation}.organization_id`, orgIds)
+      .order("id")
+      .range(from, from + PAGE - 1);
+    if (error) throw new Error(`Loading profiles failed: ${error.message}`);
+    for (const row of (data ?? []) as Record<string, unknown>[]) {
+      const profile = { ...row };
+      delete profile[relation];
+      rows.push(fromRow<Record<string, unknown>>(profile));
+    }
+    if (!data || data.length < PAGE) break;
+  }
+  return rows;
+}
+
+async function fillOrganizations(admin: SupabaseClient, db: Database, orgIds: string[], everything: boolean, viewer: User | null) {
   const tenantNames = (Object.keys(TABLES) as CollectionName[]).filter((name) => TABLES[name].tenant);
   const byOrg: Filter = everything ? null : { column: "organization_id", values: orgIds };
 
-  const [organizations, webhookEvents, ...tenant] = await Promise.all([
+  // One round trip: organizations, every tenant table and the members' profiles in parallel.
+  const [organizations, webhookEvents, teamProfiles, clientProfiles, ...tenant] = await Promise.all([
     selectAll(admin, TABLES.organizations, everything ? null : { column: "id", values: orgIds }),
     selectAll(admin, TABLES.webhookEvents, byOrg),
+    everything ? selectAll(admin, TABLES.users, null) : memberProfiles(admin, "memberships", orgIds),
+    everything ? Promise.resolve([]) : memberProfiles(admin, "client_memberships", orgIds),
     ...tenantNames.map((name) => selectAll(admin, TABLES[name], byOrg)),
   ]);
   (db.organizations as unknown[]) = organizations;
@@ -98,19 +136,25 @@ async function fillOrganizations(admin: SupabaseClient, db: Database, orgIds: st
     (db[name] as unknown[]) = tenant[index];
   });
 
-  // Profiles referenced by the loaded rows, plus the viewer.
-  const ids = new Set<string>();
-  if (viewerId) ids.add(viewerId);
+  const users = new Map<string, Record<string, unknown>>();
+  for (const profile of [...teamProfiles, ...clientProfiles]) users.set(profile.id as string, profile);
+  if (viewer) users.set(viewer.id, viewer as unknown as Record<string, unknown>);
+
+  // Rows can also point at people without a membership here (a platform
+  // operator in the audit log, a member who has since been removed). Load
+  // those in a second round trip, only when there are any.
+  const missing = new Set<string>();
   for (const name of tenantNames) {
     for (const row of db[name] as unknown as Record<string, unknown>[]) {
       for (const [field, value] of Object.entries(row)) {
-        if (typeof value === "string" && (field === "userId" || field.endsWith("UserId"))) ids.add(value);
+        if (typeof value === "string" && (field === "userId" || field.endsWith("UserId")) && !users.has(value)) missing.add(value);
       }
     }
   }
-  db.users = everything
-    ? await selectAll(admin, TABLES.users, null) as unknown as Database["users"]
-    : await selectAll(admin, TABLES.users, { column: "id", values: [...ids] }) as unknown as Database["users"];
+  if (!everything && missing.size > 0) {
+    for (const profile of await selectAll(admin, TABLES.users, { column: "id", values: [...missing] })) users.set(profile.id as string, profile);
+  }
+  db.users = [...users.values()] as unknown as Database["users"];
 }
 
 /* ---------- Saving ---------- */

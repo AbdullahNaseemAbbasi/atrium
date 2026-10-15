@@ -1,6 +1,6 @@
 "use server";
 
-import { refresh } from "next/cache";
+import { refresh, revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { getCurrentUser, requireTeamContext } from "@/lib/auth/context";
 import { can } from "@/lib/auth/permissions";
@@ -95,6 +95,8 @@ export async function createDeliverable(orgSlug: string, projectId: string, _pre
   project.updatedAt = now;
   recordActivity(db, ctx, { projectId: project.id, verb: "deliverable.uploaded", targetType: "deliverable", targetId: id, targetLabel: meta.data.title, visibility: "internal" });
   await saveDb();
+  // Lists the browser cached earlier (deliverables, approvals, dashboard) must show the new one.
+  revalidatePath(`/w/${ctx.org.slug}`, "layout");
   redirect(`/w/${ctx.org.slug}/projects/${project.id}/deliverables/${id}?uploaded=1`);
 }
 

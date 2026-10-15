@@ -71,8 +71,11 @@ object (`lib/data/types.ts`), and they still are:
 
 - `getDb()` (`lib/data/store.ts`) returns a request-scoped snapshot: the
   rows of every workspace the signed-in person belongs to, loaded with the
-  secret key in about 20 parallel queries (`lib/data/supabase/snapshot.ts`).
-  Platform operators load everything.
+  secret key (`lib/data/supabase/snapshot.ts`) in two round trips: first the
+  profile together with its memberships, then every table and every member's
+  profile in parallel. A third trip happens only when rows point at someone
+  without a membership there (a removed member, a platform operator in the
+  audit log). Platform operators load everything.
 - `saveDb()` diffs the snapshot against what was loaded and writes only the
   changed rows: tables other tables point at go in foreign-key order, the
   rest (comments, activity, notifications, audit log...) in parallel.
@@ -145,18 +148,43 @@ object (`lib/data/types.ts`), and they still are:
 
 Published tables (with `replica identity full`, so updates and deletes carry
 the old row): notifications, tasks, deliverables, deliverable_versions,
-approvals, comments, activity_events, projects, milestones, project_files,
-memberships, client_memberships, invitations. Subscribers only receive rows
-their RLS policies allow.
+approvals, comments, activity_events, projects, project_members, milestones,
+project_files, clients, memberships, client_memberships, invitations,
+subscriptions, invoices, integrations, organizations and profiles (the last
+seven were added in `20261016100000_realtime_more_tables.sql`). Subscribers
+only receive rows their RLS policies allow. Not published: audit_logs,
+notification_preferences and webhook_events.
 
 `components/realtime/realtime-sync.tsx` runs in the workspace and portal
 layouts. It joins one channel per person and workspace, listens for inserts
 and updates on those tables filtered by `organization_id`, and refreshes the
 server components on screen (debounced; hidden tabs refresh once when they
-come back). New notifications for the person also show a toast with a link.
+come back, and a dropped connection refreshes once it's back). It also
+listens for updates to this organization and to profiles. New notifications
+for the person also show a toast with a link.
 Deletes aren't streamed (Postgres changes can't filter them by workspace);
 every delete in the app also updates a parent row, which triggers the
 refresh. The memory backend has no Realtime.
+
+## Browser page cache
+
+`staleTimes.dynamic` in `next.config.ts` keeps visited workspace and portal
+pages in the browser for 30 seconds, so going back to one is instant. It
+never hides a change, because Next.js empties that whole cache whenever:
+
+- a server action calls `refresh()` or `revalidatePath()` (every action that
+  saves does; `createDeliverable` revalidates before it redirects),
+- the browser calls `router.refresh()` (what Realtime sync does on every
+  change by anyone),
+- a server action changes cookies (signing in or out).
+
+The audit log page opts out (`unstable_dynamicStaleTime = 0`): downloads and
+support views add entries without refreshing, and the log isn't published to
+Realtime. A new action that saves must refresh or revalidate too.
+
+Clicks on links show a thin bar at the top
+(`components/navigation/navigation-progress.tsx`) until Next.js can show the
+new page or its loading skeleton.
 
 ## Demo reset
 

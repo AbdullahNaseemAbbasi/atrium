@@ -54,6 +54,9 @@ Next.js app (Node runtime)
    (`saveDb()`) and refreshes the route.
 6. Other open tabs of the same workspace receive the row changes through
    Supabase Realtime (filtered by RLS) and refresh their server components.
+7. Visited pages stay in the browser for 30 seconds, so going back is
+   instant; any save or Realtime change empties that cache (see
+   `docs/supabase.md`).
 
 ## Areas
 

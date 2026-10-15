@@ -11,8 +11,13 @@ const nextConfig: NextConfig = {
     ],
   },
   experimental: {
-    // Avatar and file uploads go straight to storage; server actions only carry form fields.
+    // Profile photos (up to 1.5 MB) are posted to a server action; project files go straight to storage.
     serverActions: { bodySizeLimit: "2mb" },
+    // Keep visited workspace pages in the browser for 30s so going back to one is instant.
+    // Safe with live data: every server action that saves (refresh/revalidatePath) and every
+    // Realtime refresh (router.refresh) empties this whole cache, so a change made by anyone is
+    // never hidden behind a cached page.
+    staleTimes: { dynamic: 30 },
   },
   turbopack: {
     rules: {

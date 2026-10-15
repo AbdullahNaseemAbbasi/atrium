@@ -15,6 +15,10 @@ import { EmptyState, Pagination, Skeleton, TableSkeleton, THead, Table, TableWra
 
 export const metadata: Metadata = { title: "Audit log · Settings" };
 
+// Never served from the browser's page cache: downloads and support views add
+// entries without refreshing anything, and the log isn't a Realtime table.
+export const unstable_dynamicStaleTime = 0;
+
 type Search = Record<string, string | string[] | undefined>;
 
 export default function AuditLogPage({ params, searchParams }: PageProps<"/w/[org]/settings/audit-log">) {

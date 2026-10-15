@@ -1,6 +1,8 @@
+import { Suspense } from "react";
 import type { Metadata, Viewport } from "next";
 import { IBM_Plex_Mono, IBM_Plex_Sans } from "next/font/google";
 import { Toaster } from "sonner";
+import { NavigationProgress } from "@/components/navigation/navigation-progress";
 import "./globals.css";
 
 const plexSans = IBM_Plex_Sans({
@@ -40,6 +42,9 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
         >
           Skip to content
         </a>
+        <Suspense fallback={null}>
+          <NavigationProgress />
+        </Suspense>
         {children}
         <Toaster
           theme="dark"

@@ -27,11 +27,17 @@ access rules that the unit tests cover.
    for service-role writes.
 5. **Memory mode stays** for unit tests, E2E tests and keyless demos
    (`ATRIUM_BACKEND=memory`).
+6. **Deploy next to the database.** Every page load waits on those round
+   trips, so the app server should run in the database's region (Mumbai,
+   `ap-south-1`); from far away each trip costs about 200 ms.
 
 ## Consequences
 
-- Each request costs one snapshot load (about 20 parallel queries). That is
-  fine for agency-sized workspaces (hundreds to low thousands of rows). A
+- Each request costs one snapshot load: two round trips to Postgres (the
+  profile with its memberships, then every table in parallel). Pages a
+  person has already visited are kept in the browser for 30 seconds and
+  emptied on any change (see "Browser page cache" in `docs/supabase.md`).
+  That is fine for agency-sized workspaces (hundreds to low thousands of rows). A
   workspace with tens of thousands of tasks would need per-page queries;
   the read models in `lib/data/queries` are the place to add them.
 - Two writers can overwrite each other's change to the same row (last write

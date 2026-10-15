@@ -4,8 +4,7 @@ import { headers } from "next/headers";
 import { after, connection } from "next/server";
 import { createSupabaseServerClient, supabaseAdmin } from "@/lib/supabase/server";
 import type { User } from "../types";
-import { extendSnapshot, loadSnapshot, organizationsFor, saveSnapshot, type Snapshot } from "./snapshot";
-import { fromRow } from "./tables";
+import { extendSnapshot, loadSnapshot, saveSnapshot, viewerWithOrganizations, type Snapshot } from "./snapshot";
 
 /**
  * Request-scoped state for Supabase mode, so the data is loaded once and
@@ -18,7 +17,8 @@ import { fromRow } from "./tables";
  * saved changes straight away.
  */
 interface RequestState {
-  viewer?: Promise<User | null>;
+  /** The signed-in profile and the organizations it belongs to (one query). */
+  viewer?: Promise<{ user: User; orgIds: string[] } | null>;
   snapshot?: Promise<Snapshot>;
   /** Set once `snapshot` has loaded; the after-response save only looks at this. */
   loaded?: Snapshot;
@@ -56,15 +56,17 @@ async function requestState(): Promise<RequestState> {
  * checks the token signature; the cookie alone is never trusted).
  */
 export async function currentViewer(): Promise<User | null> {
+  return (await viewerRecord())?.user ?? null;
+}
+
+async function viewerRecord() {
   const state = await requestState();
   state.viewer ??= (async () => {
     const supabase = await createSupabaseServerClient();
     const { data, error } = await supabase.auth.getClaims();
     const authUserId = !error ? (data?.claims?.sub as string | undefined) : undefined;
     if (!authUserId) return null;
-    const { data: profile, error: profileError } = await supabaseAdmin().from("profiles").select("*").eq("auth_user_id", authUserId).maybeSingle();
-    if (profileError) throw new Error(`Loading your profile failed: ${profileError.message}`);
-    return profile ? fromRow<User>(profile) : null;
+    return viewerWithOrganizations(supabaseAdmin(), authUserId);
   })();
   return state.viewer;
 }
@@ -74,11 +76,11 @@ export async function requestSnapshot(): Promise<Snapshot> {
   const state = await requestState();
   if (!state.snapshot) {
     state.snapshot = (async () => {
-      const viewer = await currentViewer();
+      const viewer = await viewerRecord();
       const admin = supabaseAdmin();
       if (!viewer) return loadSnapshot(admin, { orgIds: [] });
-      if (viewer.isPlatformAdmin) return loadSnapshot(admin, { orgIds: [], everything: true, viewerId: viewer.id });
-      return loadSnapshot(admin, { orgIds: await organizationsFor(admin, viewer.id), viewerId: viewer.id });
+      if (viewer.user.isPlatformAdmin) return loadSnapshot(admin, { orgIds: [], everything: true, viewer: viewer.user });
+      return loadSnapshot(admin, { orgIds: viewer.orgIds, viewer: viewer.user });
     })().then((snapshot) => (state.loaded = snapshot));
     scheduleSave(state);
   }
