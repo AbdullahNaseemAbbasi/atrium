@@ -28,11 +28,11 @@ Mapped to the brief's milestones (S1 to S8).
 | Transactional email (invites, review requests, digests) through a provider adapter | Next |
 | Deployment with the Supabase keys | Next |
 
-## Phase 3: AI assistance (after an API key is available)
+## Phase 3: AI assistance
 
-Kept behind a provider adapter, with timeouts, token limits, per-workspace
-quotas and usage logging; output is always a draft a person approves.
-
-- Summarise a deliverable's feedback thread into a change list.
-- Draft a reply to a client comment.
-- Draft the weekly client update from the project's activity.
+| Step | State |
+|---|---|
+| Provider adapter (Gemini free tier now, Claude when a key is added), timeouts, model fallback | Done |
+| Feedback summary, reply draft, weekly client update; drafts only, a person decides | Done |
+| Per-workspace and per-person daily allowance, audit entry per draft | Done |
+| Usage dashboard for owners | Later |

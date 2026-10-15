@@ -343,7 +343,8 @@ export type AuditAction =
   | "integration.connected"
   | "integration.disconnected"
   | "support.accessed"
-  | "auth.sign_in";
+  | "auth.sign_in"
+  | "ai.generated";
 
 export interface AuditLog {
   id: ID;

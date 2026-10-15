@@ -182,6 +182,7 @@ export const AUDIT_ACTION_LABELS: Record<AuditAction, string> = {
   "integration.disconnected": "Integration disconnected",
   "auth.sign_in": "Signed in",
   [SUPPORT_ACCESS_ACTION]: "Support access",
+  "ai.generated": "AI draft written",
 };
 
 export function auditActionLabel(action: string) {

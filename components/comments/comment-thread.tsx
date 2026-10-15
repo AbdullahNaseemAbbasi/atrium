@@ -2,9 +2,11 @@
 
 import * as React from "react";
 import { useActionState } from "react";
-import { Lock, MessageSquare, Users } from "lucide-react";
+import { LoaderCircle, Lock, MessageSquare, PenLine, Users } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { ActionState } from "@/lib/actions/result";
+import type { AiDraftResult } from "@/lib/actions/ai";
+import { Button } from "@/components/ui/button";
 import type { CommentView } from "@/lib/data/views";
 import { Avatar } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
@@ -26,6 +28,7 @@ export function CommentThread({
   canPost = true,
   emptyText = "No comments yet.",
   placeholder = "Write a comment…",
+  onDraftReply,
 }: {
   comments: ThreadComment[];
   action: (state: ActionState, formData: FormData) => Promise<ActionState>;
@@ -34,10 +37,39 @@ export function CommentThread({
   canPost?: boolean;
   emptyText?: string;
   placeholder?: string;
+  /** When set, a "Draft a reply" button fills the box with an AI draft (never posts it). */
+  onDraftReply?: () => Promise<AiDraftResult>;
 }) {
-  const [state, formAction] = useActionState(action, null);
+  const [draft, setDraft] = React.useState<{ status: "idle" | "loading" | "filled" } | { status: "error"; message: string }>({ status: "idle" });
+  const [state, formAction] = useActionState(async (previous: ActionState, formData: FormData) => {
+    const result = await action(previous, formData);
+    if (result?.ok) setDraft({ status: "idle" });
+    return result;
+  }, null);
   const [visibility, setVisibility] = React.useState<"client" | "internal">(defaultVisibility);
   const formRef = React.useRef<HTMLFormElement>(null);
+  const bodyRef = React.useRef<HTMLTextAreaElement>(null);
+
+  async function draftReply() {
+    if (!onDraftReply) return;
+    if (bodyRef.current?.value.trim() && !window.confirm("Replace what you've written with an AI draft?")) return;
+    setDraft({ status: "loading" });
+    try {
+      const result = await onDraftReply();
+      if (!result.ok) {
+        setDraft({ status: "error", message: result.message });
+        return;
+      }
+      setVisibility("client");
+      if (bodyRef.current) {
+        bodyRef.current.value = result.text;
+        bodyRef.current.focus();
+      }
+      setDraft({ status: "filled" });
+    } catch {
+      setDraft({ status: "error", message: "The AI couldn't write a draft right now. Try again in a moment." });
+    }
+  }
   const listEnd = React.useRef<HTMLDivElement>(null);
   const count = comments.length;
 
@@ -96,6 +128,7 @@ export function CommentThread({
             Comment
           </label>
           <Textarea
+            ref={bodyRef}
             id="comment-body"
             name="body"
             rows={3}
@@ -104,6 +137,12 @@ export function CommentThread({
             required
             className={visibility === "internal" ? "border-amber-500/25 focus:border-amber-400/50 focus:ring-amber-400/10" : undefined}
           />
+          {draft.status === "filled" && <p className="text-xs text-ink-faint">AI draft. Edit it before you post; it goes to the client.</p>}
+          {draft.status === "error" && (
+            <p className="text-xs text-red-300" role="alert">
+              {draft.message}
+            </p>
+          )}
           <div className="flex flex-wrap items-center justify-between gap-3">
             {canChooseVisibility ? (
               <div className="inline-flex rounded-xl border border-line bg-white/[0.02] p-1" role="radiogroup" aria-label="Who can see this comment">
@@ -138,9 +177,17 @@ export function CommentThread({
                 {defaultVisibility === "internal" ? "Internal: only your team sees this." : "Everyone on this project can see comments."}
               </p>
             )}
-            <SubmitButton size="sm" pendingLabel="Posting…">
-              Post comment
-            </SubmitButton>
+            <div className="flex flex-wrap items-center gap-2">
+              {onDraftReply && (
+                <Button type="button" variant="ghost" size="sm" onClick={draftReply} disabled={draft.status === "loading"}>
+                  {draft.status === "loading" ? <LoaderCircle size={14} className="animate-spin" aria-hidden="true" /> : <PenLine size={14} />}
+                  {draft.status === "loading" ? "Drafting…" : "Draft a reply"}
+                </Button>
+              )}
+              <SubmitButton size="sm" pendingLabel="Posting…">
+                Post comment
+              </SubmitButton>
+            </div>
           </div>
         </form>
       )}

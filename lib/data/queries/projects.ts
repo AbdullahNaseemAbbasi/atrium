@@ -16,6 +16,7 @@ import {
   visibleProjects,
   type TeamContext,
 } from "../access";
+import { aiEnabled } from "@/lib/ai/config";
 import { previewUrlFor } from "@/lib/storage/uploads";
 import { getDb } from "../store";
 import {
@@ -185,7 +186,21 @@ export async function getProjectOverview(orgSlug: string, projectId: string) {
     status,
     count: tasks.filter((task) => task.status === status).length,
   }));
-  return { base, projectBase, milestones, upcoming, deliverables, activity, byStatus, totalTasks: tasks.length };
+  const client = project.clientId ? db.clients.find((item) => item.id === project.clientId) : undefined;
+  return {
+    base,
+    projectBase,
+    orgSlug: ctx.org.slug,
+    projectId: project.id,
+    milestones,
+    upcoming,
+    deliverables,
+    activity,
+    byStatus,
+    totalTasks: tasks.length,
+    /** The weekly client update needs a client and someone who works on the project. */
+    clientUpdate: client && aiEnabled() && canWorkOnProject(db, ctx, project) ? { clientName: client.companyName } : null,
+  };
 }
 
 /* ---------- Tasks ---------- */
@@ -307,6 +322,11 @@ export async function getDeliverableDetail(orgSlug: string, projectId: string, d
     approvals,
     comments,
     reviewers,
+    ai: {
+      enabled: aiEnabled() && canWorkOnProject(db, ctx, project),
+      hasFeedback: comments.length > 0 || approvals.length > 0,
+      canReply: comments.some((item) => item.authorIsClient && item.visibility === "client"),
+    },
     can: {
       upload: canWorkOnProject(db, ctx, project),
       submit: canSubmitDeliverable(db, ctx, project) && deliverable.status === "draft" && project.sharedWithClient && Boolean(project.clientId),

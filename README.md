@@ -10,9 +10,10 @@ who made it and when.
 
 > **Status:** runs on Supabase (Postgres with row-level security, Auth,
 > Storage and Realtime): uploads go straight to private storage, changes show
-> up live in other open tabs, and people have profile photos. Without
-> Supabase keys it falls back to an in-memory store with the same rules.
-> Stripe test mode and AI assistance are next; see
+> up live in other open tabs, and people have profile photos. AI drafts
+> (feedback summaries, replies, weekly client updates) run on Gemini's free
+> tier or Claude. Without Supabase keys it falls back to an in-memory store
+> with the same rules. Stripe test mode is next; see
 > [docs/roadmap.md](docs/roadmap.md). All data is synthetic.
 
 ## Try the demo
@@ -147,7 +148,7 @@ With a Supabase project: fill in the Supabase variables, run
 | `pnpm build && pnpm start` | Production build and server (set `SESSION_SECRET`, or `ATRIUM_DEMO=true` for a demo deploy) |
 | `pnpm lint` | ESLint |
 | `pnpm typecheck` | Route type generation + `tsc --noEmit` |
-| `pnpm test` | Unit tests (94): tenant isolation, roles, client boundaries, review state machine, KPI formulas, billing webhooks, CSV escaping, reports, upload tickets, photo checks, open-redirect guard |
+| `pnpm test` | Unit tests (102): tenant isolation, roles, client boundaries, review state machine, KPI formulas, billing webhooks, CSV escaping, reports, upload tickets, photo checks, open-redirect guard, what AI drafts may see |
 | `pnpm test:e2e` | Playwright against a production build in memory mode (30): sign-in, project and task creation, the client approval journey, cross-tenant and role checks, mobile layout |
 | `pnpm test:e2e:supabase` | The same 30 tests against a server on Supabase (real Auth and Postgres; reset the demo before and after) |
 | `pnpm seed` | Loads the demo users, photos and workspaces into Supabase |
@@ -166,6 +167,7 @@ lib/auth             session, permissions matrix, data-access entry points
 lib/data             types, seed, store, access rules, read models, queries
 lib/data/supabase    table map, request snapshot (load + diff save), demo seed
 lib/storage          signed tickets, uploads, profile photos
+lib/ai               AI provider adapter, prompts, what each draft may see, daily allowance
 supabase/            schema migration (RLS, Realtime, buckets) and CLI config
 lib/actions          server actions (validated, authorized, audited)
 lib/domain           business rules and KPI formulas
@@ -181,6 +183,7 @@ docs/                architecture, data model, security, business rules, decisio
 - [Business rules and KPI formulas](docs/business-rules.md)
 - [Security and threat model](docs/security.md)
 - [Supabase setup and data layer](docs/supabase.md)
+- [AI drafts](docs/ai.md)
 - [Decision records](docs/decisions/)
 - [Roadmap](docs/roadmap.md)
 - [Engineering conventions](docs/CONVENTIONS.md)

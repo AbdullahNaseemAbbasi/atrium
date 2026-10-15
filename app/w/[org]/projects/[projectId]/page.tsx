@@ -12,6 +12,7 @@ import { Avatar } from "@/components/ui/avatar";
 import { buttonClasses } from "@/components/ui/button";
 import { CardSkeleton, EmptyState, ProgressBar } from "@/components/ui/misc";
 import { FileTypeIcon } from "@/components/files/file-type-icon";
+import { ClientUpdateCard } from "@/components/ai/ai-drafts";
 
 export const metadata: Metadata = { title: "Project overview" };
 
@@ -138,6 +139,7 @@ async function Overview({ params }: { params: Promise<{ org: string; projectId: 
       </div>
 
       <div className="space-y-4">
+        {data.clientUpdate && <ClientUpdateCard orgSlug={data.orgSlug} projectId={data.projectId} clientName={data.clientUpdate.clientName} />}
         <Card className="p-5">
           <h2 className="font-semibold text-ink">Task breakdown</h2>
           <p className="mt-1 text-xs text-ink-faint">{data.totalTasks} tasks in total</p>

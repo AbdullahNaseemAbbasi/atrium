@@ -5,6 +5,8 @@ import { ArrowLeft, CheckCircle2, Clock3, FileWarning, History, Info, MessageSqu
 import { cn, formatBytes, formatDateTime } from "@/lib/utils";
 import { getDeliverableDetail } from "@/lib/data/queries/projects";
 import { addDeliverableComment } from "@/lib/actions/deliverables";
+import { draftReply } from "@/lib/actions/ai";
+import { FeedbackSummaryCard } from "@/components/ai/ai-drafts";
 import { CLIENT_ROLE_LABELS } from "@/lib/auth/permissions";
 import { Card, CardHeader } from "@/components/ui/card";
 import { Badge, DeliverableStatusBadge } from "@/components/ui/badge";
@@ -96,6 +98,7 @@ async function Deliverable({ params }: { params: Promise<{ org: string; projectI
                 canChooseVisibility={data.project.sharedWithClient}
                 defaultVisibility={data.project.sharedWithClient ? "client" : "internal"}
                 canPost={data.can.comment}
+                onDraftReply={data.ai.enabled && data.ai.canReply ? draftReply.bind(null, data.orgSlug, deliverable.id) : undefined}
               />
             </div>
           </Card>
@@ -140,6 +143,9 @@ async function Deliverable({ params }: { params: Promise<{ org: string; projectI
               )}
             </div>
           </Card>
+          {data.ai.enabled && (
+            <FeedbackSummaryCard orgSlug={data.orgSlug} deliverableId={deliverable.id} hasFeedback={data.ai.hasFeedback} canPostNote={data.can.comment} />
+          )}
 
           <Card>
             <CardHeader icon={History} title="Version history" description="Every upload is kept. Decisions are pinned to the version they were made on." />
