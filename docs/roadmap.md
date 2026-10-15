@@ -8,9 +8,9 @@ Mapped to the brief's milestones (S1 to S8).
 | S2 | Design system, app shell, auth screens, organization membership | Done on the demo data layer |
 | S3 | Clients, projects, team assignments, tasks, milestones | Done on the demo data layer |
 | S4 | Private deliverables, versions, comments, approval workflow, notifications | Done on Supabase (real uploads, live notifications) |
-| S5 | Plans, checkout test mode, webhook verification, usage enforcement | Done as a simulated test-mode checkout with an idempotent webhook processor; real Stripe test keys in phase 2 |
+| S5 | Plans, checkout test mode, webhook verification, usage enforcement | Done: Stripe in test mode (Checkout, plan switches, customer portal), with the simulated checkout kept for tests and the in-memory demo |
 | S6 | Client portal polish, dashboards, accessibility, responsive layouts | Done; accessibility pass to repeat after phase 2 |
-| S7 | Cross-tenant security tests, E2E tests, logging, performance review | Done: 94 unit tests, 30 Playwright tests (run on both backends) (security, approval journey, mobile layout); structured logging arrives with the Supabase phase |
+| S7 | Cross-tenant security tests, E2E tests, logging, performance review | Done: 114 unit tests, 30 Playwright tests run on both backends (security, approval journey, mobile layout) |
 | S8 | CI/CD, deployment, seed/demo accounts, screenshots, diagram, walkthrough | CI workflow, demo accounts and screenshots done; deployment and a recorded walkthrough next |
 
 ## Phase 2: Supabase and Stripe
