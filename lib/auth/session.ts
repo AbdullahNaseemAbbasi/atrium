@@ -1,14 +1,18 @@
 import "server-only";
 import { createHmac, timingSafeEqual } from "node:crypto";
 import { cookies } from "next/headers";
+import { usesSupabase } from "@/lib/supabase/config";
 
 /**
- * Signed session cookie for the demo build.
+ * Who is signed in.
  *
- * Supabase Auth replaces this module later; the rest of the app only talks to
- * `readSessionUserId`, `createSession` and `destroySession`, so the swap stays
- * local to this file. The cookie is httpOnly, SameSite=Lax and HMAC-signed so
- * it cannot be forged by editing it in the browser.
+ * - Supabase mode: Supabase Auth owns the session (httpOnly cookies refreshed
+ *   by proxy.ts). The verified JWT subject is mapped to the profile id.
+ * - Memory mode: a signed session cookie. httpOnly, SameSite=Lax and
+ *   HMAC-signed so it can't be forged by editing it in the browser.
+ *
+ * The rest of the app only calls `readSessionUserId`; sign-in and sign-out
+ * live in lib/actions/auth.ts.
  */
 const COOKIE_NAME = "atrium_session";
 const MAX_AGE_SECONDS = 60 * 60 * 24 * 7;
@@ -36,6 +40,10 @@ function verify(token: string): string | null {
 }
 
 export async function readSessionUserId(): Promise<string | null> {
+  if (usesSupabase()) {
+    const { currentViewer } = await import("@/lib/data/supabase/request");
+    return (await currentViewer())?.id ?? null;
+  }
   const token = (await cookies()).get(COOKIE_NAME)?.value;
   return token ? verify(token) : null;
 }

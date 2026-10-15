@@ -83,6 +83,7 @@ function UploadForm({
   const [visibility, setVisibility] = React.useState<"internal" | "client">(
     (state?.values?.visibility as "internal" | "client" | undefined) ?? "internal",
   );
+  const [uploading, setUploading] = React.useState(false);
   const errors = state?.fieldErrors ?? {};
   const remaining = Math.max(storage.limit - storage.used, 0);
 
@@ -100,7 +101,12 @@ function UploadForm({
   return (
     <form action={action} className="space-y-5" noValidate>
       {state && !state.ok && !state.fieldErrors && <FormMessage>{state.message}</FormMessage>}
-      <FilePicker error={errors.fileName?.[0] ?? errors.sizeBytes?.[0]} />
+      <FilePicker
+        orgSlug={orgSlug}
+        target={{ kind: "file", projectId }}
+        error={errors.fileName?.[0] ?? errors.sizeBytes?.[0]}
+        onBusyChange={setUploading}
+      />
       <p className="-mt-2 text-xs text-ink-faint">
         {formatBytes(remaining)} of {formatBytes(storage.limit)} left on your {storage.planName} plan.
       </p>
@@ -143,8 +149,8 @@ function UploadForm({
         <DialogClose asChild>
           <Button variant="ghost">Cancel</Button>
         </DialogClose>
-        <SubmitButton pendingLabel="Uploading…">
-          <Upload size={16} /> Upload
+        <SubmitButton pendingLabel="Saving…" disabled={uploading}>
+          <Upload size={16} /> {uploading ? "Uploading…" : "Save file"}
         </SubmitButton>
       </DialogFooter>
     </form>

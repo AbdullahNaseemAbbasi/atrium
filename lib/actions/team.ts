@@ -8,7 +8,7 @@ import { requireTeamContext } from "@/lib/auth/context";
 import { assignableRoles, can, ROLE_LABELS } from "@/lib/auth/permissions";
 import { recordActivity, recordAudit } from "@/lib/data/events";
 import { invitationIsPending, memberPermissions, seatUsage } from "@/lib/data/queries/team";
-import { getDb, newId } from "@/lib/data/store";
+import { getDb, newId, saveDb } from "@/lib/data/store";
 import type { OrgRole } from "@/lib/data/types";
 import { fail, formValues, ok, type ActionState } from "./result";
 
@@ -50,7 +50,7 @@ export async function inviteMembers(orgSlug: string, _prev: ActionState, formDat
     return fail("Please fix the highlighted fields.", { emails: [`Invite up to ${MAX_INVITES} people at a time. You added ${emails.length}.`] }, values);
   }
 
-  const db = getDb();
+  const db = await getDb();
   const now = new Date();
   const memberEmails = new Set(
     db.memberships
@@ -109,7 +109,9 @@ export async function inviteMembers(orgSlug: string, _prev: ActionState, formDat
     recordActivity(db, ctx, { verb: "member.invited", targetType: "member", targetId: id, targetLabel: email, visibility: "internal" });
   }
 
+  await saveDb();
   revalidatePath(`/w/${ctx.org.slug}`, "layout");
+  await saveDb();
   redirect(`/w/${ctx.org.slug}/team?invited=${emails.length}`);
 }
 
@@ -117,7 +119,7 @@ export async function inviteMembers(orgSlug: string, _prev: ActionState, formDat
 
 async function loadMember(orgSlug: string, membershipId: string) {
   const ctx = await requireTeamContext(orgSlug);
-  const db = getDb();
+  const db = await getDb();
   if (!idSchema.safeParse(membershipId).success) return null;
   const membership = db.memberships.find((item) => item.id === membershipId && item.organizationId === ctx.org.id && item.status === "active");
   const user = membership ? db.users.find((item) => item.id === membership.userId) : undefined;
@@ -148,6 +150,7 @@ export async function changeMemberRole(orgSlug: string, membershipId: string, ro
     summary: `Changed ${user.name} from ${ROLE_LABELS[from]} to ${ROLE_LABELS[parsed.data]}`,
     metadata: { from, to: parsed.data },
   });
+  await saveDb();
   refresh();
   return ok(`${user.name} is now ${parsed.data === "owner" ? "an" : "a"} ${ROLE_LABELS[parsed.data]}.`);
 }
@@ -176,7 +179,9 @@ export async function removeMember(orgSlug: string, membershipId: string): Promi
     summary: `Removed ${user.name} (${ROLE_LABELS[membership.role]}) from the workspace`,
     metadata: { role: membership.role, unassignedTasks: unassigned },
   });
+  await saveDb();
   revalidatePath(`/w/${ctx.org.slug}`, "layout");
+  await saveDb();
   return ok(unassigned > 0 ? `${user.name} was removed. ${unassigned} open ${unassigned === 1 ? "task is" : "tasks are"} now unassigned.` : `${user.name} was removed.`);
 }
 
@@ -186,7 +191,7 @@ async function loadTeamInvitation(orgSlug: string, invitationId: string) {
   const ctx = await requireTeamContext(orgSlug);
   if (!can(ctx.role, "team.invite")) return null;
   if (!idSchema.safeParse(invitationId).success) return null;
-  const db = getDb();
+  const db = await getDb();
   const invitation = db.invitations.find((item) => item.id === invitationId && item.organizationId === ctx.org.id && item.kind === "team");
   if (!invitation || !assignableRoles(ctx.role).includes(invitation.role as OrgRole)) return null;
   return { ctx, db, invitation };
@@ -199,6 +204,7 @@ export async function revokeTeamInvitation(orgSlug: string, invitationId: string
   if (invitation.status !== "pending" && invitation.status !== "expired") return fail("This invitation can't be revoked any more.");
   invitation.status = "revoked";
   recordAudit(db, ctx, { action: "invitation.revoked", entityType: "invitation", entityId: invitation.id, summary: `Revoked invitation for ${invitation.email}` });
+  await saveDb();
   refresh();
   return ok(`Invitation for ${invitation.email} revoked.`);
 }
@@ -224,6 +230,7 @@ export async function resendTeamInvitation(orgSlug: string, invitationId: string
     summary: `Re-sent invitation to ${invitation.email} as ${ROLE_LABELS[invitation.role as OrgRole]}`,
     metadata: { role: invitation.role },
   });
+  await saveDb();
   refresh();
   return ok(`Invitation re-sent to ${invitation.email}. It's valid for ${INVITE_DAYS} days.`);
 }

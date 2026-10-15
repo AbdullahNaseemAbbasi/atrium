@@ -58,7 +58,7 @@ export interface DecisionItem {
 export async function getApprovals(orgSlug: string, query: { tab?: string; project?: string }) {
   const ctx = await requireTeamContext(orgSlug);
   if (!can(ctx.role, "projects.view_assigned")) notFound();
-  const db = getDb();
+  const db = await getDb();
   const now = new Date();
   const base = `/w/${ctx.org.slug}`;
 

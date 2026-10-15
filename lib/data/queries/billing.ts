@@ -43,7 +43,7 @@ export function planRelation(current: Subscription, target: PlanKey, interval: B
 
 export async function getBillingOverview(orgSlug: string) {
   const ctx = await requireBilling(orgSlug, "billing.view");
-  const db = getDb();
+  const db = await getDb();
   const now = new Date();
   const subscription = subscriptionFor(db, ctx.org.id);
   const plan = getPlan(subscription.planKey);
@@ -115,7 +115,7 @@ export async function getCheckout(orgSlug: string, planParam: string | undefined
   const ctx = await requireBilling(orgSlug, "billing.manage");
   if (!isPlanKey(planParam)) return null;
   const interval: BillingInterval = isInterval(intervalParam) ? intervalParam : "month";
-  const db = getDb();
+  const db = await getDb();
   const now = new Date();
   const subscription = subscriptionFor(db, ctx.org.id);
   const plan = getPlan(planParam);

@@ -86,7 +86,7 @@ function runHealthChecks(db: Database, now: Date): HealthCheck[] {
 
 export async function getAdminOverview() {
   const admin = await requirePlatformAdmin();
-  const db = getDb();
+  const db = await getDb();
   const now = new Date();
   const events = storedEvents(db);
   const storageBytes = db.organizations.reduce((sum, org) => sum + computeUsage(db, org.id).storageBytes, 0);
@@ -129,7 +129,7 @@ export interface AdminWorkspaceRow {
 
 export async function listAdminWorkspaces(query: { q?: string }) {
   await requirePlatformAdmin();
-  const db = getDb();
+  const db = await getDb();
   const q = query.q?.trim().toLowerCase() ?? "";
   const rows: AdminWorkspaceRow[] = db.organizations
     .filter((org) => !q || org.name.toLowerCase().includes(q) || org.slug.includes(q))
@@ -166,7 +166,7 @@ export type WebhookFilter = (typeof WEBHOOK_FILTERS)[number];
 
 export async function listWebhookEvents(query: { status?: string; page?: string }) {
   await requirePlatformAdmin();
-  const db = getDb();
+  const db = await getDb();
   const now = new Date();
   const status: WebhookFilter = (WEBHOOK_FILTERS as readonly string[]).includes(query.status ?? "") ? (query.status as WebhookFilter) : "all";
   const all = storedEvents(db);

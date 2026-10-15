@@ -2,8 +2,10 @@ import { defineConfig, devices } from "@playwright/test";
 
 /**
  * End-to-end tests run against a production build on its own port, so they
- * never touch the data of a running dev server. The in-memory store starts
- * from the same seed on every boot.
+ * never touch the data of a running dev server. They force the in-memory
+ * backend (even when .env.local has Supabase keys), so the shared Supabase
+ * demo data is never changed by a test run, and every boot starts from the
+ * same seed.
  */
 const PORT = 3200;
 export const E2E_SESSION_SECRET = "e2e-session-secret-at-least-32-characters-long";
@@ -28,6 +30,6 @@ export default defineConfig({
     url: `http://localhost:${PORT}/login`,
     reuseExistingServer: !process.env.CI,
     timeout: 120_000,
-    env: { SESSION_SECRET: E2E_SESSION_SECRET, ATRIUM_DEMO: "true" },
+    env: { SESSION_SECRET: E2E_SESSION_SECRET, ATRIUM_DEMO: "true", ATRIUM_BACKEND: "memory" },
   },
 });

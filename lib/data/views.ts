@@ -32,6 +32,7 @@ export interface UserLite {
   email: string;
   title?: string;
   avatarHue: number;
+  avatarUrl?: string;
 }
 
 export interface ClientLite {
@@ -42,7 +43,7 @@ export interface ClientLite {
 }
 
 export function toUserLite(user: User): UserLite {
-  return { id: user.id, name: user.name, email: user.email, title: user.title, avatarHue: user.avatarHue };
+  return { id: user.id, name: user.name, email: user.email, title: user.title, avatarHue: user.avatarHue, avatarUrl: user.avatarUrl };
 }
 
 export function userLite(db: Database, id: ID | undefined | null): UserLite | null {

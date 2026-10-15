@@ -10,7 +10,7 @@ import { isInterval, isPlanKey, priceIdFor, trustedPrice } from "@/lib/billing/p
 import { computeUsage, downgradeBlockers } from "@/lib/billing/usage";
 import { newEventId, simulateProviderDelivery, type BillingEvent } from "@/lib/billing/webhooks";
 import { planRelation, subscriptionFor } from "@/lib/data/queries/billing";
-import { getDb } from "@/lib/data/store";
+import { getDb, saveDb } from "@/lib/data/store";
 import type { BillingInterval } from "@/lib/data/types";
 import { fail, ok, type ActionState } from "./result";
 
@@ -49,7 +49,7 @@ export async function completeTestCheckout(orgSlug: string, _prev: ActionState, 
   const plan = getPlan(planKey);
   const interval: BillingInterval = plan.price.month === 0 ? "month" : intervalInput;
 
-  const db = getDb();
+  const db = await getDb();
   const subscription = subscriptionFor(db, ctx.org.id);
   const relation = planRelation(subscription, planKey, interval);
   if (relation === "current" && subscription.status !== "canceled") return fail(`You're already on ${plan.name} (${interval === "year" ? "yearly" : "monthly"}).`);
@@ -106,7 +106,9 @@ export async function completeTestCheckout(orgSlug: string, _prev: ActionState, 
     if (result.httpStatus !== 200) return fail(`The test payment couldn't be completed: ${result.body.message}`);
   }
 
+  await saveDb();
   revalidatePath(`/w/${ctx.org.slug}`, "layout");
+  await saveDb();
   redirect(`/w/${ctx.org.slug}/billing?upgraded=1`);
 }
 
@@ -114,7 +116,7 @@ export async function completeTestCheckout(orgSlug: string, _prev: ActionState, 
 export async function setCancelAtPeriodEnd(orgSlug: string, cancel: boolean): Promise<ActionState> {
   const ctx = await requireTeamContext(orgSlug);
   if (!can(ctx.role, "billing.manage")) return fail("Only owners and billing managers can cancel the subscription.");
-  const db = getDb();
+  const db = await getDb();
   const subscription = db.subscriptions.find((item) => item.organizationId === ctx.org.id);
   if (!subscription || subscription.planKey === "starter") return fail("The free Starter plan has nothing to cancel.");
   if (subscription.cancelAtPeriodEnd === cancel) return ok(cancel ? "Cancellation was already scheduled." : "The subscription is already active.");
@@ -140,6 +142,7 @@ export async function setCancelAtPeriodEnd(orgSlug: string, cancel: boolean): Pr
     { now, ip: await clientIp() },
   );
   if (result.httpStatus !== 200) return fail(`Couldn't update the subscription: ${result.body.message}`);
+  await saveDb();
   refresh();
   return ok(cancel ? "Cancellation scheduled. You keep every feature until the period ends." : "Subscription resumed. It renews as usual.");
 }

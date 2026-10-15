@@ -6,7 +6,7 @@ import { requireTeamContext } from "@/lib/auth/context";
 import { describeBlocker, milestoneBlockers } from "@/lib/domain/rules";
 import { canManageProject, getVisibleProject } from "@/lib/data/access";
 import { clientAudience, notify, projectAudience, recordActivity } from "@/lib/data/events";
-import { getDb, newId } from "@/lib/data/store";
+import { getDb, newId, saveDb } from "@/lib/data/store";
 import { fail, formValues, invalid, ok, type ActionState } from "./result";
 
 const milestoneSchema = z.object({
@@ -46,7 +46,7 @@ function toDueAt(value: string | undefined) {
 /** Loads a project the viewer may manage (lead, manager or owner) in this workspace. */
 async function manageableProject(orgSlug: string, projectId: string) {
   const ctx = await requireTeamContext(orgSlug);
-  const db = getDb();
+  const db = await getDb();
   const project = getVisibleProject(db, ctx, projectId);
   if (!project || project.organizationId !== ctx.org.id || !canManageProject(db, ctx, project)) return null;
   return { ctx, db, project };
@@ -54,7 +54,7 @@ async function manageableProject(orgSlug: string, projectId: string) {
 
 async function manageableMilestone(orgSlug: string, milestoneId: string) {
   const ctx = await requireTeamContext(orgSlug);
-  const db = getDb();
+  const db = await getDb();
   const milestone = db.milestones.find((item) => item.id === milestoneId && item.organizationId === ctx.org.id);
   const project = milestone ? getVisibleProject(db, ctx, milestone.projectId) : null;
   if (!milestone || !project || !canManageProject(db, ctx, project)) return null;
@@ -82,6 +82,7 @@ export async function createMilestone(orgSlug: string, projectId: string, _prev:
     approvalRequired: parsed.data.approvalRequired,
   });
   project.updatedAt = new Date().toISOString();
+  await saveDb();
   refresh();
   return ok(`Milestone "${parsed.data.title}" added.`);
 }
@@ -100,6 +101,7 @@ export async function updateMilestone(orgSlug: string, milestoneId: string, _pre
     approvalRequired: parsed.data.approvalRequired,
   });
   project.updatedAt = new Date().toISOString();
+  await saveDb();
   refresh();
   return ok("Milestone saved.");
 }
@@ -116,6 +118,7 @@ export async function moveMilestone(orgSlug: string, milestoneId: string, direct
   ordered.forEach((item, position) => {
     item.position = position + 1;
   });
+  await saveDb();
   refresh();
   return ok(`Moved "${milestone.title}" ${direction}.`);
 }
@@ -163,6 +166,7 @@ export async function completeMilestone(orgSlug: string, milestoneId: string): P
     href: `/portal/${ctx.org.slug}/projects/${project.id}`,
     deduplicationKey: `milestone:${milestone.id}:completed`,
   });
+  await saveDb();
   refresh();
   return ok(`"${milestone.title}" marked complete.`);
 }
@@ -174,6 +178,7 @@ export async function reopenMilestone(orgSlug: string, milestoneId: string): Pro
   if (milestone.status !== "completed") return ok("This milestone is already open.");
   Object.assign(milestone, { status: "in_progress", completedAt: undefined });
   project.updatedAt = new Date().toISOString();
+  await saveDb();
   refresh();
   return ok(`"${milestone.title}" reopened.`);
 }

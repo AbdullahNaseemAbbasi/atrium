@@ -20,8 +20,12 @@ export interface User {
   name: string;
   email: string;
   title?: string;
-  /** Hue (0-360) used for the generated avatar. */
+  /** Hue (0-360) used for the fallback avatar when there is no photo. */
   avatarHue: number;
+  /** Public URL of the profile photo, if the person has one. */
+  avatarUrl?: string;
+  /** Supabase Auth user id this profile belongs to (Supabase mode only). */
+  authUserId?: string;
   timezone: string;
   isPlatformAdmin?: boolean;
   createdAt: ISODate;
@@ -197,6 +201,8 @@ export interface DeliverableVersion {
   /** Private object-storage key. Never a public URL. */
   storageKey: string;
   note?: string;
+  /** True when the stored object is a real image that can be shown inline. */
+  hasPreview?: boolean;
   uploadedByUserId: ID;
   createdAt: ISODate;
 }
@@ -397,6 +403,14 @@ export interface WebhookEvent {
   status: WebhookStatus;
   receivedAt: ISODate;
   processedAt?: ISODate;
+  /** When the provider created the event (used to ignore out-of-order events). */
+  eventCreatedAt?: ISODate;
+  /** Short human-readable result of processing. */
+  outcome?: string;
+  /** Valid but older than the stored state, so it was ignored. */
+  stale?: boolean;
+  /** Verified payload, kept so an operator can replay it. */
+  payload?: string;
 }
 
 /* ---------- Integrations ---------- */

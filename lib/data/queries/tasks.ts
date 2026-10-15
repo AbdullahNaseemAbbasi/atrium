@@ -222,7 +222,7 @@ function toUserLiteById(db: Database, id: string) {
 export async function getWorkspaceTasks(orgSlug: string, query: WorkspaceTasksQuery) {
   const ctx = await requireTeamContext(orgSlug);
   if (!can(ctx.role, "projects.view_assigned")) notFound();
-  const db = getDb();
+  const db = await getDb();
   const now = new Date();
   const base = `/w/${ctx.org.slug}`;
 

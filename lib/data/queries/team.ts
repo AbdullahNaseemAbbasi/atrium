@@ -79,7 +79,7 @@ export function memberPermissions(ctx: TeamContext, target: { userId: string; ro
 export async function getTeam(orgSlug: string) {
   const ctx = await requireTeamContext(orgSlug);
   if (!can(ctx.role, "team.view")) notFound();
-  const db = getDb();
+  const db = await getDb();
   const now = new Date();
 
   const memberships = db.memberships.filter((item) => item.organizationId === ctx.org.id && item.status === "active");
@@ -154,7 +154,7 @@ export type TeamPage = Awaited<ReturnType<typeof getTeam>>;
 export async function getInviteForm(orgSlug: string) {
   const ctx = await requireTeamContext(orgSlug);
   if (!can(ctx.role, "team.invite")) notFound();
-  const db = getDb();
+  const db = await getDb();
   const now = new Date();
   return {
     base: `/w/${ctx.org.slug}`,

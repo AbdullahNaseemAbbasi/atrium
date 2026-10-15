@@ -1,39 +1,47 @@
 # Architecture
 
 Atrium is a single Next.js 16 application (App Router, React 19, TypeScript
-strict, Tailwind 4). The first phase ships the complete product UI on an
-in-memory data layer with real authorization rules; the second phase swaps
-the data layer for Supabase (Postgres, Auth, Storage, Realtime) and Stripe in
-test mode without changing pages.
+strict, Tailwind 4) on Supabase (Postgres, Auth, Storage, Realtime). The
+first phase built the product UI on an in-memory data layer with real
+authorization rules; the second phase put Supabase behind the same data
+layer without changing pages (ADR 0004). The in-memory store remains for
+tests.
 
 ```
 Browser
   │  HTML streamed per request (Cache Components + Suspense skeletons)
   ▼
 Next.js app (Node runtime)
-  ├─ proxy.ts ............. fast redirect when no session cookie
+  ├─ proxy.ts ............. refreshes the Supabase session, fast redirect
+  │                         when signed out
   ├─ app/ ................. routes: marketing, auth, /w/[org] team app,
   │                         /portal/[org] client portal, /admin, /api/*
-  ├─ lib/auth ............. session cookie (HMAC), DAL: requireTeamContext,
-  │                         requireClientContext, requirePlatformAdmin
+  ├─ lib/auth ............. Supabase Auth (verified JWT claims), DAL:
+  │                         requireTeamContext, requireClientContext,
+  │                         requirePlatformAdmin
   ├─ lib/data/queries ..... read models per area (server-only)
   ├─ lib/actions .......... server actions (zod validation, permission check,
   │                         tenant ownership check, audit/activity/notify)
   ├─ lib/data/access.ts ... pure tenant + resource rules (unit tested)
   ├─ lib/domain ........... business rules and KPI formulas (unit tested)
-  └─ lib/data/store.ts .... in-memory DB seeded with synthetic data
-                            (→ Supabase Postgres in phase 2)
+  ├─ lib/data/store.ts .... getDb()/saveDb(): request snapshot from
+  │                         Postgres (secret key), diff-saved; or the
+  │                         in-memory store in tests
+  ├─ lib/storage .......... signed upload tickets, Storage URLs, photos
+  └─ components/realtime .. Realtime subscription → refresh + toasts
+                            (browser reads under RLS)
 ```
 
 ## Request flow
 
-1. `proxy.ts` redirects to `/login` when there is no session cookie at all.
-   It is an optimisation, not the security boundary.
+1. `proxy.ts` refreshes the Supabase session cookies and redirects to
+   `/login` when there is no valid session. It is an optimisation, not the
+   security boundary.
 2. A page renders its static frame immediately and streams the data part
    inside `<Suspense>`.
 3. The data part calls a query, e.g. `listProjects(orgSlug, filters)`.
-   The query first calls `requireTeamContext(orgSlug)`: verify the signed
-   cookie, load the user, resolve the organization **from an active
+   The query first calls `requireTeamContext(orgSlug)`: verify the JWT
+   claims, load the profile, resolve the organization **from an active
    membership** (never from request input alone). A client user hitting a
    team URL is redirected to their portal; anyone else gets a 404.
 4. The query reads only through `lib/data/access.ts` helpers
@@ -42,7 +50,10 @@ Next.js app (Node runtime)
 5. Mutations are server actions. Each one re-runs the context check,
    validates input with zod, verifies every referenced id belongs to the
    tenant, applies plan limits, writes the change, then records audit,
-   activity and notifications (`lib/data/events.ts`) and refreshes the route.
+   activity and notifications (`lib/data/events.ts`), saves the changed rows
+   (`saveDb()`) and refreshes the route.
+6. Other open tabs of the same workspace receive the row changes through
+   Supabase Realtime (filtered by RLS) and refresh their server components.
 
 ## Areas
 
@@ -53,7 +64,7 @@ Next.js app (Node runtime)
 | Team app | `/w/[org]` dashboard, `projects` (+ overview, tasks, milestones, deliverables, files, activity, settings), `tasks`, `clients`, `team`, `approvals`, `activity`, `notifications`, `reports`, `billing`, `settings/*` |
 | Client portal | `/portal/[org]` overview, `projects`, `deliverables/[id]` review, `approvals`, `files`, `notifications` |
 | Platform | `/admin`, `/admin/workspaces`, `/admin/webhooks` |
-| API | `/api/files/download` (signed links), CSV/JSON exports, `/api/webhooks/billing` |
+| API | `/api/files/download` (signed links, memory mode), CSV/JSON exports, `/api/webhooks/billing`, `/api/cron/reset-demo`, `/auth/callback` (email links) |
 
 ## Why these choices
 

@@ -7,9 +7,10 @@ import { requirePlatformAdmin } from "@/lib/auth/context";
 import { getPlan } from "@/lib/billing/plans";
 import { computeUsage } from "@/lib/billing/usage";
 import { replayStoredEvent } from "@/lib/billing/webhooks";
-import { getDb, newId, resetDb } from "@/lib/data/store";
+import { getDb, newId, resetDb, saveDb } from "@/lib/data/store";
 import { SUPPORT_ACCESS_ACTION } from "@/lib/settings/options";
 import { formatBytes } from "@/lib/utils";
+import { usesSupabase } from "@/lib/supabase/config";
 import { fail, ok, type ActionState } from "./result";
 
 async function clientIp() {
@@ -17,10 +18,16 @@ async function clientIp() {
   return list.get("x-forwarded-for")?.split(",")[0]?.trim() || list.get("x-real-ip") || "local";
 }
 
-/** Restores the deterministic demo data for every workspace. */
+/** Restores the deterministic demo data for the demo workspaces. */
 export async function resetDemoData(): Promise<void> {
   await requirePlatformAdmin();
-  resetDb();
+  if (usesSupabase()) {
+    const { resetDemoData: resetRemote } = await import("@/lib/data/supabase/demo-seed");
+    const { supabaseAdmin } = await import("@/lib/supabase/server");
+    await resetRemote(supabaseAdmin());
+  } else {
+    resetDb();
+  }
   revalidatePath("/", "layout");
   redirect("/admin?reset=1");
 }
@@ -48,7 +55,7 @@ export interface SupportView {
  */
 export async function openSupportView(organizationId: string): Promise<SupportView | { ok: false; message: string }> {
   const admin = await requirePlatformAdmin();
-  const db = getDb();
+  const db = await getDb();
   const org = db.organizations.find((item) => item.id === organizationId);
   if (!org) return { ok: false, message: "Workspace not found." };
 
@@ -74,6 +81,7 @@ export async function openSupportView(organizationId: string): Promise<SupportVi
     .filter((item) => item.organizationId === org.id)
     .reduce<string | null>((latest, item) => (!latest || item.createdAt > latest ? item.createdAt : latest), null);
   const roles = ["owner", "manager", "member", "billing"] as const;
+  await saveDb();
 
   return {
     ok: true,
@@ -103,8 +111,9 @@ export async function openSupportView(organizationId: string): Promise<SupportVi
 export async function replayWebhookEvent(providerEventId: string): Promise<ActionState> {
   await requirePlatformAdmin();
   if (!/^evt_[A-Za-z0-9_]{4,64}$/.test(providerEventId)) return fail("Unknown event.");
-  const result = replayStoredEvent(getDb(), providerEventId, { ip: await clientIp() });
+  const result = replayStoredEvent((await getDb()), providerEventId, { ip: await clientIp() });
   if (!result) return fail("That event has no stored payload to replay.");
+  await saveDb();
   revalidatePath("/admin", "layout");
   return result.body.status === "skipped_duplicate"
     ? ok(`Replayed ${providerEventId}: recorded as a duplicate, nothing changed.`)

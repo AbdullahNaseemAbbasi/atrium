@@ -1,6 +1,6 @@
 import { format } from "date-fns";
 import { can } from "@/lib/auth/permissions";
-import { getDb, newId } from "@/lib/data/store";
+import { getDb, newId, saveDb } from "@/lib/data/store";
 import { fileSlug } from "@/lib/export/csv";
 import { attachmentHeaders, notFoundResponse, requestIp, routeTeamContext } from "@/lib/export/route-auth";
 import { buildWorkspaceExport } from "@/lib/export/workspace";
@@ -14,7 +14,7 @@ export async function GET(_request: Request, context: RouteContext<"/api/w/[org]
   const ctx = await routeTeamContext(org);
   if (!ctx || !can(ctx.role, "data.export")) return notFoundResponse();
 
-  const db = getDb();
+  const db = await getDb();
   const now = new Date();
   const data = buildWorkspaceExport(db, ctx.org.id, now, ctx.user.id);
   const records = Object.values(data).reduce<number>((sum, value) => sum + (Array.isArray(value) ? value.length : 0), 0);
@@ -31,6 +31,7 @@ export async function GET(_request: Request, context: RouteContext<"/api/w/[org]
     ip: await requestIp(),
     createdAt: now.toISOString(),
   });
+  await saveDb();
 
   return new Response(JSON.stringify(data, null, 2), {
     headers: attachmentHeaders(`${fileSlug(ctx.org.slug)}-workspace-export-${format(now, "yyyy-MM-dd")}.json`, "application/json; charset=utf-8"),

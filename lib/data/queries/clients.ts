@@ -71,7 +71,7 @@ export interface ClientListRow {
 export async function listClients(orgSlug: string, query: { q?: string; status?: string }) {
   const ctx = await requireTeamContext(orgSlug);
   loadClientsContext(ctx);
-  const db = getDb();
+  const db = await getDb();
   const now = new Date();
   const projects = visibleProjects(db, ctx);
   const all = db.clients.filter((client) => client.organizationId === ctx.org.id);
@@ -158,7 +158,7 @@ export type ClientActivityItem = ActivityView & { when: string; visibility: "int
 async function loadClient(orgSlug: string, clientId: string) {
   const ctx = await requireTeamContext(orgSlug);
   loadClientsContext(ctx);
-  const db = getDb();
+  const db = await getDb();
   // Out-of-tenant and unknown ids look exactly the same: a 404.
   const client = db.clients.find((item) => item.id === clientId && item.organizationId === ctx.org.id);
   if (!client) notFound();
@@ -277,7 +277,7 @@ function industryOptions(db: Database, orgId: string) {
 export async function getNewClientForm(orgSlug: string) {
   const ctx = await requireTeamContext(orgSlug);
   if (!can(ctx.role, "clients.manage")) notFound();
-  const db = getDb();
+  const db = await getDb();
   return {
     base: `/w/${ctx.org.slug}`,
     orgSlug: ctx.org.slug,

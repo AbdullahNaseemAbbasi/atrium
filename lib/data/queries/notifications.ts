@@ -31,7 +31,7 @@ const NOTIFICATION_GROUPS = [
 /** The signed-in user's notifications in this workspace only, never anyone else's. */
 export async function getNotificationsPage(orgSlug: string, query: { filter?: string; page?: string }) {
   const ctx = await requireTeamContext(orgSlug);
-  const db = getDb();
+  const db = await getDb();
   const now = new Date();
   const filter: "all" | "unread" = query.filter === "unread" ? "unread" : "all";
 

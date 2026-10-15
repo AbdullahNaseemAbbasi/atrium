@@ -12,7 +12,7 @@ import { getDb } from "@/lib/data/store";
 export async function routeTeamContext(orgSlug: string) {
   const userId = await readSessionUserId();
   if (!userId) return null;
-  return resolveTeamContext(getDb(), userId, orgSlug);
+  return resolveTeamContext((await getDb()), userId, orgSlug);
 }
 
 export async function requestIp() {

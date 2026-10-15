@@ -72,7 +72,13 @@ async function Review({ params }: { params: Promise<{ org: string; deliverableId
 
       <div className="grid gap-4 xl:grid-cols-[1.5fr_1fr] xl:grid-rows-[auto_1fr]">
         <div className="min-w-0 space-y-4">
-          <FilePreview fileName={current.fileName} mimeType={current.mimeType} sizeBytes={current.sizeBytes} version={current.version} />
+          <FilePreview
+            fileName={current.fileName}
+            mimeType={current.mimeType}
+            sizeBytes={current.sizeBytes}
+            version={current.version}
+            previewUrl={data.previewUrl}
+          />
           {current.note && (
             <FormNote icon={Info}>
               <span className="text-ink-secondary">

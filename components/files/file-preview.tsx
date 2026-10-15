@@ -1,18 +1,36 @@
+import Image from "next/image";
 import { Play } from "lucide-react";
 import { formatBytes } from "@/lib/utils";
 import { fileKind } from "./file-type-icon";
 
 /**
- * Representative thumbnail for a private file. Real previews are generated
- * from storage after upload; the demo build draws a neutral placeholder that
- * matches the file type so reviewers see the layout of the review screen.
+ * Preview of a private file. Uploaded images show through a short-lived
+ * signed URL (`previewUrl`); other types, and the seeded demo files, get a
+ * neutral drawing that matches the file type.
  */
-export function FilePreview({ fileName, mimeType, sizeBytes, version }: { fileName: string; mimeType: string; sizeBytes: number; version: number }) {
+export function FilePreview({
+  fileName,
+  mimeType,
+  sizeBytes,
+  version,
+  previewUrl,
+}: {
+  fileName: string;
+  mimeType: string;
+  sizeBytes: number;
+  version: number;
+  previewUrl?: string | null;
+}) {
   const kind = fileKind(mimeType, fileName);
   return (
     <figure className="overflow-hidden rounded-2xl border border-line bg-[#0a1520]">
       <div className="relative grid aspect-[16/9] place-items-center overflow-hidden bg-[radial-gradient(circle_at_30%_20%,rgba(34,211,238,0.08),transparent_55%)]">
-        {kind === "image" && <MockupArt />}
+        {previewUrl ? (
+          // Signed URLs change on every render and expire, so they skip the image optimizer.
+          <Image src={previewUrl} alt={`Version ${version} of ${fileName}`} fill unoptimized sizes="(min-width: 1280px) 60vw, 100vw" className="object-contain" />
+        ) : (
+          kind === "image" && <MockupArt />
+        )}
         {kind === "pdf" && <DocumentArt />}
         {kind === "video" && (
           <div className="relative grid h-full w-full place-items-center bg-[linear-gradient(135deg,#0f2533,#09141d)]">

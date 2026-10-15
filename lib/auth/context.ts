@@ -26,7 +26,7 @@ export async function getCurrentUser(): Promise<User | null> {
   // Everything after this point is per-request: reading the clock, seeding the
   // demo store and building relative dates must not be prerendered.
   await connection();
-  return getDb().users.find((user) => user.id === userId) ?? null;
+  return (await getDb()).users.find((user) => user.id === userId) ?? null;
 }
 
 export async function requireUser(): Promise<User> {
@@ -42,7 +42,7 @@ export async function requireUser(): Promise<User> {
  */
 export async function requireTeamContext(orgSlug: string): Promise<TeamContext> {
   const user = await requireUser();
-  const db = getDb();
+  const db = await getDb();
   const ctx = resolveTeamContext(db, user.id, orgSlug);
   if (ctx) return ctx;
   if (resolveClientContext(db, user.id, orgSlug)) redirect(`/portal/${orgSlug}`);
@@ -51,7 +51,7 @@ export async function requireTeamContext(orgSlug: string): Promise<TeamContext> 
 
 export async function requireClientContext(orgSlug: string): Promise<ClientContext> {
   const user = await requireUser();
-  const db = getDb();
+  const db = await getDb();
   const ctx = resolveClientContext(db, user.id, orgSlug);
   if (ctx) return ctx;
   if (resolveTeamContext(db, user.id, orgSlug)) redirect(`/w/${orgSlug}`);
@@ -65,8 +65,8 @@ export async function requirePlatformAdmin(): Promise<User> {
 }
 
 /** Where a user lands after signing in. */
-export function homePathFor(user: User) {
-  const db = getDb();
+export async function homePathFor(user: User) {
+  const db = await getDb();
   const workspace = teamWorkspacesFor(db, user.id)[0];
   if (workspace) return `/w/${workspace.org.slug}`;
   const portal = clientPortalsFor(db, user.id)[0];

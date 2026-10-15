@@ -8,11 +8,12 @@ who made it and when.
 
 ![Atrium dashboard](docs/screenshots/dashboard.png)
 
-> **Status:** the complete product UI runs on an in-memory data layer with
-> the real authorization rules, validation, plan limits and audit trail.
-> Supabase (Postgres + RLS, Auth, Storage, Realtime) and Stripe test mode are
-> the next phase; see [docs/roadmap.md](docs/roadmap.md). All data is
-> synthetic.
+> **Status:** runs on Supabase (Postgres with row-level security, Auth,
+> Storage and Realtime): uploads go straight to private storage, changes show
+> up live in other open tabs, and people have profile photos. Without
+> Supabase keys it falls back to an in-memory store with the same rules.
+> Stripe test mode and AI assistance are next; see
+> [docs/roadmap.md](docs/roadmap.md). All data is synthetic.
 
 ## Try the demo
 
@@ -79,6 +80,10 @@ Password for every account: `atrium-demo`.
   client-visible tasks, submitted deliverables and client-visible comments,
   files and activity.
 - Downloads are re-authorized, audited and issued as short-lived signed links.
+- Uploads go straight to a private bucket through signed URLs; the saved row
+  must match a signed ticket and an object of the reported size.
+- Row-level security mirrors the access rules for everything the browser
+  reads (Realtime); only the server writes.
 - Approvals are idempotent per user and version; stale tabs can't approve an
   older version.
 - Billing webhooks are HMAC-verified, deduplicated by event id and ordered.
@@ -89,8 +94,8 @@ Details and the threat model: [docs/security.md](docs/security.md).
 ## Stack
 
 Next.js 16 (App Router, Cache Components, server actions) · React 19 ·
-TypeScript (strict) · Tailwind CSS 4 · Radix UI primitives · zod · date-fns ·
-Vitest · Playwright. One app, no separate API server
+TypeScript (strict) · Tailwind CSS 4 · Radix UI primitives · Supabase
+(Postgres, Auth, Storage, Realtime) · zod · date-fns · Vitest · Playwright. One app, no separate API server
 ([why](docs/decisions/0001-single-nextjs-app-with-supabase.md)).
 
 ## Run it locally
@@ -99,9 +104,13 @@ Requirements: Node 24 and pnpm 10.
 
 ```bash
 pnpm install
-cp .env.example .env.local   # optional in development
+cp .env.example .env.local   # optional: without Supabase keys it runs in memory
 pnpm dev                     # http://localhost:3000
 ```
+
+With a Supabase project: fill in the Supabase variables, run
+`supabase db push` and `pnpm seed` (details in
+[docs/supabase.md](docs/supabase.md)).
 
 | Command | What it does |
 |---|---|
@@ -109,11 +118,13 @@ pnpm dev                     # http://localhost:3000
 | `pnpm build && pnpm start` | Production build and server (set `SESSION_SECRET`, or `ATRIUM_DEMO=true` for a demo deploy) |
 | `pnpm lint` | ESLint |
 | `pnpm typecheck` | Route type generation + `tsc --noEmit` |
-| `pnpm test` | Unit tests (82): tenant isolation, roles, client boundaries, review state machine, KPI formulas, billing webhooks, CSV escaping, reports |
-| `pnpm test:e2e` | Playwright against a production build (30): sign-in, project and task creation, the client approval journey, cross-tenant and role checks, mobile layout |
+| `pnpm test` | Unit tests (92): tenant isolation, roles, client boundaries, review state machine, KPI formulas, billing webhooks, CSV escaping, reports, upload tickets, photo checks |
+| `pnpm test:e2e` | Playwright against a production build in memory mode (30): sign-in, project and task creation, the client approval journey, cross-tenant and role checks, mobile layout |
+| `pnpm seed` | Loads the demo users, photos and workspaces into Supabase |
 
-The demo data lives in memory and resets when the server restarts (or from
-`/admin` → Reset demo data).
+On Supabase the demo resets with `pnpm seed`, from `/admin` → Reset demo
+data, or on a schedule through `/api/cron/reset-demo`. In memory mode it
+resets when the server restarts.
 
 ## Project structure
 
@@ -123,6 +134,9 @@ components/ui        design system (cards, buttons, badges, forms, dialogs, tabl
 components/*         feature components (shell, tasks, deliverables, portal, billing…)
 lib/auth             session, permissions matrix, data-access entry points
 lib/data             types, seed, store, access rules, read models, queries
+lib/data/supabase    table map, request snapshot (load + diff save), demo seed
+lib/storage          signed tickets, uploads, profile photos
+supabase/            schema migration (RLS, Realtime, buckets) and CLI config
 lib/actions          server actions (validated, authorized, audited)
 lib/domain           business rules and KPI formulas
 lib/billing          plans, prices, usage, webhook processor
@@ -136,6 +150,7 @@ docs/                architecture, data model, security, business rules, decisio
 - [Data model](docs/data-model.md)
 - [Business rules and KPI formulas](docs/business-rules.md)
 - [Security and threat model](docs/security.md)
+- [Supabase setup and data layer](docs/supabase.md)
 - [Decision records](docs/decisions/)
 - [Roadmap](docs/roadmap.md)
 - [Engineering conventions](docs/CONVENTIONS.md)

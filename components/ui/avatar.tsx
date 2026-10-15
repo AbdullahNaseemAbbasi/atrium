@@ -1,9 +1,13 @@
+import Image from "next/image";
 import { cn, initials } from "@/lib/utils";
 
 interface AvatarUser {
   name: string;
   avatarHue: number;
+  avatarUrl?: string;
 }
+
+const PIXELS = { xs: 24, sm: 32, md: 36, lg: 44, xl: 64 } as const;
 
 const SIZES = {
   xs: "h-6 w-6 text-[10px]",
@@ -25,6 +29,17 @@ export function Avatar({
   ring?: boolean;
 }) {
   const hue = user.avatarHue;
+  if (user.avatarUrl) {
+    return (
+      <span
+        className={cn("relative inline-block flex-none select-none overflow-hidden rounded-full bg-surface-raised", ring && "ring-2 ring-canvas", SIZES[size], className)}
+        title={user.name}
+        aria-hidden="true"
+      >
+        <Image src={user.avatarUrl} alt="" fill sizes={`${PIXELS[size]}px`} className="object-cover" />
+      </span>
+    );
+  }
   return (
     <span
       className={cn(

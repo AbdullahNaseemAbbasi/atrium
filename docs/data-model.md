@@ -42,7 +42,7 @@ webhook_events (provider, provider_event_id) unique
 | tasks | organization_id, project_id, milestone_id?, title, status, priority, due_at, assignee_user_id?, client_visible, completed_at | index(organization_id, assignee_user_id, status), index(project_id, status) |
 | deliverables | organization_id, project_id, milestone_id?, title, status, current_version, submitted_at | index(project_id, status) |
 | deliverable_versions | organization_id, deliverable_id, version, file_name, mime_type, size_bytes, storage_key, note | unique(deliverable_id, version) |
-| approvals | organization_id, deliverable_id, version_id, version, client_user_id, decision, comment, decided_at | unique(deliverable_id, version, client_user_id) – makes decisions idempotent |
+| approvals | organization_id, deliverable_id, version_id, version, client_user_id, decision, comment, decided_at | unique(deliverable_id, version, client_user_id): makes decisions idempotent |
 | comments | organization_id, project_id, task_id?, deliverable_id?, author_user_id, body, visibility (internal/client) | check(task_id or deliverable_id) |
 | files | organization_id, project_id, name, mime_type, size_bytes, storage_key, visibility | index(project_id) |
 | activity_events | organization_id, project_id?, actor_user_id, verb, target_type, target_id, target_label, visibility | index(organization_id, created_at desc) |

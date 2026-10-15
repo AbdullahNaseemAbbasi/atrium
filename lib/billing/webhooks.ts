@@ -141,18 +141,8 @@ export const billingEventSchema = z.discriminatedUnion("type", [
 
 export type BillingEvent = z.infer<typeof billingEventSchema>;
 
-/**
- * Stored webhook row. `eventCreatedAt` and `outcome` extend the shared
- * `WebhookEvent` type so ordering and "ignored" results can be shown.
- */
-export interface StoredWebhookEvent extends WebhookEvent {
-  eventCreatedAt?: string;
-  outcome?: string;
-  /** True when the event was valid but older than the stored state. */
-  stale?: boolean;
-  /** Verified payload, kept so operators can redeliver it (demo replay). */
-  payload?: string;
-}
+/** Stored webhook row (ordering, outcome and replay fields live on the shared type). */
+export type StoredWebhookEvent = WebhookEvent;
 
 export function storedEvents(db: Database) {
   return db.webhookEvents as StoredWebhookEvent[];

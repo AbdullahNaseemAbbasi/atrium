@@ -23,10 +23,12 @@ The matrix lives in `lib/auth/permissions.ts`; resource rules in
 | **Cross-tenant access by guessing ids (IDOR/BOLA)** | The organization comes from a verified membership. Every query and action loads the row and checks `organizationId` plus the resource rule. Invisible rows return 404, never 403. Tests cover project, deliverable, task and activity ids across tenants. |
 | Client user escalating to team permissions by sharing a URL | Team routes call `requireTeamContext`; a client membership never resolves as a team membership. Client users are redirected to their portal. |
 | Client seeing internal work | Clients see only shared projects of their own client, `clientVisible` tasks, submitted deliverables and `client` comments/files/activity. Budget is never part of a portal view model. |
-| Forged session | Session cookie is `httpOnly`, `SameSite=Lax`, `Secure` in production and HMAC-signed; signature compared in constant time. (Replaced by Supabase Auth in phase 2.) |
+| Forged session | Supabase Auth sessions; the server trusts only verified JWT claims (`getClaims`) and maps them to a profile. The memory build uses an `httpOnly`, HMAC-signed cookie compared in constant time. |
 | CSRF on mutations | Server actions are POST-only and Next.js checks the `Origin` header against the host. Cookies are `SameSite=Lax`. |
-| Private file leakage | Files are referenced by private storage keys, never public URLs. Downloads go through `requestDownload`, which re-checks access, audits the download and issues a 60-second HMAC-signed link bound to the user; the download route checks access again. Responses use `Content-Disposition: attachment` and `nosniff`. |
-| Malicious uploads | Extension and MIME allowlist, 5 GB cap, plan storage limit, server-side validation. Bytes go directly to private storage via signed upload URLs (phase 2); malware scanning is listed as future work. |
+| Private file leakage | Files are referenced by private storage keys, never public URLs. Downloads go through `requestDownload`, which re-checks access, audits the download and issues a 60-second Storage signed URL (memory build: an HMAC-signed link bound to the user, re-checked by the route). Responses use `Content-Disposition: attachment` and `nosniff`. |
+| Malicious uploads | Extension and MIME allowlist, size cap, plan storage limit, checked before a signed upload URL is issued and again when the row is saved. The row must match an HMAC-signed ticket (workspace, project, person, file, size) and the stored object's size. Inline previews only for PNG, JPEG, WebP and GIF whose stored type matches (never SVG), shown from the Storage domain. Profile photos are checked by their first bytes. Malware scanning is future work. |
+| Browser reading other tenants' rows | Every table has RLS with SELECT-only policies that mirror `access.ts`; no write policies, `anon` has no access, budgets and client notes aren't granted to `authenticated`. Realtime delivers only rows the policies allow. |
+| Leaked secret key | The secret key is read only in server modules (`server-only`) and scripts, lives in `.env.local` (git-ignored) and is never sent to the browser. |
 | Duplicate approvals / race conditions | Decisions are idempotent per user + version; the posted version must equal the current version. |
 | Billing webhook spoofing and replays | HMAC signature over the raw body; event ids stored and deduplicated; out-of-order events ignored; subscription state only changes from verified events, never from redirect parameters. |
 | Plan limit bypass | Limits enforced in server actions, not only in the UI. |
@@ -49,7 +51,7 @@ archived projects are kept until the workspace is deleted.
 
 ## Known limits of the demo build
 
-- Data is in memory and resets on server restart (or from `/admin`).
-- One shared demo password; real authentication arrives with Supabase Auth.
-- Downloads return a placeholder text file describing the object.
-- No email is sent; notifications are in-app.
+- One shared demo password for the demo accounts (they can't change it);
+  accounts people create use their own.
+- Demo files are small text placeholders; real uploads are stored as is.
+- No email is sent except Supabase Auth's own messages; notifications are in-app.

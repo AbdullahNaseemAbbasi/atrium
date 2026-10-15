@@ -23,7 +23,7 @@ export async function GET(request: NextRequest) {
   const userId = await readSessionUserId();
   if (!userId || userId !== claims.userId) return NextResponse.json({ error: "Not found" }, { status: 404 });
 
-  const db = getDb();
+  const db = await getDb();
   const ctx = resolveTeamContext(db, userId, claims.orgSlug) ?? resolveClientContext(db, userId, claims.orgSlug);
   if (!ctx) return NextResponse.json({ error: "Not found" }, { status: 404 });
 

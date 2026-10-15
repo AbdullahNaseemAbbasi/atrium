@@ -1,5 +1,6 @@
 "use server";
 
+import { saveDb } from "@/lib/data/store";
 import { z } from "zod";
 import { formValues, invalid, ok, type ActionState } from "./result";
 
@@ -31,5 +32,6 @@ export async function sendContactMessage(_prev: ActionState, formData: FormData)
   // Bots that fill the hidden field get the same answer, so they learn nothing.
   if (parsed.data.website) return ok(reply);
 
+  await saveDb();
   return ok(reply);
 }

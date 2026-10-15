@@ -16,6 +16,7 @@ import {
   visibleProjects,
   type TeamContext,
 } from "../access";
+import { previewUrlFor } from "@/lib/storage/uploads";
 import { getDb } from "../store";
 import {
   approvalsOf,
@@ -56,7 +57,7 @@ export interface ProjectListQuery {
 
 export async function listProjects(orgSlug: string, query: ProjectListQuery) {
   const ctx = await requireTeamContext(orgSlug);
-  const db = getDb();
+  const db = await getDb();
   const now = new Date();
   const all = visibleProjects(db, ctx);
 
@@ -113,14 +114,14 @@ export async function listProjects(orgSlug: string, query: ProjectListQuery) {
 /** Loads a project the viewer may see, or renders a 404 (never a 403, so IDs can't be probed). */
 export async function loadProject(orgSlug: string, projectId: string) {
   const ctx = await requireTeamContext(orgSlug);
-  const db = getDb();
+  const db = await getDb();
   const project = getVisibleProject(db, ctx, projectId);
   if (!project) notFound();
   return { ctx, db, project, base: `/w/${ctx.org.slug}`, projectBase: `/w/${ctx.org.slug}/projects/${project.id}` };
 }
 
-function teamOptions(ctx: TeamContext): UserLite[] {
-  const db = getDb();
+async function teamOptions(ctx: TeamContext): Promise<UserLite[]> {
+  const db = await getDb();
   return db.memberships
     .filter((item) => item.organizationId === ctx.org.id && item.status === "active" && item.role !== "billing")
     .map((item) => db.users.find((user) => user.id === item.userId)!)
@@ -302,6 +303,7 @@ export async function getDeliverableDetail(orgSlug: string, projectId: string, d
     clientName: client?.companyName ?? null,
     deliverable: row,
     versions,
+    previewUrl: versions[0] ? await previewUrlFor(versions[0]) : null,
     approvals,
     comments,
     reviewers,
@@ -328,7 +330,7 @@ export async function getDeliverableDetail(orgSlug: string, projectId: string, d
 export async function getNewProjectForm(orgSlug: string) {
   const ctx = await requireTeamContext(orgSlug);
   if (!can(ctx.role, "projects.create")) notFound();
-  const db = getDb();
+  const db = await getDb();
   const subscription = db.subscriptions.find((item) => item.organizationId === ctx.org.id);
   const plan = getPlan(subscription?.planKey ?? "starter");
   const activeCount = db.projects.filter((item) => item.organizationId === ctx.org.id && isProjectActive(item)).length;
@@ -338,7 +340,7 @@ export async function getNewProjectForm(orgSlug: string) {
     clients: db.clients
       .filter((client) => client.organizationId === ctx.org.id && client.status !== "archived")
       .map((client) => ({ id: client.id, name: client.companyName })),
-    team: teamOptions(ctx),
+    team: await teamOptions(ctx),
     currentUserId: ctx.user.id,
     limit: checkLimit(plan, "projects", activeCount),
     planName: plan.name,

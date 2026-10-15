@@ -65,7 +65,15 @@ export async function getProfileSettings(orgSlug: string) {
   const { user } = ctx;
   return {
     orgSlug: ctx.org.slug,
-    user: { id: user.id, name: user.name, email: user.email, title: user.title ?? "", timezone: user.timezone, avatarHue: user.avatarHue },
+    user: {
+      id: user.id,
+      name: user.name,
+      email: user.email,
+      title: user.title ?? "",
+      timezone: user.timezone,
+      avatarHue: user.avatarHue,
+      avatarUrl: user.avatarUrl,
+    },
     roleLabel: ROLE_LABELS[ctx.role],
     memberSince: ctx.membership.joinedAt,
     timezones: timezoneOptions(user.timezone),
@@ -76,7 +84,7 @@ export async function getProfileSettings(orgSlug: string) {
 
 export async function getWorkspaceSettings(orgSlug: string) {
   const ctx = await requireTeamContext(orgSlug);
-  const db = getDb();
+  const db = await getDb();
   const owner = db.memberships.find((item) => item.organizationId === ctx.org.id && item.role === "owner" && item.status === "active");
   return {
     orgSlug: ctx.org.slug,
@@ -112,7 +120,7 @@ export function preferenceFor(db: Database, ctx: TeamContext) {
 
 export async function getNotificationSettings(orgSlug: string) {
   const ctx = await requireTeamContext(orgSlug);
-  const db = getDb();
+  const db = await getDb();
   const preference = preferenceFor(db, ctx);
   return {
     orgSlug: ctx.org.slug,
@@ -129,7 +137,7 @@ export async function getNotificationSettings(orgSlug: string) {
 
 export async function getIntegrations(orgSlug: string) {
   const ctx = await requireTeamContext(orgSlug);
-  const db = getDb();
+  const db = await getDb();
   const now = new Date();
   const connections = db.integrations.filter((item) => item.organizationId === ctx.org.id);
   const subscription = db.subscriptions.find((item) => item.organizationId === ctx.org.id);
@@ -238,7 +246,7 @@ export async function requireAuditContext(orgSlug: string) {
 
 export async function getAuditLog(orgSlug: string, query: AuditQuery) {
   const ctx = await requireAuditContext(orgSlug);
-  const db = getDb();
+  const db = await getDb();
   const now = new Date();
   const filters = normaliseAuditQuery(query);
   const all = db.auditLogs.filter((log) => log.organizationId === ctx.org.id);
@@ -275,7 +283,7 @@ export async function getAuditLog(orgSlug: string, query: AuditQuery) {
 export async function getDataSettings(orgSlug: string) {
   const ctx = await requireTeamContext(orgSlug);
   if (!can(ctx.role, "data.export")) notFound();
-  const db = getDb();
+  const db = await getDb();
   const lastExport = newestFirst(db.auditLogs.filter((log) => log.organizationId === ctx.org.id && log.action === "data.exported"))[0];
   return {
     orgSlug: ctx.org.slug,

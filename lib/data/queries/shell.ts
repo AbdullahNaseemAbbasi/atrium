@@ -2,6 +2,7 @@ import "server-only";
 import { getCurrentUser, requireClientContext, requireTeamContext } from "@/lib/auth/context";
 import { can } from "@/lib/auth/permissions";
 import { formatRelative } from "@/lib/utils";
+import { usesSupabase } from "@/lib/supabase/config";
 import {
   clientPortalsFor,
   teamWorkspacesFor,
@@ -69,8 +70,8 @@ function navFor(role: OrgRole, base: string): NavItem[] {
   return items;
 }
 
-function switcherFor(userId: string): SwitcherEntry[] {
-  const db = getDb();
+async function switcherFor(userId: string): Promise<SwitcherEntry[]> {
+  const db = await getDb();
   const teams = teamWorkspacesFor(db, userId).map(({ org, membership }) => ({
     name: org.name,
     slug: org.slug,
@@ -90,8 +91,8 @@ function switcherFor(userId: string): SwitcherEntry[] {
   return [...teams, ...portals];
 }
 
-function notificationItems(userId: string, orgId: string, now: Date, limit: number) {
-  const db = getDb();
+async function notificationItems(userId: string, orgId: string, now: Date, limit: number) {
+  const db = await getDb();
   const mine = newestFirst(db.notifications.filter((item) => item.recipientUserId === userId && item.organizationId === orgId));
   return {
     unread: mine.filter((item) => !item.readAt).length,
@@ -114,6 +115,7 @@ export interface WorkspaceShell {
   role: OrgRole;
   org: { id: string; name: string; slug: string; hue: number };
   base: string;
+  live: boolean;
   nav: NavItem[];
   switcher: SwitcherEntry[];
   notifications: { unread: number; items: NotificationItem[] };
@@ -124,7 +126,7 @@ export interface WorkspaceShell {
 
 export async function getWorkspaceShell(orgSlug: string): Promise<WorkspaceShell> {
   const ctx = await requireTeamContext(orgSlug);
-  const db = getDb();
+  const db = await getDb();
   const now = new Date();
   const base = `/w/${ctx.org.slug}`;
 
@@ -168,9 +170,11 @@ export async function getWorkspaceShell(orgSlug: string): Promise<WorkspaceShell
     role: ctx.role,
     org: { id: ctx.org.id, name: ctx.org.name, slug: ctx.org.slug, hue: ctx.org.brandHue },
     base,
+    /** Supabase Realtime is on (off in memory mode). */
+    live: usesSupabase(),
     nav: navFor(ctx.role, base),
-    switcher: switcherFor(ctx.user.id),
-    notifications: notificationItems(ctx.user.id, ctx.org.id, now, 6),
+    switcher: await switcherFor(ctx.user.id),
+    notifications: await notificationItems(ctx.user.id, ctx.org.id, now, 6),
     search,
     can: {
       settings: can(ctx.role, "workspace.update") || can(ctx.role, "audit.view"),
@@ -185,9 +189,10 @@ export async function getWorkspaceShell(orgSlug: string): Promise<WorkspaceShell
 export interface PortalShell {
   user: UserLite;
   role: "approver" | "viewer";
-  org: { name: string; slug: string; hue: number };
+  org: { id: string; name: string; slug: string; hue: number };
   client: { id: string; name: string; hue: number };
   base: string;
+  live: boolean;
   switcher: SwitcherEntry[];
   notifications: { unread: number; items: NotificationItem[] };
   pendingReviews: number;
@@ -195,18 +200,19 @@ export interface PortalShell {
 
 export async function getPortalShell(orgSlug: string): Promise<PortalShell> {
   const ctx = await requireClientContext(orgSlug);
-  const db = getDb();
+  const db = await getDb();
   const now = new Date();
   const projects = visibleProjects(db, ctx);
   const projectIds = new Set(projects.map((project) => project.id));
   return {
     user: toUserLite(ctx.user),
     role: ctx.role,
-    org: { name: ctx.org.name, slug: ctx.org.slug, hue: ctx.org.brandHue },
+    org: { id: ctx.org.id, name: ctx.org.name, slug: ctx.org.slug, hue: ctx.org.brandHue },
     client: { id: ctx.client.id, name: ctx.client.companyName, hue: ctx.client.brandHue },
     base: `/portal/${ctx.org.slug}`,
-    switcher: switcherFor(ctx.user.id),
-    notifications: notificationItems(ctx.user.id, ctx.org.id, now, 6),
+    live: usesSupabase(),
+    switcher: await switcherFor(ctx.user.id),
+    notifications: await notificationItems(ctx.user.id, ctx.org.id, now, 6),
     pendingReviews: db.deliverables.filter((item) => projectIds.has(item.projectId) && item.status === "in_review").length,
   };
 }
@@ -215,6 +221,6 @@ export async function getPortalShell(orgSlug: string): Promise<PortalShell> {
 export async function getOptionalViewer() {
   const user = await getCurrentUser();
   if (!user) return null;
-  const switcher = switcherFor(user.id);
+  const switcher = await switcherFor(user.id);
   return { name: user.name, home: switcher[0]?.href ?? (user.isPlatformAdmin ? "/admin" : "/onboarding") };
 }

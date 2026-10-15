@@ -17,7 +17,7 @@ export async function GET(_request: Request, context: RouteContext<"/api/w/[org]
   const ctx = await routeTeamContext(org);
   if (!ctx || !can(ctx.role, "billing.view")) return notFoundResponse();
 
-  const db = getDb();
+  const db = await getDb();
   const invoice = db.invoices.find((item) => item.id === invoiceId && item.organizationId === ctx.org.id);
   if (!invoice) return notFoundResponse();
   const subscription = db.subscriptions.find((item) => item.organizationId === ctx.org.id);

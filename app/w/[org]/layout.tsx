@@ -1,4 +1,5 @@
 import { Suspense } from "react";
+import { RealtimeSync } from "@/components/realtime/realtime-sync";
 import { AppFooter, AppFrame, HeaderSkeleton } from "@/components/shell/chrome";
 import { WorkspaceHeader } from "@/components/shell/workspace-header";
 import { getWorkspaceShell } from "@/lib/data/queries/shell";
@@ -27,5 +28,10 @@ export default function WorkspaceLayout({ children, params }: LayoutProps<"/w/[o
 async function Header({ params }: { params: Promise<{ org: string }> }) {
   const { org } = await params;
   const shell = await getWorkspaceShell(org);
-  return <WorkspaceHeader shell={shell} />;
+  return (
+    <>
+      <WorkspaceHeader shell={shell} />
+      {shell.live && <RealtimeSync orgId={shell.org.id} userId={shell.user.id} scope="team" />}
+    </>
+  );
 }

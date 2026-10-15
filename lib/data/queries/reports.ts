@@ -246,7 +246,7 @@ function weeklySeries(values: WeekCount[]) {
 export async function getReports(orgSlug: string) {
   const ctx = await requireTeamContext(orgSlug);
   if (!can(ctx.role, "reports.view")) notFound();
-  const db: Database = getDb();
+  const db: Database = await getDb();
   const now = new Date();
 
   const projects = visibleProjects(db, ctx);

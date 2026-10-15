@@ -25,6 +25,7 @@ export function NewDeliverableButton({
   variant?: "primary" | "secondary";
 }) {
   const [state, action] = useActionState(createDeliverable.bind(null, orgSlug, projectId), null);
+  const [uploading, setUploading] = React.useState(false);
   const errors = state?.fieldErrors ?? {};
   return (
     <Dialog>
@@ -56,13 +57,18 @@ export function NewDeliverableButton({
           <Field label="Description" htmlFor="dlv-description" hint="What should the client look at?">
             <Textarea id="dlv-description" name="description" rows={2} defaultValue={state?.values?.description} />
           </Field>
-          <FilePicker error={errors.fileName?.[0] ?? errors.sizeBytes?.[0]} />
+          <FilePicker
+            orgSlug={orgSlug}
+            target={{ kind: "deliverable", projectId }}
+            error={errors.fileName?.[0] ?? errors.sizeBytes?.[0]}
+            onBusyChange={setUploading}
+          />
           <Field label="Version note" htmlFor="dlv-note" hint="Optional. Shown next to version 1.">
             <Input id="dlv-note" name="note" placeholder="First draft for internal review" defaultValue={state?.values?.note} />
           </Field>
           <div className="flex justify-end border-t border-line pt-5">
-            <SubmitButton pendingLabel="Uploading…">
-              <FileUp size={16} /> Upload draft
+            <SubmitButton pendingLabel="Saving…" disabled={uploading}>
+              <FileUp size={16} /> {uploading ? "Uploading…" : "Save draft"}
             </SubmitButton>
           </div>
         </form>
@@ -81,6 +87,7 @@ export function NewVersionButton({ orgSlug, deliverableId, nextVersion }: { orgS
     }
     return result;
   }, null);
+  const [uploading, setUploading] = React.useState(false);
   const errors = state?.fieldErrors ?? {};
 
   return (
@@ -93,12 +100,19 @@ export function NewVersionButton({ orgSlug, deliverableId, nextVersion }: { orgS
       <DialogContent title={`Upload version ${nextVersion}`} description="Earlier versions and their decisions stay in the history.">
         <form action={action} className="space-y-5" noValidate>
           {state && !state.ok && <FormMessage>{state.message}</FormMessage>}
-          <FilePicker error={errors.fileName?.[0] ?? errors.sizeBytes?.[0]} />
+          <FilePicker
+            orgSlug={orgSlug}
+            target={{ kind: "version", deliverableId }}
+            error={errors.fileName?.[0] ?? errors.sizeBytes?.[0]}
+            onBusyChange={setUploading}
+          />
           <Field label="What changed?" htmlFor="ver-note" hint="Clients see this note when they review.">
             <Textarea id="ver-note" name="note" rows={3} placeholder="Shortened the headline and updated the CTA, as requested." />
           </Field>
           <div className="flex justify-end border-t border-line pt-5">
-            <SubmitButton pendingLabel="Uploading…">Upload version</SubmitButton>
+            <SubmitButton pendingLabel="Saving…" disabled={uploading}>
+              {uploading ? "Uploading…" : "Save version"}
+            </SubmitButton>
           </div>
         </form>
       </DialogContent>

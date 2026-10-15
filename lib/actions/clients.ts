@@ -8,7 +8,7 @@ import { requireTeamContext } from "@/lib/auth/context";
 import { can, CLIENT_ROLE_LABELS } from "@/lib/auth/permissions";
 import { checkLimit, getPlan } from "@/lib/billing/plans";
 import { recordActivity, recordAudit } from "@/lib/data/events";
-import { getDb, newId } from "@/lib/data/store";
+import { getDb, newId, saveDb } from "@/lib/data/store";
 import type { Client, ClientRole, Database } from "@/lib/data/types";
 import { fail, formValues, invalid, ok, type ActionState } from "./result";
 
@@ -67,10 +67,10 @@ function nameTaken(db: Database, orgId: string, name: string, excludeId?: string
 }
 
 /** Field errors from zod plus the duplicate-name check, so every problem shows in one pass. */
-function invalidClient(error: z.ZodError, formData: FormData, orgId: string, excludeId?: string): ActionState {
+async function invalidClient(error: z.ZodError, formData: FormData, orgId: string, excludeId?: string): Promise<ActionState> {
   const state = invalid(error, formValues(formData));
   const name = String(formData.get("companyName") ?? "").trim();
-  if (state?.fieldErrors && name.length >= 2 && !state.fieldErrors.companyName && nameTaken(getDb(), orgId, name, excludeId)) {
+  if (state?.fieldErrors && name.length >= 2 && !state.fieldErrors.companyName && nameTaken((await getDb()), orgId, name, excludeId)) {
     state.fieldErrors.companyName = ["A client with this name already exists."];
   }
   return state;
@@ -79,7 +79,7 @@ function invalidClient(error: z.ZodError, formData: FormData, orgId: string, exc
 async function manageAccessContext(orgSlug: string) {
   const ctx = await requireTeamContext(orgSlug);
   if (!can(ctx.role, "clients.manage_access")) return null;
-  return { ctx, db: getDb() };
+  return { ctx, db: (await getDb()) };
 }
 
 /* ---------- Create & edit ---------- */
@@ -89,13 +89,13 @@ export async function createClient(orgSlug: string, _prev: ActionState, formData
   if (!can(ctx.role, "clients.manage")) return fail("You don't have permission to add clients.");
 
   const parsed = clientSchema.safeParse(Object.fromEntries(formData));
-  if (!parsed.success) return invalidClient(parsed.error, formData, ctx.org.id);
+  if (!parsed.success) return await invalidClient(parsed.error, formData, ctx.org.id);
   const input = parsed.data;
   if (input.status === "archived") {
     return fail("New clients can't start archived.", { status: ["Choose Active, Onboarding or Paused."] }, formValues(formData));
   }
 
-  const db = getDb();
+  const db = await getDb();
   if (nameTaken(db, ctx.org.id, input.companyName)) {
     return fail("Please fix the highlighted fields.", { companyName: ["A client with this name already exists."] }, formValues(formData));
   }
@@ -131,19 +131,21 @@ export async function createClient(orgSlug: string, _prev: ActionState, formData
   recordAudit(db, ctx, { action: "client.created", entityType: "client", entityId: id, summary: `Created client ${client.companyName}` });
   recordActivity(db, ctx, { verb: "client.added", targetType: "client", targetId: id, targetLabel: client.companyName, visibility: "internal" });
 
+  await saveDb();
   revalidatePath(`/w/${ctx.org.slug}`, "layout");
+  await saveDb();
   redirect(`/w/${ctx.org.slug}/clients/${id}?created=1`);
 }
 
 export async function updateClient(orgSlug: string, clientId: string, _prev: ActionState, formData: FormData): Promise<ActionState> {
   const ctx = await requireTeamContext(orgSlug);
   if (!can(ctx.role, "clients.manage")) return fail("You don't have permission to edit clients.");
-  const db = getDb();
+  const db = await getDb();
   const client = db.clients.find((item) => item.id === clientId && item.organizationId === ctx.org.id);
   if (!client) return fail("Client not found.");
 
   const parsed = clientSchema.safeParse(Object.fromEntries(formData));
-  if (!parsed.success) return invalidClient(parsed.error, formData, ctx.org.id, client.id);
+  if (!parsed.success) return await invalidClient(parsed.error, formData, ctx.org.id, client.id);
   const input = parsed.data;
   if (nameTaken(db, ctx.org.id, input.companyName, client.id)) {
     return fail("Please fix the highlighted fields.", { companyName: ["Another client already uses this name."] }, formValues(formData));
@@ -187,7 +189,9 @@ export async function updateClient(orgSlug: string, clientId: string, _prev: Act
     });
   }
 
+  await saveDb();
   revalidatePath(`/w/${ctx.org.slug}`, "layout");
+  await saveDb();
   redirect(`/w/${ctx.org.slug}/clients/${client.id}?saved=1`);
 }
 
@@ -258,6 +262,7 @@ export async function inviteClientUser(orgSlug: string, clientId: string, _prev:
   });
   recordActivity(db, ctx, { verb: "member.invited", targetType: "client", targetId: client.id, targetLabel: email, visibility: "internal" });
 
+  await saveDb();
   refresh();
   return ok(`Invitation sent to ${email}.`);
 }
@@ -293,6 +298,7 @@ export async function setPortalAccess(orgSlug: string, membershipId: string, sta
       : `Restored ${user.name}'s access to the ${client.companyName} portal`,
     metadata: { clientId: client.id, role: membership.role },
   });
+  await saveDb();
   refresh();
   return ok(revoking ? `${user.name} can no longer open the portal.` : `${user.name} has portal access again.`);
 }
@@ -314,6 +320,7 @@ export async function setPortalRole(orgSlug: string, membershipId: string, role:
     summary: `Changed ${user.name} from ${CLIENT_ROLE_LABELS[from]} to ${CLIENT_ROLE_LABELS[parsed.data]} on the ${client.companyName} portal`,
     metadata: { from, to: parsed.data, clientId: client.id },
   });
+  await saveDb();
   refresh();
   return ok(`${user.name} is now ${parsed.data === "approver" ? "an Approver" : "a Viewer"}.`);
 }
@@ -341,6 +348,7 @@ export async function revokeClientInvitation(orgSlug: string, invitationId: stri
     entityId: invitation.id,
     summary: `Revoked the ${client.companyName} portal invitation for ${invitation.email}`,
   });
+  await saveDb();
   refresh();
   return ok(`Invitation for ${invitation.email} revoked.`);
 }
@@ -360,6 +368,7 @@ export async function resendClientInvitation(orgSlug: string, invitationId: stri
     summary: `Re-sent the ${client.companyName} portal invitation to ${invitation.email}`,
     metadata: { role: invitation.role },
   });
+  await saveDb();
   refresh();
   return ok(`Invitation re-sent to ${invitation.email}. It's valid for ${INVITE_DAYS} days.`);
 }

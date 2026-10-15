@@ -75,7 +75,13 @@ async function Deliverable({ params }: { params: Promise<{ org: string; projectI
 
       <div className="grid gap-4 xl:grid-cols-[1.5fr_1fr]">
         <div className="space-y-4">
-          <FilePreview fileName={current.fileName} mimeType={current.mimeType} sizeBytes={current.sizeBytes} version={current.version} />
+          <FilePreview
+            fileName={current.fileName}
+            mimeType={current.mimeType}
+            sizeBytes={current.sizeBytes}
+            version={current.version}
+            previewUrl={data.previewUrl}
+          />
           {current.note && (
             <FormNote icon={Info}>
               <span className="text-ink-secondary">Version {current.version} note:</span> {current.note}

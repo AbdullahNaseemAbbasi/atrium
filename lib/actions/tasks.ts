@@ -4,22 +4,22 @@ import { refresh } from "next/cache";
 import { requireTeamContext } from "@/lib/auth/context";
 import { canWorkOnProject, getVisibleProject } from "@/lib/data/access";
 import { notify, recordActivity } from "@/lib/data/events";
-import { getDb, newId } from "@/lib/data/store";
-import type { TaskStatus } from "@/lib/data/types";
+import { getDb, newId, saveDb } from "@/lib/data/store";
+import type { Database, TaskStatus } from "@/lib/data/types";
 import { commentSchema, taskSchema } from "@/lib/validation/schemas";
 import { fail, formValues, invalid, ok, type ActionState } from "./result";
 
 /** Loads a task and checks the caller can work on its project. */
 async function loadTask(orgSlug: string, taskId: string) {
   const ctx = await requireTeamContext(orgSlug);
-  const db = getDb();
+  const db = await getDb();
   const task = db.tasks.find((item) => item.id === taskId && item.organizationId === ctx.org.id);
   const project = task ? getVisibleProject(db, ctx, task.projectId) : null;
   if (!task || !project || !canWorkOnProject(db, ctx, project)) return null;
   return { ctx, db, task, project };
 }
 
-function validateRefs(db: ReturnType<typeof getDb>, projectId: string, assigneeId?: string, milestoneId?: string) {
+function validateRefs(db: Database, projectId: string, assigneeId?: string, milestoneId?: string) {
   if (assigneeId && !db.projectMembers.some((item) => item.projectId === projectId && item.userId === assigneeId)) {
     return { assigneeId: ["Assign someone on this project."] };
   }
@@ -31,7 +31,7 @@ function validateRefs(db: ReturnType<typeof getDb>, projectId: string, assigneeI
 
 export async function createTask(orgSlug: string, projectId: string, _prev: ActionState, formData: FormData): Promise<ActionState> {
   const ctx = await requireTeamContext(orgSlug);
-  const db = getDb();
+  const db = await getDb();
   const project = getVisibleProject(db, ctx, projectId);
   if (!project || !canWorkOnProject(db, ctx, project)) return fail("You can't add tasks to this project.");
 
@@ -76,6 +76,7 @@ export async function createTask(orgSlug: string, projectId: string, _prev: Acti
       href: `/w/${ctx.org.slug}/projects/${project.id}/tasks?task=${id}`,
     });
   }
+  await saveDb();
   refresh();
   return ok("Task added.");
 }
@@ -111,6 +112,7 @@ export async function updateTask(orgSlug: string, taskId: string, _prev: ActionS
       href: `/w/${ctx.org.slug}/projects/${project.id}/tasks?task=${task.id}`,
     });
   }
+  await saveDb();
   refresh();
   return ok("Task saved.");
 }
@@ -138,6 +140,7 @@ export async function setTaskStatus(orgSlug: string, taskId: string, status: Tas
       visibility: task.clientVisible ? "client" : "internal",
     });
   }
+  await saveDb();
   refresh();
 }
 
@@ -147,6 +150,7 @@ export async function deleteTask(orgSlug: string, taskId: string) {
   const { db, task } = loaded;
   db.tasks = db.tasks.filter((item) => item.id !== task.id);
   db.comments = db.comments.filter((item) => item.taskId !== task.id);
+  await saveDb();
   refresh();
 }
 
@@ -175,6 +179,7 @@ export async function addTaskComment(orgSlug: string, taskId: string, _prev: Act
       deduplicationKey: `task-comment:${task.id}`,
     });
   }
+  await saveDb();
   refresh();
   return ok();
 }

@@ -7,7 +7,8 @@ import { can } from "@/lib/auth/permissions";
 import { canManageProject, canWorkOnProject, getVisibleProject } from "@/lib/data/access";
 import { recordActivity, recordAudit } from "@/lib/data/events";
 import { storageUsage } from "@/lib/data/storage";
-import { getDb, newId } from "@/lib/data/store";
+import { getDb, newId, saveDb } from "@/lib/data/store";
+import { claimUpload, removeStoredObject } from "@/lib/storage/uploads";
 import { uploadSchema } from "@/lib/validation/schemas";
 import { formatBytes } from "@/lib/utils";
 import { fail, formValues, invalid, ok, type ActionState } from "./result";
@@ -17,13 +18,13 @@ const visibilitySchema = z.object({
 });
 
 /**
- * Adds a project file. Only metadata reaches the server; in production the
- * bytes go to private storage through a short-lived signed upload URL that is
- * issued after these same checks (permission, type, size, plan storage).
+ * Saves a project file. The bytes are already in private storage (the browser
+ * uploaded them through the signed URL from `prepareUpload`); this checks the
+ * ticket and the object, then records the row.
  */
 export async function uploadProjectFile(orgSlug: string, projectId: string, _prev: ActionState, formData: FormData): Promise<ActionState> {
   const ctx = await requireTeamContext(orgSlug);
-  const db = getDb();
+  const db = await getDb();
   const project = getVisibleProject(db, ctx, projectId);
   if (!project || project.organizationId !== ctx.org.id || !canWorkOnProject(db, ctx, project) || !can(ctx.role, "deliverables.upload")) {
     return fail("You can't upload files to this project.");
@@ -45,6 +46,9 @@ export async function uploadProjectFile(orgSlug: string, projectId: string, _pre
     );
   }
 
+  const upload = await claimUpload(formData, { orgId: ctx.org.id, projectId: project.id, userId: ctx.user.id, ...file.data }, "files");
+  if (!upload.ok) return fail(upload.message, { fileName: [upload.message] }, formValues(formData));
+
   const now = new Date().toISOString();
   const id = newId("fil");
   db.files.push({
@@ -54,7 +58,7 @@ export async function uploadProjectFile(orgSlug: string, projectId: string, _pre
     name: file.data.fileName,
     mimeType: file.data.mimeType || "application/octet-stream",
     sizeBytes: file.data.sizeBytes,
-    storageKey: `org/${ctx.org.id}/projects/${project.id}/files/${id}/${crypto.randomUUID()}`,
+    storageKey: upload.storageKey,
     visibility: meta.data.visibility,
     uploadedByUserId: ctx.user.id,
     createdAt: now,
@@ -68,6 +72,7 @@ export async function uploadProjectFile(orgSlug: string, projectId: string, _pre
     targetLabel: file.data.fileName,
     visibility: meta.data.visibility,
   });
+  await saveDb();
   refresh();
   return ok(
     meta.data.visibility === "client"
@@ -81,7 +86,7 @@ export async function uploadProjectFile(orgSlug: string, projectId: string, _pre
 /** Removes a project file. Deliverable versions are never deleted: they carry the approval history. */
 export async function deleteProjectFile(orgSlug: string, fileId: string): Promise<ActionState> {
   const ctx = await requireTeamContext(orgSlug);
-  const db = getDb();
+  const db = await getDb();
   const file = db.files.find((item) => item.id === fileId && item.organizationId === ctx.org.id);
   const project = file ? getVisibleProject(db, ctx, file.projectId) : null;
   if (!file || !project) return fail("That file no longer exists.");
@@ -95,6 +100,8 @@ export async function deleteProjectFile(orgSlug: string, fileId: string): Promis
     summary: `Deleted ${file.name} from ${project.name}`,
     metadata: { visibility: file.visibility, sizeBytes: file.sizeBytes },
   });
+  await saveDb();
+  await removeStoredObject(file.storageKey);
   refresh();
   return ok(`${file.name} deleted.`);
 }

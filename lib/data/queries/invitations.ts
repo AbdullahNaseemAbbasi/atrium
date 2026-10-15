@@ -4,7 +4,7 @@ import { getCurrentUser, requireUser } from "@/lib/auth/context";
 import { CLIENT_ROLE_DESCRIPTIONS, CLIENT_ROLE_LABELS, ROLE_DESCRIPTIONS, ROLE_LABELS } from "@/lib/auth/permissions";
 import { formatRelative } from "@/lib/utils";
 import { clientPortalsFor, teamWorkspacesFor } from "../access";
-import { getDb } from "../store";
+import { getDbForInvitation, getDbForInvitesTo } from "../store";
 import type { ClientRole, Database, Invitation, OrgRole, User } from "../types";
 
 /**
@@ -74,7 +74,7 @@ export async function getInvitationPreview(token: string): Promise<InvitationPre
   await connection();
   if (!TOKEN_PATTERN.test(token)) return null;
 
-  const db = getDb();
+  const db = await getDbForInvitation(token);
   const invitation = db.invitations.find((item) => item.id === token);
   if (!invitation) return null;
   const org = db.organizations.find((item) => item.id === invitation.organizationId);
@@ -127,7 +127,7 @@ export interface OnboardingState {
 
 export async function getOnboardingState(): Promise<OnboardingState> {
   const user = await requireUser();
-  const db = getDb();
+  const db = await getDbForInvitesTo(user.email);
   const now = new Date();
   const email = user.email.toLowerCase();
 

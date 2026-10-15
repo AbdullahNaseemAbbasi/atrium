@@ -17,6 +17,7 @@ import {
   type ClientContext,
 } from "../access";
 import { isVersionSentToClient, latestSentVersion } from "../client-review";
+import { previewUrlFor } from "@/lib/storage/uploads";
 import { getDb } from "../store";
 import { approvalsOf, newestFirst, paginate, sortTasks, taskDueText, toActivityView, toCommentView, userLite, versionsOf, type UserLite } from "../views";
 import type { ActivityEvent, Database, Deliverable, DeliverableStatus, Project } from "../types";
@@ -184,7 +185,7 @@ function portalActivity(db: Database, ctx: ClientContext, events: ActivityEvent[
 
 export async function getPortalOverview(orgSlug: string) {
   const ctx = await requireClientContext(orgSlug);
-  const db = getDb();
+  const db = await getDb();
   const now = new Date();
   const projects = visibleProjects(db, ctx);
   const projectIds = new Set(projects.map((project) => project.id));
@@ -244,7 +245,7 @@ export async function getPortalOverview(orgSlug: string) {
 
 export async function listPortalProjects(orgSlug: string, query: { status?: string }) {
   const ctx = await requireClientContext(orgSlug);
-  const db = getDb();
+  const db = await getDb();
   const now = new Date();
   const all = visibleProjects(db, ctx).map((project) => toProjectCard(db, ctx, project, now));
   const isActive = (row: PortalProjectCard) => row.status !== "completed" && row.status !== "cancelled";
@@ -266,7 +267,7 @@ export async function listPortalProjects(orgSlug: string, query: { status?: stri
 
 export async function getPortalProject(orgSlug: string, projectId: string) {
   const ctx = await requireClientContext(orgSlug);
-  const db = getDb();
+  const db = await getDb();
   const project = getVisibleProject(db, ctx, projectId);
   if (!project || project.organizationId !== ctx.org.id) notFound();
   const now = new Date();
@@ -362,7 +363,7 @@ export async function getPortalProject(orgSlug: string, projectId: string) {
 
 export async function getPortalDeliverable(orgSlug: string, deliverableId: string) {
   const ctx = await requireClientContext(orgSlug);
-  const db = getDb();
+  const db = await getDb();
   const deliverable = db.deliverables.find((item) => item.id === deliverableId && item.organizationId === ctx.org.id);
   if (!deliverable || !canViewDeliverable(db, ctx, deliverable)) notFound();
   const shownVersion = latestSentVersion(deliverable);
@@ -399,6 +400,8 @@ export async function getPortalDeliverable(orgSlug: string, deliverableId: strin
       decision: decisionByVersion.get(version.version) ?? null,
     }));
   const current = versions.find((version) => version.version === shownVersion)!;
+  const shownRow = db.deliverableVersions.find((item) => item.deliverableId === deliverable.id && item.version === shownVersion);
+  const previewUrl = shownRow ? await previewUrlFor(shownRow) : null;
 
   const comments = visibleComments(ctx, db.comments.filter((item) => item.deliverableId === deliverable.id && item.organizationId === ctx.org.id))
     .sort((a, b) => Date.parse(a.createdAt) - Date.parse(b.createdAt))
@@ -418,6 +421,7 @@ export async function getPortalDeliverable(orgSlug: string, deliverableId: strin
     agencyName: ctx.org.name,
     clientName: ctx.client.companyName,
     role: ctx.role,
+    previewUrl,
     roleLabel: CLIENT_ROLE_LABELS[ctx.role],
     project: { id: project.id, name: project.name },
     milestone: milestone ? { id: milestone.id, title: milestone.title, approvalRequired: milestone.approvalRequired } : null,
@@ -446,7 +450,7 @@ export async function getPortalDeliverable(orgSlug: string, deliverableId: strin
 
 export async function getPortalApprovals(orgSlug: string, query: { decision?: string; page?: string }) {
   const ctx = await requireClientContext(orgSlug);
-  const db = getDb();
+  const db = await getDb();
   const now = new Date();
   const projects = visibleProjects(db, ctx);
   const projectIds = new Set(projects.map((project) => project.id));
@@ -497,7 +501,7 @@ export async function getPortalApprovals(orgSlug: string, query: { decision?: st
 
 export async function getPortalFiles(orgSlug: string, query: { project?: string; type?: string; q?: string }) {
   const ctx = await requireClientContext(orgSlug);
-  const db = getDb();
+  const db = await getDb();
   const now = new Date();
   const projects = visibleProjects(db, ctx);
   const projectById = new Map(projects.map((project) => [project.id, project]));
@@ -588,7 +592,7 @@ export async function getPortalFiles(orgSlug: string, query: { project?: string;
 
 export async function getPortalNotifications(orgSlug: string, query: { filter?: string; page?: string }) {
   const ctx = await requireClientContext(orgSlug);
-  const db = getDb();
+  const db = await getDb();
   const now = new Date();
   const mine = newestFirst(db.notifications.filter((item) => item.recipientUserId === ctx.user.id && item.organizationId === ctx.org.id));
   const filter = query.filter === "unread" ? "unread" : "all";

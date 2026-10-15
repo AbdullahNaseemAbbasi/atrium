@@ -8,7 +8,7 @@ import { checkLimit, getPlan } from "@/lib/billing/plans";
 import { isProjectActive } from "@/lib/domain/rules";
 import { canManageProject, getVisibleProject } from "@/lib/data/access";
 import { clientAudience, notify, recordActivity, recordAudit } from "@/lib/data/events";
-import { getDb, newId } from "@/lib/data/store";
+import { getDb, newId, saveDb } from "@/lib/data/store";
 import type { ProjectStatus } from "@/lib/data/types";
 import { projectSchema } from "@/lib/validation/schemas";
 import { fail, formValues, invalid, ok, type ActionState } from "./result";
@@ -28,7 +28,7 @@ export async function createProject(orgSlug: string, _prev: ActionState, formDat
   if (!parsed.success) return invalid(parsed.error, formValues(formData));
   const input = parsed.data;
 
-  const db = getDb();
+  const db = await getDb();
   // Every referenced record must belong to this workspace.
   if (input.clientId && !db.clients.some((client) => client.id === input.clientId && client.organizationId === ctx.org.id)) {
     return fail("That client doesn't exist in this workspace.", { clientId: ["Choose a client from the list."] }, formValues(formData));
@@ -83,13 +83,15 @@ export async function createProject(orgSlug: string, _prev: ActionState, formDat
     href: `/w/${ctx.org.slug}/projects/${id}`,
   });
 
+  await saveDb();
   revalidatePath(`/w/${ctx.org.slug}`, "layout");
+  await saveDb();
   redirect(`/w/${ctx.org.slug}/projects/${id}?created=1`);
 }
 
 export async function updateProject(orgSlug: string, projectId: string, _prev: ActionState, formData: FormData): Promise<ActionState> {
   const ctx = await requireTeamContext(orgSlug);
-  const db = getDb();
+  const db = await getDb();
   const project = getVisibleProject(db, ctx, projectId);
   if (!project) return fail("Project not found.");
   if (!canManageProject(db, ctx, project)) return fail("Only the project lead or a manager can edit this project.");
@@ -144,18 +146,21 @@ export async function updateProject(orgSlug: string, projectId: string, _prev: A
     }
   }
 
+  await saveDb();
   revalidatePath(`/w/${ctx.org.slug}`, "layout");
+  await saveDb();
   return ok("Project saved.");
 }
 
 export async function setProjectStatus(orgSlug: string, projectId: string, status: ProjectStatus) {
   const ctx = await requireTeamContext(orgSlug);
-  const db = getDb();
+  const db = await getDb();
   const project = getVisibleProject(db, ctx, projectId);
   if (!project || !canManageProject(db, ctx, project)) throw new Error("Not allowed");
   if (project.status === status) return;
   project.status = status;
   project.updatedAt = new Date().toISOString();
   recordActivity(db, ctx, { projectId, verb: "project.status_changed", targetType: "project", targetId: projectId, targetLabel: project.name });
+  await saveDb();
   refresh();
 }

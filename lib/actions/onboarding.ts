@@ -8,7 +8,7 @@ import { ROLE_LABELS } from "@/lib/auth/permissions";
 import { checkLimit, getPlan } from "@/lib/billing/plans";
 import type { TeamContext } from "@/lib/data/access";
 import { recordActivity, recordAudit } from "@/lib/data/events";
-import { getDb, newId } from "@/lib/data/store";
+import { getDb, isSlugTaken, newId, saveDb } from "@/lib/data/store";
 import type { Invitation, Membership, Organization, Subscription } from "@/lib/data/types";
 import {
   INDUSTRIES,
@@ -34,7 +34,7 @@ export async function checkSlugAvailability(rawSlug: string): Promise<SlugCheck>
   if (!user) return { slug, available: false, message: "Sign in to check workspace addresses." };
   const issue = slugIssue(slug);
   if (issue) return { slug, available: false, message: issue };
-  const taken = getDb().organizations.some((org) => org.slug === slug);
+  const taken = await isSlugTaken(slug);
   return taken
     ? { slug, available: false, message: "That address is already taken. Try adding your city or a short word." }
     : { slug, available: true, message: "This address is available." };
@@ -100,8 +100,8 @@ export async function createWorkspace(_prev: ActionState, formData: FormData): P
   if (!parsed.success) return invalid(parsed.error, values);
   const input = parsed.data;
 
-  const db = getDb();
-  if (db.organizations.some((org) => org.slug === input.slug)) {
+  const db = await getDb();
+  if (await isSlugTaken(input.slug)) {
     return fail("That workspace address was taken a moment ago.", { slug: ["That address is already taken. Try another."] }, values);
   }
 
@@ -202,5 +202,6 @@ export async function createWorkspace(_prev: ActionState, formData: FormData): P
     });
   }
 
+  await saveDb();
   redirect(`/w/${org.slug}?welcome=1`);
 }

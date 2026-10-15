@@ -7,7 +7,7 @@ import { CLIENT_ROLE_LABELS, ROLE_LABELS } from "@/lib/auth/permissions";
 import { checkLimit, getPlan } from "@/lib/billing/plans";
 import type { ClientContext, TeamContext } from "@/lib/data/access";
 import { notify, recordAudit } from "@/lib/data/events";
-import { getDb, newId } from "@/lib/data/store";
+import { getDbForInvitation, newId, saveDb } from "@/lib/data/store";
 import type { ClientRole, OrgRole } from "@/lib/data/types";
 import { fail, type ActionState } from "./result";
 
@@ -24,7 +24,7 @@ export async function acceptInvitation(token: string): Promise<ActionState> {
   const user = await getCurrentUser();
   if (!user) return fail("Sign in with the invited email address to accept this invitation.");
 
-  const db = getDb();
+  const db = await getDbForInvitation(token);
   const invitation = db.invitations.find((item) => item.id === token);
   if (!invitation) return fail("This invitation doesn't exist any more.");
   const org = db.organizations.find((item) => item.id === invitation.organizationId);
@@ -56,6 +56,7 @@ export async function acceptInvitation(token: string): Promise<ActionState> {
       // Already on the team: close the invitation and open the workspace.
       invitation.status = "accepted";
       invitation.acceptedAt = joinedAt;
+      await saveDb();
       redirect(`/w/${org.slug}`);
     }
 
@@ -106,6 +107,7 @@ export async function acceptInvitation(token: string): Promise<ActionState> {
     if (existing) {
       invitation.status = "accepted";
       invitation.acceptedAt = joinedAt;
+      await saveDb();
       redirect(`/portal/${org.slug}`);
     }
 
@@ -132,6 +134,8 @@ export async function acceptInvitation(token: string): Promise<ActionState> {
     destination = `/portal/${org.slug}?joined=1`;
   }
 
+  await saveDb();
   revalidatePath("/", "layout");
+  await saveDb();
   redirect(destination);
 }

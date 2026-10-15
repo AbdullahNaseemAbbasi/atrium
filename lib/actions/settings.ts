@@ -5,8 +5,11 @@ import { z } from "zod";
 import { requireTeamContext } from "@/lib/auth/context";
 import { can } from "@/lib/auth/permissions";
 import { recordAudit } from "@/lib/data/events";
-import { DEMO_PASSWORD } from "@/lib/data/seed";
-import { getDb } from "@/lib/data/store";
+import { DEMO_ACCOUNTS, DEMO_PASSWORD } from "@/lib/data/seed";
+import { getDb, saveDb } from "@/lib/data/store";
+import { MAX_AVATAR_BYTES, removeAvatar, sniffAvatar, storeAvatar } from "@/lib/storage/avatars";
+import { SUPABASE_PUBLISHABLE_KEY, SUPABASE_URL, usesSupabase } from "@/lib/supabase/config";
+import { createSupabaseServerClient } from "@/lib/supabase/server";
 import type { IntegrationKey, NotificationGroup } from "@/lib/data/types";
 import { INDUSTRIES, INTEGRATIONS, NOTIFICATION_GROUPS, TIMEZONE_VALUES } from "@/lib/settings/options";
 import { fail, formValues, invalid, ok, type ActionState } from "./result";
@@ -31,15 +34,53 @@ export async function updateProfile(orgSlug: string, _prev: ActionState, formDat
   if (!parsed.success) return invalid(parsed.error, formValues(formData));
 
   // A user only ever edits their own row; the id comes from the session, not the form.
-  const user = getDb().users.find((item) => item.id === ctx.user.id);
+  const user = (await getDb()).users.find((item) => item.id === ctx.user.id);
   if (!user) return fail("Your account could not be found. Sign in again.");
   user.name = parsed.data.name;
   user.title = parsed.data.title || undefined;
   user.timezone = parsed.data.timezone;
   user.avatarHue = parsed.data.avatarHue;
 
+  await saveDb();
   revalidatePath(`/w/${ctx.org.slug}`, "layout");
+  await saveDb();
   return ok("Profile saved.");
+}
+
+/** Replaces the signed-in person's profile photo. The id comes from the session, never the form. */
+export async function uploadAvatar(orgSlug: string, formData: FormData): Promise<ActionState> {
+  const ctx = await requireTeamContext(orgSlug);
+  const file = formData.get("avatar");
+  if (!(file instanceof File) || file.size === 0) return fail("Choose a photo first.");
+  if (file.size > MAX_AVATAR_BYTES) return fail("Photos can be up to 1.5 MB. Try a smaller one.");
+  const bytes = new Uint8Array(await file.arrayBuffer());
+  const kind = sniffAvatar(bytes);
+  if (!kind) return fail("Use a JPG, PNG or WebP photo.");
+
+  const user = (await getDb()).users.find((item) => item.id === ctx.user.id);
+  if (!user) return fail("Your account could not be found. Sign in again.");
+  const previous = user.avatarUrl;
+  try {
+    user.avatarUrl = await storeAvatar(user.id, bytes, kind);
+  } catch {
+    return fail("The photo couldn't be saved. Try again in a moment.");
+  }
+  await saveDb();
+  await removeAvatar(previous, user.id);
+  revalidatePath(`/w/${ctx.org.slug}`, "layout");
+  return ok("Photo updated.");
+}
+
+export async function deleteAvatar(orgSlug: string): Promise<ActionState> {
+  const ctx = await requireTeamContext(orgSlug);
+  const user = (await getDb()).users.find((item) => item.id === ctx.user.id);
+  if (!user) return fail("Your account could not be found. Sign in again.");
+  const previous = user.avatarUrl;
+  user.avatarUrl = undefined;
+  await saveDb();
+  await removeAvatar(previous, user.id);
+  revalidatePath(`/w/${ctx.org.slug}`, "layout");
+  return ok("Photo removed. Your initials show instead.");
 }
 
 const passwordSchema = z
@@ -52,10 +93,24 @@ const passwordSchema = z
   .refine((value) => value.password !== value.currentPassword, { message: "Choose a password you haven't used here.", path: ["password"] });
 
 export async function changePassword(orgSlug: string, _prev: ActionState, formData: FormData): Promise<ActionState> {
-  await requireTeamContext(orgSlug);
+  const ctx = await requireTeamContext(orgSlug);
   const parsed = passwordSchema.safeParse(Object.fromEntries(formData));
   if (!parsed.success) return invalid(parsed.error);
-  // Demo accounts share one password; Supabase Auth verifies and stores it in production.
+  const isDemo = DEMO_ACCOUNTS.some((account) => account.userId === ctx.user.id);
+
+  if (usesSupabase() && !isDemo) {
+    // Check the current password without touching this session's cookies.
+    const { createClient } = await import("@supabase/supabase-js");
+    const probe = createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY, { auth: { persistSession: false, autoRefreshToken: false } });
+    const check = await probe.auth.signInWithPassword({ email: ctx.user.email, password: parsed.data.currentPassword });
+    if (check.error) return fail("Please fix the highlighted fields.", { currentPassword: ["That isn't your current password."] });
+    await probe.auth.signOut({ scope: "local" });
+    const supabase = await createSupabaseServerClient();
+    const { error } = await supabase.auth.updateUser({ password: parsed.data.password });
+    if (error) return fail(error.message.includes("weak") ? "Choose a stronger password." : "Your password couldn't be changed. Try again.");
+    return ok("Password changed. Use the new one next time you sign in.");
+  }
+
   if (parsed.data.currentPassword !== DEMO_PASSWORD) {
     return fail("Please fix the highlighted fields.", { currentPassword: ["That isn't your current password."] });
   }
@@ -83,7 +138,7 @@ export async function updateWorkspace(orgSlug: string, _prev: ActionState, formD
   const parsed = schema.safeParse(Object.fromEntries(formData));
   if (!parsed.success) return invalid(parsed.error, formValues(formData));
 
-  const org = getDb().organizations.find((item) => item.id === ctx.org.id);
+  const org = (await getDb()).organizations.find((item) => item.id === ctx.org.id);
   if (!org) return fail("Workspace not found.");
   const next = { ...parsed.data, website: parsed.data.website || undefined };
   const changed = (Object.keys(next) as (keyof typeof next)[]).filter((key) => (org[key] ?? "") !== (next[key] ?? ""));
@@ -92,7 +147,7 @@ export async function updateWorkspace(orgSlug: string, _prev: ActionState, formD
   const metadata: Record<string, string> = { fields: changed.join(", ") };
   if (changed.includes("name")) metadata.previousName = org.name;
   Object.assign(org, next);
-  recordAudit(getDb(), ctx, {
+  recordAudit((await getDb()), ctx, {
     action: "workspace.updated",
     entityType: "organization",
     entityId: org.id,
@@ -100,7 +155,9 @@ export async function updateWorkspace(orgSlug: string, _prev: ActionState, formD
     metadata,
   });
 
+  await saveDb();
   revalidatePath(`/w/${ctx.org.slug}`, "layout");
+  await saveDb();
   return ok("Workspace settings saved.");
 }
 
@@ -121,7 +178,7 @@ export async function updateNotificationPreferences(orgSlug: string, _prev: Acti
     email: groups.filter((group) => !enabled("email").has(group)) as NotificationGroup[],
   };
 
-  const db = getDb();
+  const db = await getDb();
   const existing = db.notificationPreferences.find((item) => item.userId === ctx.user.id && item.organizationId === ctx.org.id);
   if (existing) {
     existing.muted = muted;
@@ -129,6 +186,7 @@ export async function updateNotificationPreferences(orgSlug: string, _prev: Acti
   } else {
     db.notificationPreferences.push({ userId: ctx.user.id, organizationId: ctx.org.id, muted, digest: digest.data });
   }
+  await saveDb();
   refresh();
   return ok("Notification preferences saved.");
 }
@@ -153,7 +211,7 @@ export async function connectIntegration(orgSlug: string, key: string, _prev: Ac
     .safeParse(formData.get("account") ?? "");
   if (!account.success) return fail("Please fix the highlighted fields.", { account: [account.error.issues[0].message] }, formValues(formData));
 
-  const db = getDb();
+  const db = await getDb();
   if (db.integrations.some((item) => item.organizationId === ctx.org.id && item.key === meta.key)) {
     return fail(`${meta.name} is already connected. Disconnect it first to switch accounts.`);
   }
@@ -165,6 +223,7 @@ export async function connectIntegration(orgSlug: string, key: string, _prev: Ac
     summary: `Connected ${meta.name} (${account.data})`,
     metadata: { integration: meta.key, change: "connected" },
   });
+  await saveDb();
   refresh();
   return ok(`${meta.name} connected (demo, no data is sent).`);
 }
@@ -174,7 +233,7 @@ export async function disconnectIntegration(orgSlug: string, key: string): Promi
   if (!can(ctx.role, "integrations.manage")) return fail("Only workspace owners can disconnect integrations.");
   const parsedKey = integrationKey.safeParse(key);
   if (!parsedKey.success) return fail("That integration isn't available.");
-  const db = getDb();
+  const db = await getDb();
   const connection = db.integrations.find((item) => item.organizationId === ctx.org.id && item.key === parsedKey.data);
   if (!connection) return fail("That integration isn't connected.");
   const meta = INTEGRATIONS.find((item) => item.key === parsedKey.data)!;
@@ -186,6 +245,7 @@ export async function disconnectIntegration(orgSlug: string, key: string): Promi
     summary: `Disconnected ${meta.name} (${connection.account})`,
     metadata: { integration: meta.key, change: "disconnected" },
   });
+  await saveDb();
   refresh();
   return ok(`${meta.name} disconnected.`);
 }

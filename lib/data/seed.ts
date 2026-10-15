@@ -25,6 +25,7 @@ import type {
   User,
   Visibility,
 } from "./types";
+import { portraitUrl } from "./portraits";
 
 /**
  * Deterministic synthetic demo data. Every name, company and email is
@@ -67,6 +68,9 @@ export function createSeed(now: Date): Database {
     // Platform operator
     { id: "usr_sam", name: "Sam Rivera", email: "sam@atrium.example", title: "Platform Operations", avatarHue: 185, timezone: "UTC", isPlatformAdmin: true, createdAt: daysAgo(500), lastActiveAt: hoursAgo(12) },
   ];
+
+  // Placeholder profile photos (see lib/data/portraits.ts).
+  for (const user of users) user.avatarUrl = portraitUrl(user);
 
   /* ---------------- Organizations ---------------- */
 

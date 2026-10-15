@@ -43,7 +43,7 @@ export function groupByDay<T extends { createdAt: string }>(items: T[], now: Dat
 export async function getActivityLog(orgSlug: string, query: { project?: string; type?: string; page?: string }) {
   const ctx = await requireTeamContext(orgSlug);
   if (!can(ctx.role, "projects.view_assigned")) notFound();
-  const db = getDb();
+  const db = await getDb();
   const now = new Date();
   const base = `/w/${ctx.org.slug}`;
 

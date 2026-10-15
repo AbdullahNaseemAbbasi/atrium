@@ -103,7 +103,7 @@ export interface BillingDashboard {
 
 export async function getDashboard(orgSlug: string, range: DashboardRange): Promise<TeamDashboard | BillingDashboard> {
   const ctx = await requireTeamContext(orgSlug);
-  const db = getDb();
+  const db = await getDb();
   const now = new Date();
   const base = `/w/${ctx.org.slug}`;
   const firstName = ctx.user.name.split(" ")[0];

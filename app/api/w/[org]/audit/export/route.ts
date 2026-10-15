@@ -2,7 +2,7 @@ import type { NextRequest } from "next/server";
 import { format } from "date-fns";
 import { can } from "@/lib/auth/permissions";
 import { filterAuditLogs, normaliseAuditQuery, toAuditRow } from "@/lib/data/queries/settings";
-import { getDb, newId } from "@/lib/data/store";
+import { getDb, newId, saveDb } from "@/lib/data/store";
 import { fileSlug, toCsv } from "@/lib/export/csv";
 import { attachmentHeaders, notFoundResponse, requestIp, routeTeamContext } from "@/lib/export/route-auth";
 
@@ -17,7 +17,7 @@ export async function GET(request: NextRequest, context: RouteContext<"/api/w/[o
   const ctx = await routeTeamContext(org);
   if (!ctx || !can(ctx.role, "audit.view")) return notFoundResponse();
 
-  const db = getDb();
+  const db = await getDb();
   const now = new Date();
   const search = request.nextUrl.searchParams;
   const filters = normaliseAuditQuery({
@@ -62,6 +62,7 @@ export async function GET(request: NextRequest, context: RouteContext<"/api/w/[o
     ip: await requestIp(),
     createdAt: now.toISOString(),
   });
+  await saveDb();
 
   return new Response(csv, {
     headers: attachmentHeaders(`${fileSlug(ctx.org.slug)}-audit-log-${format(now, "yyyy-MM-dd")}.csv`, "text/csv; charset=utf-8"),
