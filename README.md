@@ -17,20 +17,49 @@ who made it and when.
 
 ## Try the demo
 
-Run it locally (below), open `/login` and pick a demo account. Each one
-shows a different side of the permission model.
+Run it locally (below), open `/login` and either click a demo account or
+type its email with the password. Each account shows a different side of
+the permission model.
 
-| Account | What you'll see |
+**Password for every demo account: `atrium-demo`**
+
+These are made-up demo people (the `.example` addresses can't receive
+mail). Changes you make are wiped when the demo is reset.
+
+The seven accounts with a button on the sign-in page:
+
+| Email | Role | What you'll see |
+|---|---|---|
+| `alex@kinetic.example` | Agency owner, Kinetic Studio | Everything, plus a second workspace (Lumen Labs) in the switcher |
+| `emma@kinetic.example` | Project manager | All projects and clients, invites, audit log, reports; no billing |
+| `liam@kinetic.example` | Team member | Only the projects he's assigned to |
+| `olivia@kinetic.example` | Billing manager | Plan, usage and invoices; no project data |
+| `daniel@acme.example` | Client approver, Acme Co. | Acme Co.'s portal; can approve or request changes |
+| `chris@acme.example` | Client viewer, Acme Co. | Same portal, comments only |
+| `sam@atrium.example` | Platform operator | `/admin`: health, workspaces, webhook log |
+
+More people in the demo (same password, sign in by typing the email):
+
+| Email | Role |
 |---|---|
-| Agency owner (`alex@kinetic.example`) | Everything, plus a second workspace in the switcher |
-| Project manager (`emma@kinetic.example`) | All projects and clients, invites, audit log, reports; no billing |
-| Team member (`liam@kinetic.example`) | Only the projects he's assigned to |
-| Billing manager (`olivia@kinetic.example`) | Plan, usage and invoices; no project data |
-| Client approver (`daniel@acme.example`) | Acme Co.'s portal; can approve or request changes |
-| Client viewer (`chris@acme.example`) | Same portal, comments only |
-| Platform operator (`sam@atrium.example`) | `/admin`: health, workspaces, webhook log |
+| `sophia@kinetic.example` | Team member, Kinetic Studio |
+| `noah@kinetic.example` | Team member, Kinetic Studio |
+| `ethan@kinetic.example` | Team member, Kinetic Studio |
+| `ava@kinetic.example` | Team member, Kinetic Studio |
+| `priya@novatech.example` | Client approver, NovaTech (Kinetic Studio) |
+| `marcus@pulse.example` | Client approver, Pulse Marketing (Kinetic Studio) |
+| `hannah@shopease.example` | Client approver, ShopEase (Kinetic Studio) |
+| `omar@brightpath.example` | Client approver, BrightPath (Kinetic Studio) |
+| `maya@lumen.example` | Owner, Lumen Labs (the second workspace) |
+| `leo@lumen.example` | Team member, Lumen Labs |
+| `zara@orbit.example` | Client approver, Orbit Fintech (Lumen Labs) |
 
-Password for every account: `atrium-demo`.
+To see live updates, sign in as `alex@kinetic.example` in one browser and
+`daniel@acme.example` in another (or a private window), open the same
+deliverable and leave a comment.
+
+You can also create your own account at `/signup`; it starts with an empty
+workspace.
 
 ## What it does
 
