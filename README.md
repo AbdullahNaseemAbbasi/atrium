@@ -6,7 +6,9 @@ portal where they review versioned deliverables, comment, and approve or
 request changes. Every decision is recorded against the exact version, with
 who made it and when.
 
-![Atrium dashboard](docs/screenshots/dashboard.png)
+![Next.js 16](https://img.shields.io/badge/Next.js-16-000000?logo=nextdotjs) ![React 19](https://img.shields.io/badge/React-19-149eca?logo=react&logoColor=white) ![TypeScript strict](https://img.shields.io/badge/TypeScript-strict-3178c6?logo=typescript&logoColor=white) ![Supabase](https://img.shields.io/badge/Supabase-Postgres%20%2B%20RLS-3ecf8e?logo=supabase&logoColor=white) ![Stripe test mode](https://img.shields.io/badge/Stripe-test%20mode-635bff?logo=stripe&logoColor=white) ![AI drafts on Gemini or Claude](https://img.shields.io/badge/AI-Gemini%20%7C%20Claude-8e75b2) ![114 unit and 30 end-to-end tests](https://img.shields.io/badge/tests-114%20unit%20%C2%B7%2030%20e2e-2ea44f)
+
+![Atrium dashboard: KPI tiles with 12-week trends, recent projects and the team's open tasks](docs/screenshots/dashboard.png)
 
 > **Status:** runs on Supabase (Postgres with row-level security, Auth,
 > Storage and Realtime): uploads go straight to private storage, changes show
@@ -16,6 +18,66 @@ who made it and when.
 > Without Supabase keys it falls back to an in-memory store with the same
 > rules. Deployment is next; see
 > [docs/roadmap.md](docs/roadmap.md). All data is synthetic.
+
+## Screenshots
+
+Taken from the app running on Supabase, with Gemini writing the drafts and
+Stripe in a sandbox. Every person and company in them is made up. Click an
+image for the full 2x size.
+
+### AI drafts
+
+The team gets three drafts: a summary of what the client asked for, a reply
+to the client, and a weekly update for the client. A person reads and edits
+each one; nothing reaches a client on its own. Drafts run on Gemini's free
+tier, or on Claude when `ANTHROPIC_API_KEY` is set.
+
+| Feedback summary on a deliverable | Reply draft in the comment box |
+|---|---|
+| ![AI feedback summary listing two change requests and an open question for version 3](docs/screenshots/ai-summary.png) | ![AI reply draft answering the client's latest comment, filled into the comment box](docs/screenshots/ai-reply.png) |
+| **Weekly client update** | **Audit log: every AI call with its model and provider** |
+| ![AI weekly update for the client on the project overview](docs/screenshots/ai-update.png) | ![Audit log showing a Stripe plan change and three AI drafts with model, feature and provider](docs/screenshots/audit-log.png) |
+
+Each draft gets only the material its reader may see: the reply and the
+weekly update never contain internal notes, internal tasks, budgets or
+unsent versions (tested in `tests/ai.test.ts`). What people wrote goes into
+the prompt fenced and escaped as material, not instructions. Each workspace
+gets 30 drafts a day and each person 15, counted from the audit log. When
+one Gemini model is busy or over quota, the next one in the chain answers.
+More in [docs/ai.md](docs/ai.md).
+
+### Billing on Stripe (test mode)
+
+| Pricing page | Checkout summary in Atrium |
+|---|---|
+| ![Pricing page with Starter, Professional and Agency plans](docs/screenshots/pricing.png) | ![Atrium checkout page for the Agency plan in Stripe test mode](docs/screenshots/checkout.png) |
+| **Stripe Checkout with the test card** | **Back in Atrium once the webhook lands** |
+| ![Stripe-hosted checkout in the sandbox with the 4242 test card filled in](docs/screenshots/stripe-checkout.png) | ![Billing page on the Agency plan with the Visa 4242 card and the Stripe test mode badge](docs/screenshots/billing.png) |
+
+![Webhook event log in the operator console: checkout.session.completed, invoice.paid and customer.subscription.updated from Stripe, all processed](docs/screenshots/webhooks.png)
+
+Upgrades from a free plan go through Stripe Checkout. Switching paid plans
+swaps the subscription's price and invoices the difference, cancelling
+waits for the end of the paid period, and "Manage billing in Stripe" opens
+the customer portal. The app never sets the plan itself in these flows.
+`/api/webhooks/stripe` checks the `Stripe-Signature` header over the raw
+body, accepts a price only if its lookup key, amount and interval match the
+plan catalogue, skips event IDs it has already seen and ignores events older
+than the stored state. Realtime then refreshes the open billing page. Live
+keys are refused. More in [docs/stripe.md](docs/stripe.md).
+
+### Sign up, client portal, board, phone
+
+| Sign up | The client's review screen |
+|---|---|
+| ![Sign-up form with a password strength meter](docs/screenshots/signup.png) | ![Client portal review screen with Approve v3 and Request changes](docs/screenshots/portal-review.png) |
+| **Task board** | **Phone layouts** |
+| ![Kanban task board for the Website Redesign project](docs/screenshots/board.png) | ![The dashboard and the client review screen on a phone](docs/screenshots/mobile.png) |
+
+A client only ever receives their own shared projects, client-visible tasks
+and comments, and the versions they were sent. An approval is stored against
+the exact version, with who decided and when; a stale tab can't approve an
+older version.
 
 ## Try the demo
 
@@ -81,9 +143,13 @@ workspace.
 - Approval queue, activity log, notifications, reports with documented
   formulas, settings (profile, workspace, notification preferences,
   integrations, audit log with CSV export, data export).
-- Billing: plan comparison, usage meters, a test-mode checkout, cancel and
-  resume, invoices. Plan changes go through a signed, idempotent webhook
+- Billing: plan comparison, usage meters, Stripe Checkout in test mode,
+  plan switches with proration, cancel and resume, Stripe's customer
+  portal, invoices. Without Stripe keys a simulated checkout runs instead.
+  Either way, plan changes go through one signed, idempotent webhook
   processor.
+- AI drafts: feedback summaries, client replies and weekly client updates,
+  on Gemini or Claude.
 
 **Client portal**
 - Overview of what needs their review, project progress and recent updates.
@@ -94,12 +160,6 @@ workspace.
 **Platform operations**
 - Health checks, platform metrics, workspace list with an audited
   metadata-only support view, webhook event log and replay.
-
-| Client review | Task board | Reports |
-|---|---|---|
-| ![Client review](docs/screenshots/portal-review.png) | ![Board](docs/screenshots/board.png) | ![Reports](docs/screenshots/reports.png) |
-| **Billing** | **Client detail** | **Calendar** |
-| ![Billing](docs/screenshots/billing.png) | ![Client](docs/screenshots/client.png) | ![Calendar](docs/screenshots/calendar.png) |
 
 ## Security model
 
@@ -117,7 +177,9 @@ workspace.
   reads (Realtime); only the server writes.
 - Approvals are idempotent per user and version; stale tabs can't approve an
   older version.
-- Billing webhooks are HMAC-verified, deduplicated by event id and ordered.
+- Stripe webhooks must carry a valid `Stripe-Signature` (simulated ones an
+  HMAC); events are deduplicated by id and ordered, and a plan only comes
+  from a catalogue price whose amount matches.
 - Plan limits are enforced on the server.
 
 Details and the threat model: [docs/security.md](docs/security.md).
@@ -126,7 +188,8 @@ Details and the threat model: [docs/security.md](docs/security.md).
 
 Next.js 16 (App Router, Cache Components, server actions) · React 19 ·
 TypeScript (strict) · Tailwind CSS 4 · Radix UI primitives · Supabase
-(Postgres, Auth, Storage, Realtime) · zod · date-fns · Vitest · Playwright. One app, no separate API server
+(Postgres, Auth, Storage, Realtime) · Stripe (test mode) · Gemini or Claude
+for AI drafts · zod · date-fns · Vitest · Playwright. One app, no separate API server
 ([why](docs/decisions/0001-single-nextjs-app-with-supabase.md)).
 
 ## Run it locally
@@ -173,7 +236,7 @@ lib/ai               AI provider adapter, prompts, what each draft may see, dail
 supabase/            schema migration (RLS, Realtime, buckets) and CLI config
 lib/actions          server actions (validated, authorized, audited)
 lib/domain           business rules and KPI formulas
-lib/billing          plans, prices, usage, webhook processor
+lib/billing          plans, prices, usage, Stripe adapter, webhook processor
 tests/  e2e/         Vitest and Playwright suites
 docs/                architecture, data model, security, business rules, decisions, roadmap
 ```

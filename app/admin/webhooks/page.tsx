@@ -34,7 +34,7 @@ async function Webhooks({ searchParams }: { searchParams: Promise<Record<string,
     <>
       <PageHeader
         title="Webhook events"
-        description="Billing events received at /api/webhooks/billing. Each is signature-checked, deduplicated by event ID and ordered by creation time."
+        description="Billing events from Stripe (/api/webhooks/stripe) and the simulated checkout (/api/webhooks/billing). Each is signature-checked, deduplicated by event ID and ordered by creation time."
         actions={data.replayCandidate && <ReplayEventButton providerEventId={data.replayCandidate.providerEventId} />}
       />
       <Card>
