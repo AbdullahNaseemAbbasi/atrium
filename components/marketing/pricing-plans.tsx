@@ -47,7 +47,7 @@ export function PricingPlans() {
                 data-value={option.value}
                 className={cn(
                   "inline-flex h-9 items-center gap-2 rounded-lg px-4 text-sm font-medium transition",
-                  active ? "bg-cyan-500/20 text-cyan-100 shadow-[0_0_14px_rgba(34,211,238,.2)]" : "text-ink-muted hover:text-ink",
+                  active ? "bg-cyan-500/20 text-cyan-100" : "text-ink-muted hover:text-ink",
                 )}
               >
                 {option.label}

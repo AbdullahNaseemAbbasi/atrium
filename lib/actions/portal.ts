@@ -42,7 +42,7 @@ export async function decideOnDeliverable(orgSlug: string, deliverableId: string
     case "decided": {
       refresh();
       const approved = outcome.approval.decision === "approved";
-      const milestoneNote = outcome.milestone?.to === "completed" ? ` That completes “${outcome.milestone.title}”.` : "";
+      const milestoneNote = outcome.milestone?.to === "completed" ? ` That completes the milestone "${outcome.milestone.title}".` : "";
       return ok(
         approved
           ? `Version ${outcome.approval.version} approved. ${ctx.org.name} has been notified.${milestoneNote}`

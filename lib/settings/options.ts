@@ -130,7 +130,7 @@ export const INTEGRATIONS: IntegrationMeta[] = [
     description: "Embed Figma frames as deliverable previews for client review.",
     accountLabel: "Figma team",
     accountPlaceholder: "Studio Design Team",
-    accountHint: "Clients see the frame preview, not your Figma files.",
+    accountHint: "Clients only see the frame preview. Your Figma files stay private.",
   },
   {
     key: "github",

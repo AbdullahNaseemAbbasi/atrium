@@ -49,7 +49,7 @@ export function MyTasksCard({
         icon={CheckSquare}
         className="sm:flex-col sm:items-stretch 2xl:flex-row 2xl:items-center"
         title={scope === "mine" ? "My tasks" : "Team tasks"}
-        description={scope === "mine" ? "Your assigned work and upcoming deadlines." : "Open work across every project you can see."}
+        description={scope === "mine" ? "Open tasks assigned to you." : "Open tasks in the projects you can see."}
         action={
           <div className="flex flex-wrap items-center gap-1.5" role="group" aria-label="Filter tasks">
             {FILTERS.map((item) => (
@@ -93,13 +93,13 @@ export function MyTasksCard({
             compact
             icon={PartyPopper}
             title={filter === "Overdue" ? "Nothing overdue" : "No tasks here"}
-            description={filter === "All" ? "New assignments will show up here." : "Try another filter."}
+            description={filter === "All" ? "Tasks assigned to you will show up here." : "Try another filter."}
           />
         ) : (
-          <Table className="min-w-[620px]">
+          <Table className="min-w-[440px] 2xl:min-w-[620px]">
             <THead>
               <Th className="px-2">Task</Th>
-              <Th className="px-2">Project</Th>
+              <Th className="hidden px-2 2xl:table-cell">Project</Th>
               <Th className="px-2">Priority</Th>
               <Th className="px-2">Due</Th>
               <Th className="px-2">Status</Th>
@@ -111,9 +111,17 @@ export function MyTasksCard({
                     <Link href={`${base}/projects/${task.projectId}/tasks?task=${task.id}`} className="font-medium text-ink hover:text-cyan-300">
                       {task.title}
                     </Link>
-                    {scope === "all" && task.assigneeName && <p className="mt-0.5 text-[11px] text-ink-faint">{task.assigneeName}</p>}
+                    <p className="mt-0.5 text-[11px] text-ink-faint">
+                      <span className="2xl:hidden">{task.projectName}</span>
+                      {scope === "all" && task.assigneeName && (
+                        <>
+                          <span className="2xl:hidden"> · </span>
+                          {task.assigneeName}
+                        </>
+                      )}
+                    </p>
                   </Td>
-                  <Td className="px-2 py-3">{task.projectName}</Td>
+                  <Td className="hidden px-2 py-3 2xl:table-cell">{task.projectName}</Td>
                   <Td className="px-2 py-3">
                     <PriorityBadge priority={task.priority} />
                   </Td>

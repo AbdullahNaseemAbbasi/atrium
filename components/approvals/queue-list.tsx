@@ -72,7 +72,7 @@ export function QueueList({ items, tab }: { items: QueueItem[]; tab: Exclude<App
                         asked for changes on v{item.decision?.version ?? item.version} · {item.atText}
                       </span>
                     </p>
-                    {item.decision?.comment && <p className="line-clamp-2 text-ink-muted">“{item.decision.comment}”</p>}
+                    {item.decision?.comment && <p className="line-clamp-2 text-ink-muted">{item.decision.comment}</p>}
                   </div>
                 )}
                 {tab === "drafts" && (
@@ -129,7 +129,7 @@ export function DecisionList({ items }: { items: DecisionItem[] }) {
                   <span className={approved ? "text-emerald-300" : "text-red-300"}>{approved ? "approved" : "requested changes on"}</span>
                   <span className="text-ink-faint">v{item.version}</span>
                 </p>
-                {item.comment && <p className="line-clamp-2 text-ink-muted">“{item.comment}”</p>}
+                {item.comment && <p className="line-clamp-2 text-ink-muted">{item.comment}</p>}
               </div>
               <div className="flex items-center justify-between gap-3 pl-12 lg:justify-end lg:pl-0">
                 <span className="flex items-center gap-3">

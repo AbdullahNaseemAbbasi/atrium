@@ -1,427 +1,343 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import {
-  ArrowRight,
-  Bell,
-  Building2,
-  CreditCard,
-  FileClock,
-  FolderKanban,
-  KeyRound,
-  Layers,
-  ScrollText,
-  Send,
-  ShieldCheck,
-  Users,
-  type LucideIcon,
-} from "lucide-react";
 import { PLAN_ORDER, PLANS } from "@/lib/billing/plans";
-import { cn } from "@/lib/utils";
-import { buttonClasses } from "@/components/ui/button";
-import { PlanCard } from "@/components/marketing/plan-card";
-import {
-  CheckList,
-  Container,
-  CtaBand,
-  Eyebrow,
-  FaqList,
-  ScreenshotFrame,
-  SectionHeading,
-  type FaqItem,
-} from "@/components/marketing/primitives";
-import { AuditSnippet, NotificationsSnippet, PortalSnippet, UsageSnippet } from "@/components/marketing/product-snippets";
+import { formatBytes, formatMoney } from "@/lib/utils";
+import { Container, CtaBand, ScreenshotFrame, SectionHeading, ctaClasses } from "@/components/marketing/primitives";
 
 export const metadata: Metadata = {
-  title: { absolute: "Atrium: the client portal for agencies" },
+  title: { absolute: "Atrium: client sign-off for agencies and studios" },
   description:
-    "Give every client one place to review work, approve it and see what happens next. Projects, versioned deliverables, approvals and billing for agencies and studios.",
+    "Atrium is a shared space for an agency and its clients. Send a version of the work, and the client approves it or asks for changes on the record.",
   openGraph: {
-    title: "Atrium: the client portal for agencies",
-    description: "Projects, versioned deliverables and recorded approvals in one portal your clients can find.",
-    images: [{ url: "/screenshots/dashboard.png", width: 1440, height: 900, alt: "The Atrium workspace dashboard" }],
+    title: "Atrium: client sign-off for agencies and studios",
+    description: "Send a version of the work. Your client approves it or asks for changes, and the decision stays with that version.",
+    images: [{ url: "/screenshots/portal-review.png", width: 1440, height: 900, alt: "A client reviewing version 3 of a homepage mockup in Atrium" }],
   },
 };
 
-const STEPS = [
-  {
-    icon: Building2,
-    title: "Set up your workspace",
-    text: "Create a workspace, invite your team and add your clients. Roles decide who sees budgets, billing and internal notes.",
-  },
-  {
-    icon: Send,
-    title: "Share work when it's ready",
-    text: "Upload deliverables to a project. Every upload becomes a new version, and drafts stay internal until you send them for review.",
-  },
-  {
-    icon: FileClock,
-    title: "Get a clear decision",
-    text: "Clients approve or request changes from their portal. Each decision is pinned to the exact version, with the reviewer and the time.",
-  },
-];
-
-const FAQ: FaqItem[] = [
-  {
-    question: "Do my clients need a paid account?",
-    answer:
-      "No. You invite client contacts to their portal and they sign in for free. Team seats on your plan are for your own people; clients are counted by portal, not by person.",
-  },
-  {
-    question: "Can clients see our internal comments or budgets?",
-    answer:
-      "No. Clients only see projects you've shared with them, tasks you've marked as client-visible, deliverables you've submitted and comments posted to the client thread. Internal notes, budgets and drafts never reach the portal.",
-  },
-  {
-    question: "What happens when a client requests changes?",
-    answer:
-      "The deliverable moves to “Changes requested” with the client's comment attached. You upload a new version and send it back for review. Every earlier version and decision stays in the history.",
-  },
-  {
-    question: "Can I try it before signing up?",
-    answer: (
-      <>
-        Yes. The <Link href="/login" className="text-cyan-300 hover:text-cyan-200">sign-in page</Link> has demo accounts for an agency owner, a
-        project manager, a team member, a billing manager and two client roles, all in a workspace filled with sample projects.
-      </>
-    ),
-  },
-  {
-    question: "What happens if we reach a plan limit?",
-    answer:
-      "Atrium tells you which limit you've reached, for example active projects or team seats, and stops new ones until you upgrade or free up space. Nothing you already have is removed or hidden.",
-  },
-  {
-    question: "Is the data on this site real?",
-    answer:
-      "No. This is a demo build. Every company, person and email address is fictional, and changes you make in the demo are not kept for long, so feel free to click anything.",
-  },
-];
-
-export default function LandingPage() {
+export default function HomePage() {
   return (
     <>
       <Hero />
-      <HowItWorks />
-      <Features />
-      <Security />
-      <PricingTeaser />
-      <section aria-labelledby="faq-title" className="py-20 sm:py-24">
-        <Container className="grid gap-10 lg:grid-cols-[1fr_1.6fr]">
-          <SectionHeading
-            id="faq-title"
-            align="left"
-            eyebrow="Questions"
-            title="Before you invite your first client"
-            description={
-              <>
-                Something else on your mind? The <Link href="/help" className="text-cyan-300 hover:text-cyan-200">help centre</Link> covers
-                setup, roles and billing, or you can <Link href="/contact" className="text-cyan-300 hover:text-cyan-200">ask us directly</Link>.
-              </>
-            }
-          />
-          <FaqList items={FAQ} />
-        </Container>
-      </section>
+      <ReviewStory />
+      <WhatClientsSee />
+      <DayToDay />
+      <PricingSummary />
+      <Questions />
       <CtaBand />
     </>
   );
 }
 
+/* ---------- Hero ---------- */
+
 function Hero() {
   return (
-    <section aria-labelledby="hero-title" className="relative pt-14 sm:pt-20">
-      <div
-        className="pointer-events-none absolute left-1/2 top-0 h-[420px] w-[min(900px,100vw)] -translate-x-1/2 rounded-full bg-cyan-500/[0.08] blur-[110px]"
-        aria-hidden="true"
-      />
-      <Container className="relative text-center">
-        <div className="flex justify-center">
-          <Eyebrow icon={Layers}>The client portal for agencies and studios</Eyebrow>
+    <section aria-labelledby="hero-title" className="pt-14 sm:pt-20">
+      <Container>
+        <div className="grid gap-8 lg:grid-cols-[1.15fr_1fr] lg:items-end lg:gap-16">
+          <div>
+            <p className="text-[0.9375rem] text-ink-muted">For design and development studios that work with clients</p>
+            <h1 id="hero-title" className="mt-4 text-balance text-[2.5rem] font-semibold leading-[1.08] text-ink sm:text-[3.5rem]">
+              Show your client the latest version. Get their decision on the record.
+            </h1>
+          </div>
+          <div className="lg:pb-2">
+            <p className="text-pretty text-[1.0625rem] leading-relaxed text-ink-secondary">
+              You upload a design, a document or a video. Your client sees that exact version in their own portal, comments on it, and
+              approves it or asks for changes. Atrium keeps each decision with the version it was made on, so nobody has to search
+              their inbox to find out what was agreed.
+            </p>
+            <div className="mt-7 flex flex-col gap-3 sm:flex-row sm:items-center">
+              <Link href="/login" className={ctaClasses("primary")}>
+                Try the demo
+              </Link>
+              <Link href="/pricing" className="px-1 text-[0.9375rem] text-ink-secondary underline decoration-white/25 underline-offset-4 hover:text-ink hover:decoration-cyan-400">
+                See pricing
+              </Link>
+            </div>
+            <p className="mt-4 text-sm text-ink-faint">The demo doesn&apos;t need an account. Pick the agency owner or the client on the sign-in page.</p>
+          </div>
         </div>
-        <h1 id="hero-title" className="mx-auto mt-6 max-w-4xl text-balance text-4xl font-bold leading-[1.08] tracking-tight text-ink sm:text-6xl">
-          Give every client one place to{" "}
-          <span className="bg-gradient-to-r from-cyan-300 to-sky-400 bg-clip-text text-transparent">review and approve</span> your work.
-        </h1>
-        <p className="mx-auto mt-6 max-w-2xl text-pretty text-base leading-relaxed text-ink-muted sm:text-lg">
-          Atrium keeps projects, versioned deliverables and sign-offs together. Your team works in a private workspace, and each client gets
-          a portal that shows only their projects, so approvals stop getting lost in email threads.
-        </p>
-        <div className="mt-9 flex flex-col justify-center gap-3 sm:flex-row">
-          <Link href="/signup" className={buttonClasses({ size: "lg", className: "px-6" })}>
-            Start free <ArrowRight size={16} aria-hidden="true" />
-          </Link>
-          <Link href="/login" className={buttonClasses({ variant: "outline", size: "lg", className: "px-6" })}>
-            Explore the demo
-          </Link>
-        </div>
-        <p className="mt-4 text-xs text-ink-faint">Free for up to 3 active projects. No card needed.</p>
-      </Container>
-      <Container className="relative mt-14 sm:mt-16">
+
         <ScreenshotFrame
-          src="/screenshots/dashboard.png"
-          alt="The Atrium dashboard for Kinetic Studio: quick actions, active projects, tasks due soon, pending approvals and a table of recent projects."
-          label="Kinetic Studio · Dashboard"
+          src="/screenshots/portal-review.png"
+          alt="The client portal: Daniel from Acme Co. looking at version 3 of a homepage mockup, with Approve and Request changes buttons"
           priority
+          crop="aspect-[4/5] sm:aspect-[1440/860]"
+          focus="object-right-top sm:object-left-top"
+          className="mt-12 sm:mt-16"
+          caption="The client's side. Daniel from Acme Co. is looking at version 3 of the homepage mockup Kinetic Studio sent him."
         />
       </Container>
     </section>
   );
 }
 
-function HowItWorks() {
-  return (
-    <section aria-labelledby="how-title" className="py-20 sm:py-28">
-      <Container>
-        <SectionHeading
-          id="how-title"
-          eyebrow="How it works"
-          title="From first upload to approved work in three steps"
-          description="Atrium follows the way agency work already moves: your team makes it, the client reviews it, and everyone can see where it stands."
-        />
-        <ol className="relative mt-14 grid gap-4 md:grid-cols-3">
-          <span
-            className="absolute left-[16%] right-[16%] top-[38px] hidden h-px bg-gradient-to-r from-cyan-400/0 via-cyan-400/40 to-cyan-400/0 md:block"
-            aria-hidden="true"
-          />
-          {STEPS.map((step, index) => (
-            <li key={step.title} className="card relative p-6 text-center">
-              <span className="relative mx-auto grid h-12 w-12 place-items-center rounded-2xl border border-cyan-400/30 bg-[#0c1d29] text-cyan-300 shadow-[0_0_24px_rgba(34,211,238,.18)]">
-                <step.icon size={21} aria-hidden="true" />
-              </span>
-              <p className="mt-5 text-xs font-semibold uppercase tracking-[0.14em] text-cyan-300/80">Step {index + 1}</p>
-              <h3 className="mt-2 text-lg font-semibold text-ink">{step.title}</h3>
-              <p className="mt-2 text-sm leading-relaxed text-ink-muted">{step.text}</p>
-            </li>
-          ))}
-        </ol>
-      </Container>
-    </section>
-  );
-}
+/* ---------- A review, step by step ---------- */
 
-function FeatureRow({
-  id,
-  icon: Icon,
-  eyebrow,
-  title,
-  text,
-  points,
-  image,
-  reverse = false,
-}: {
-  id: string;
-  icon: LucideIcon;
-  eyebrow: string;
-  title: string;
-  text: string;
-  points: string[];
-  image: { src: string; alt: string; label: string };
-  reverse?: boolean;
-}) {
-  return (
-    <div className={cn("grid items-center gap-10 lg:gap-14", reverse ? "lg:grid-cols-[1.15fr_0.85fr]" : "lg:grid-cols-[0.85fr_1.15fr]")}>
-      <div className={reverse ? "lg:order-2" : undefined}>
-        <p className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.14em] text-cyan-300">
-          <Icon size={15} aria-hidden="true" /> {eyebrow}
-        </p>
-        <h3 id={id} className="mt-3 text-balance text-2xl font-bold tracking-tight text-ink sm:text-3xl">
-          {title}
-        </h3>
-        <p className="mt-4 leading-relaxed text-ink-muted">{text}</p>
-        <CheckList items={points} className="mt-6" />
-      </div>
-      <ScreenshotFrame
-        src={image.src}
-        alt={image.alt}
-        label={image.label}
-        sizes="(min-width: 1200px) 640px, (min-width: 1024px) 55vw, 100vw"
-        className={reverse ? "lg:order-1" : undefined}
-      />
-    </div>
-  );
-}
-
-function SmallFeature({
-  icon: Icon,
-  title,
-  text,
-  children,
-}: {
-  icon: LucideIcon;
-  title: string;
-  text: string;
-  children: React.ReactNode;
-}) {
-  return (
-    <article className="card flex min-w-0 flex-col p-6 sm:p-7">
-      <div className="flex items-center gap-3">
-        <span className="grid h-10 w-10 flex-none place-items-center rounded-xl bg-cyan-500/10 text-cyan-300">
-          <Icon size={19} aria-hidden="true" />
-        </span>
-        <h3 className="text-lg font-semibold text-ink">{title}</h3>
-      </div>
-      <p className="mt-3 text-sm leading-relaxed text-ink-muted">{text}</p>
-      <div className="mt-6 flex-1 rounded-2xl bg-gradient-to-b from-cyan-500/[0.06] to-transparent p-3 sm:p-5">{children}</div>
-    </article>
-  );
-}
-
-function Features() {
-  return (
-    <section aria-labelledby="features-title" className="border-y border-line bg-[#06101a]/40 py-20 sm:py-28">
-      <Container>
-        <SectionHeading
-          id="features-title"
-          eyebrow="What's inside"
-          title="Everything a client review needs, and nothing it doesn't"
-          description="One workspace for your team, one portal per client, and a record of every decision in between."
-        />
-        <div className="mt-16 space-y-24">
-          <FeatureRow
-            id="feature-projects"
-            icon={FolderKanban}
-            eyebrow="Projects & milestones"
-            title="Plan the work in milestones your client can follow"
-            text="Break each project into milestones and tasks, with owners, priorities and due dates. Overdue work is flagged on the dashboard before anyone has to ask."
-            points={[
-              "Board and list views for tasks, filterable by assignee and priority",
-              "Milestones that only complete once every deliverable in them is approved",
-              "Mark any task as internal to keep it off the client portal",
-            ]}
-            image={{
-              src: "/screenshots/board.png",
-              alt: "The task board for the Website Redesign project with To do, In progress, In review, Blocked and Done columns.",
-              label: "Website Redesign · Tasks",
-            }}
-          />
-          <FeatureRow
-            id="feature-deliverables"
-            reverse
-            icon={Layers}
-            eyebrow="Deliverables & approvals"
-            title="Every version kept, every decision on record"
-            text="Upload a file and it becomes version one. Upload again and it becomes version two. When the client approves, Atrium records who approved which version and when."
-            points={[
-              "Full version history with notes on what changed",
-              "Approve or request changes, with a comment the team sees straight away",
-              "Drafts stay internal until you submit them for review",
-            ]}
-            image={{
-              src: "/screenshots/review.png",
-              alt: "A deliverable page for Homepage mockup version 3, waiting for client review, with client reviewers and version history.",
-              label: "Homepage mockup · v3",
-            }}
-          />
-        </div>
-        <div className="mt-24 grid gap-4 md:grid-cols-2">
-          <SmallFeature
-            icon={Users}
-            title="A portal for each client"
-            text="Clients see shared projects, submitted deliverables and the client thread. Approvers can sign off; viewers can follow along and comment."
-          >
-            <PortalSnippet />
-          </SmallFeature>
-          <SmallFeature
-            icon={Bell}
-            title="Notifications and activity"
-            text="The right people hear when work is submitted, approved or commented on. Repeats within ten minutes are folded into one notification."
-          >
-            <NotificationsSnippet />
-          </SmallFeature>
-          <SmallFeature
-            icon={CreditCard}
-            title="Billing and plan limits"
-            text="Plans set limits on projects, client portals, seats and storage, and the server enforces them. Billing managers see invoices without seeing project data."
-          >
-            <UsageSnippet />
-          </SmallFeature>
-          <SmallFeature
-            icon={ScrollText}
-            title="Audit log"
-            text="Invitations, role changes, sharing, approvals, downloads and exports are recorded with who did it, when and from which IP address."
-          >
-            <AuditSnippet />
-          </SmallFeature>
-        </div>
-      </Container>
-    </section>
-  );
-}
-
-const SECURITY = [
+const STORY = [
   {
-    icon: Building2,
-    title: "Tenant isolation",
-    text: "Every record belongs to one workspace, and every page and action checks your membership before reading or writing. Anything outside your workspace returns “not found”, so IDs can't be probed.",
+    when: "Mon 10:12",
+    who: "Liam, designer at Kinetic",
+    what: "uploads homepage-mockup-v3.png. It's a draft, so Acme can't see it yet.",
   },
   {
-    icon: KeyRound,
-    title: "Private files, expiring links",
-    text: "Files are never public. A download link is issued only after your access is checked, names exactly one file and expires after 60 seconds. Access is checked again when the link is used.",
+    when: "Mon 15:40",
+    who: "Emma, the project lead",
+    what: "sends version 3 to Acme. Daniel gets a notification in his portal.",
   },
   {
-    icon: ScrollText,
-    title: "A trail you can read",
-    text: "Security-relevant changes are written to an audit log with actor, time and IP address, so you can answer “who shared this?” without guessing.",
+    when: "Tue 09:05",
+    who: "Chris at Acme",
+    what: "asks whether the mobile menu is final. Chris can comment but can't approve.",
+  },
+  {
+    when: "Tue 09:20",
+    who: "Emma",
+    what: "leaves an internal note for her team about the Thursday call. Acme never sees it.",
+  },
+  {
+    when: "Tue 11:30",
+    who: "Daniel",
+    what: "approves version 3. His name, the version and the time are saved, and the Visual design milestone closes because that was its last open item.",
   },
 ];
 
-function Security() {
+function ReviewStory() {
   return (
-    <section aria-labelledby="security-title" className="py-20 sm:py-28">
+    <section aria-labelledby="story-title" className="mt-24 border-t border-line py-20 sm:mt-28">
       <Container>
-        <div className="flex flex-col justify-between gap-6 md:flex-row md:items-end">
-          <SectionHeading
-            id="security-title"
-            align="left"
-            eyebrow="Security"
-            title="Client work stays with the people it belongs to"
-            description="Agencies hold other companies' unreleased work. Atrium is built so one client can never stumble into another's files."
+        <SectionHeading
+          id="story-title"
+          title="How one review goes"
+          description="An example from the demo workspace, where Kinetic Studio is redesigning the Acme Co. website."
+        />
+        <div className="mt-12 grid gap-12 lg:grid-cols-[1fr_1.1fr] lg:gap-16">
+          <ol className="space-y-7">
+            {STORY.map((step) => (
+              <li key={step.when} className="grid grid-cols-[5.5rem_1fr] gap-4 sm:grid-cols-[6.5rem_1fr]">
+                <span className="pt-0.5 font-mono text-[0.8125rem] text-ink-faint">{step.when}</span>
+                <p className="text-[0.9375rem] leading-relaxed text-ink-secondary">
+                  <span className="font-medium text-ink">{step.who}</span> {step.what}
+                </p>
+              </li>
+            ))}
+          </ol>
+          <ScreenshotFrame
+            src="/screenshots/review.png"
+            alt="The agency's view of the same deliverable: version history, the client's comments and the approval trail"
+            crop="aspect-[4/3]"
+            sizes="(min-width: 1024px) 560px, 100vw"
+            caption="The agency's side of the same file: every version, the discussion, and who decided what."
           />
-          <Link href="/security" className={buttonClasses({ variant: "secondary", className: "w-fit" })}>
-            How we handle security <ArrowRight size={15} aria-hidden="true" />
-          </Link>
         </div>
-        <div className="mt-12 grid gap-4 md:grid-cols-3">
-          {SECURITY.map((item) => (
-            <article key={item.title} className="card p-6">
-              <span className="grid h-11 w-11 place-items-center rounded-xl border border-cyan-400/20 bg-cyan-500/[0.07] text-cyan-300 shadow-[0_0_20px_rgba(34,211,238,.12)]">
-                <item.icon size={20} aria-hidden="true" />
-              </span>
-              <h3 className="mt-5 font-semibold text-ink">{item.title}</h3>
-              <p className="mt-2 text-sm leading-relaxed text-ink-muted">{item.text}</p>
-            </article>
-          ))}
-        </div>
-        <p className="mt-6 flex items-center gap-2 text-xs text-ink-faint">
-          <ShieldCheck size={14} className="text-cyan-300" aria-hidden="true" />
-          The access rules are plain functions covered by automated tests, and run before every query and server action.
-        </p>
       </Container>
     </section>
   );
 }
 
-function PricingTeaser() {
+/* ---------- What the client sees ---------- */
+
+const CLIENT_SEES = [
+  "Projects you choose to share with them",
+  "Tasks you mark as visible to the client",
+  "Versions you send for review, with your note on what changed",
+  "Comments written for them, and their own comments",
+  "Files you share, through download links that expire after a minute",
+];
+
+const TEAM_ONLY = [
+  "Drafts you haven't sent yet",
+  "Internal notes on a deliverable or a task",
+  "Internal tasks, budgets and billing",
+  "Other clients, and projects you haven't shared",
+];
+
+function WhatClientsSee() {
   return (
-    <section aria-labelledby="pricing-title" className="border-y border-line bg-[#06101a]/40 py-20 sm:py-28">
+    <section aria-labelledby="sees-title" className="border-t border-line py-20">
       <Container>
         <SectionHeading
-          id="pricing-title"
-          eyebrow="Pricing"
-          title="Start free, upgrade when the client list grows"
-          description="Every plan includes client portals, versioned deliverables and approval history. Paid plans add room and controls."
+          id="sees-title"
+          title="What your client sees, and what stays with your team"
+          description="Clients sign in to a portal for their own company. They see what you share with them and nothing else, even if they guess a link."
         />
-        <div className="mt-14 grid gap-5 lg:grid-cols-3">
-          {PLAN_ORDER.map((key) => (
-            <PlanCard key={key} plan={PLANS[key]} />
+        <div className="mt-12 grid gap-10 md:grid-cols-2 md:gap-16">
+          <div>
+            <h3 className="border-b border-line pb-3 text-base font-semibold text-ink">Your client sees</h3>
+            <ul className="mt-4 space-y-3">
+              {CLIENT_SEES.map((item) => (
+                <li key={item} className="text-[0.9375rem] leading-relaxed text-ink-secondary">
+                  {item}
+                </li>
+              ))}
+            </ul>
+          </div>
+          <div>
+            <h3 className="border-b border-line pb-3 text-base font-semibold text-ink">Only your team sees</h3>
+            <ul className="mt-4 space-y-3">
+              {TEAM_ONLY.map((item) => (
+                <li key={item} className="text-[0.9375rem] leading-relaxed text-ink-secondary">
+                  {item}
+                </li>
+              ))}
+            </ul>
+            <p className="mt-6 text-sm leading-relaxed text-ink-faint">
+              Each client user is either an approver or a viewer. Viewers can read and comment; only approvers can sign work off.
+            </p>
+          </div>
+        </div>
+      </Container>
+    </section>
+  );
+}
+
+/* ---------- The rest of the work ---------- */
+
+const DETAILS = [
+  {
+    title: "Version history",
+    text: "Every upload is kept. An approval belongs to the version it was given on, so a later upload starts a fresh review instead of inheriting a yes.",
+  },
+  {
+    title: "Roles",
+    text: "Owners and managers see every project. Team members see the ones they're on. A billing manager handles invoices and never sees project files.",
+  },
+  {
+    title: "Private files",
+    text: "Files aren't public. Someone who can see a file gets a download link that works for 60 seconds, and the download goes into the audit log.",
+  },
+  {
+    title: "Audit log",
+    text: "Invitations, role changes, approvals, exports and plan changes are recorded with who did it and when. Owners can export it as a CSV.",
+  },
+  {
+    title: "Reports",
+    text: "Review turnaround per client, how often work is approved on the first version, and which projects are behind. The formula is written next to each number.",
+  },
+  {
+    title: "Plan limits",
+    text: "Atrium checks your plan before it creates a project, invites someone or accepts an upload, and tells you which limit you'd go over.",
+  },
+];
+
+function DayToDay() {
+  return (
+    <section aria-labelledby="work-title" className="border-t border-line py-20">
+      <Container>
+        <div className="grid gap-6 lg:grid-cols-[1fr_1fr] lg:items-start">
+          <SectionHeading id="work-title" title="The work behind the review" />
+          <p className="text-pretty text-[1.0625rem] leading-relaxed text-ink-muted">
+            Projects are split into milestones and tasks. Your team works from a board, a list or a calendar. When a milestone needs the
+            client&apos;s sign-off, it stays open until its last deliverable is approved.
+          </p>
+        </div>
+        <ScreenshotFrame
+          src="/screenshots/board.png"
+          alt="The task board for the Website Redesign project, with columns for to do, in progress, in review, blocked and done"
+          className="mt-10"
+          crop="aspect-[4/5] sm:aspect-[1440/760]"
+        />
+        <dl className="mt-14 grid gap-x-16 gap-y-10 sm:grid-cols-2">
+          {DETAILS.map((item) => (
+            <div key={item.title} className="border-t border-line pt-5">
+              <dt className="text-base font-semibold text-ink">{item.title}</dt>
+              <dd className="mt-2 text-[0.9375rem] leading-relaxed text-ink-muted">{item.text}</dd>
+            </div>
+          ))}
+        </dl>
+      </Container>
+    </section>
+  );
+}
+
+/* ---------- Pricing ---------- */
+
+function PricingSummary() {
+  return (
+    <section aria-labelledby="pricing-title" className="border-t border-line py-20">
+      <Container>
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+          <SectionHeading id="pricing-title" title="Pricing" description="Monthly prices in US dollars. Paying yearly saves about 20%." />
+          <Link href="/pricing" className="text-[0.9375rem] text-cyan-300 underline-offset-4 hover:underline">
+            Compare the plans in detail
+          </Link>
+        </div>
+        <div className="mt-10 divide-y divide-white/[0.08] border-y border-white/[0.08]">
+          {PLAN_ORDER.map((key) => {
+            const plan = PLANS[key];
+            const projects = plan.limits.projects === null ? "Unlimited projects" : `${plan.limits.projects} active projects`;
+            const clients = plan.limits.clients === null ? "unlimited client portals" : `${plan.limits.clients} client portals`;
+            return (
+              <div key={key} className="grid gap-2 py-6 md:grid-cols-[12rem_10rem_1fr] md:items-baseline md:gap-8">
+                <h3 className="text-lg font-semibold text-ink">{plan.name}</h3>
+                <p className="text-ink">
+                  {plan.price.month === 0 ? (
+                    "Free"
+                  ) : (
+                    <>
+                      {formatMoney(plan.price.month)} <span className="text-sm text-ink-faint">a month</span>
+                    </>
+                  )}
+                </p>
+                <p className="text-[0.9375rem] leading-relaxed text-ink-muted">
+                  {plan.tagline} {projects}, {clients}, {plan.limits.seats} team seats and {formatBytes(plan.limits.storageBytes)} of
+                  storage.
+                </p>
+              </div>
+            );
+          })}
+        </div>
+      </Container>
+    </section>
+  );
+}
+
+/* ---------- Questions ---------- */
+
+const QUESTIONS = [
+  {
+    q: "Do my clients need an account?",
+    a: "Yes. You invite them by email and they get a login for their company's portal. They can't see your other clients or anything you keep internal.",
+  },
+  {
+    q: "What happens to older versions?",
+    a: "They stay in the history with their comments and decisions, and you can still download them. Nothing is overwritten.",
+  },
+  {
+    q: "Can someone at the client approve for the whole team?",
+    a: "Only people you invite as approvers can approve. Viewers can follow along and comment.",
+  },
+  {
+    q: "Is the data in the demo real?",
+    a: "No. Kinetic Studio, Acme Co. and everyone in the demo are made up, and the demo data resets when the server restarts.",
+  },
+];
+
+function Questions() {
+  return (
+    <section aria-labelledby="questions-title" className="border-t border-line py-20">
+      <Container>
+        <SectionHeading id="questions-title" title="Questions we get asked" />
+        <div className="mt-10 grid gap-x-16 gap-y-10 md:grid-cols-2">
+          {QUESTIONS.map((item) => (
+            <div key={item.q}>
+              <h3 className="text-base font-semibold text-ink">{item.q}</h3>
+              <p className="mt-2 text-[0.9375rem] leading-relaxed text-ink-muted">{item.a}</p>
+            </div>
           ))}
         </div>
-        <p className="mt-8 text-center text-sm text-ink-muted">
-          Prices in US dollars.{" "}
-          <Link href="/pricing" className="font-medium text-cyan-300 hover:text-cyan-200">
-            Compare every plan feature →
+        <p className="mt-12 text-[0.9375rem] text-ink-muted">
+          Something else?{" "}
+          <Link href="/help" className="text-cyan-300 underline-offset-4 hover:underline">
+            The help centre
+          </Link>{" "}
+          covers setup, reviews and billing, or you can{" "}
+          <Link href="/contact" className="text-cyan-300 underline-offset-4 hover:underline">
+            write to us
           </Link>
+          .
         </p>
       </Container>
     </section>

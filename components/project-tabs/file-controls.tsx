@@ -162,7 +162,7 @@ export function DeleteFileButton({ orgSlug, fileId, name }: { orgSlug: string; f
       title="Delete file"
       className="text-ink-faint hover:bg-red-500/10 hover:text-red-300"
       onClick={() => {
-        if (!window.confirm(`Delete “${name}”? It's removed for your team and the client. This can't be undone.`)) return;
+        if (!window.confirm(`Delete ${name}? It's removed for your team and the client. This can't be undone.`)) return;
         startTransition(async () => {
           const result = await deleteProjectFile(orgSlug, fileId);
           if (result?.ok) toast.success(result.message);

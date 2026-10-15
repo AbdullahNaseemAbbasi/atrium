@@ -40,7 +40,7 @@ async function Team({ params }: { params: Promise<{ org: string }> }) {
       <FlashToast messages={{ invited: "Invitations sent. They'll get an email with a link to join." }} />
       <PageHeader
         title="Team"
-        description={`Everyone who works in ${data.orgName}, their roles and pending invitations.`}
+        description={`The people in ${data.orgName}, their roles and pending invitations.`}
         actions={
           data.can.invite && (
             <Link href={`${data.base}/team/invite`} className={buttonClasses({ size: "lg" })}>
@@ -175,7 +175,7 @@ function MemberIdentity({ member }: { member: MemberRow }) {
       <div className="min-w-0">
         <p className="flex items-center gap-2 truncate font-medium text-ink">
           <span className="truncate">{member.user.name}</span>
-          {member.isSelf && <span className="rounded bg-cyan-500/15 px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-cyan-200">You</span>}
+          {member.isSelf && <span className="rounded bg-cyan-500/15 px-1.5 py-0.5 text-[11px] font-medium text-cyan-200">You</span>}
         </p>
         <p className="truncate text-xs text-ink-faint">{member.user.email}</p>
       </div>
@@ -204,7 +204,7 @@ function MembersTable({ data }: { data: TeamData }) {
               <Td className="max-w-[280px]">
                 <MemberIdentity member={member} />
               </Td>
-              <Td className="max-w-[200px] truncate text-xs">{member.user.title ?? "—"}</Td>
+              <Td className="max-w-[200px] truncate text-xs">{member.user.title ?? "Not set"}</Td>
               <Td>
                 <RoleCell data={data} member={member} />
               </Td>

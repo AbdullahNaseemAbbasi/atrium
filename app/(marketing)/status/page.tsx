@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { CheckCircle2, FlaskConical } from "lucide-react";
+import { CheckCircle2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
 import { Container } from "@/components/marketing/primitives";
@@ -114,10 +114,8 @@ export default function StatusPage() {
     <Container className="max-w-[960px] pb-24 pt-14 sm:pt-20">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
         <div>
-          <Badge tone="amber" className="gap-1.5">
-            <FlaskConical size={12} aria-hidden="true" /> Demo status page
-          </Badge>
-          <h1 className="mt-4 text-4xl font-bold tracking-tight text-ink sm:text-5xl">System status</h1>
+          <p className="text-sm text-ink-faint">Demo status page</p>
+          <h1 className="mt-3 text-4xl font-semibold text-ink sm:text-5xl">System status</h1>
         </div>
         <p className="max-w-sm text-sm text-ink-muted sm:text-right">
           Sample data that shows how Atrium reports its health. It isn&apos;t connected to live monitoring.
@@ -126,13 +124,10 @@ export default function StatusPage() {
 
       <section
         aria-label="Current status"
-        className="relative mt-8 overflow-hidden rounded-2xl border border-emerald-400/25 bg-gradient-to-r from-emerald-500/[0.12] to-emerald-500/[0.03] p-6 shadow-[0_0_50px_rgba(52,211,153,.08)]"
+        className="mt-8 border-y border-line py-6"
       >
         <div className="flex items-center gap-4">
-          <span className="relative grid h-12 w-12 flex-none place-items-center rounded-full bg-emerald-500/15 text-emerald-300">
-            <span className="absolute inset-0 animate-ping rounded-full bg-emerald-400/10 [animation-duration:2.5s]" aria-hidden="true" />
-            <CheckCircle2 size={24} aria-hidden="true" />
-          </span>
+          <CheckCircle2 size={26} className="flex-none text-emerald-300" aria-hidden="true" />
           <div>
             <p className="text-lg font-semibold text-ink">All systems operational</p>
             <p className="mt-0.5 text-sm text-ink-muted">No open incidents. The last one was resolved {daysAgoLabel(INCIDENTS[0].daysAgo).toLowerCase()}.</p>
@@ -159,7 +154,7 @@ export default function StatusPage() {
                     <h3 className="font-medium text-ink">{component.name}</h3>
                     <p className="mt-0.5 text-xs text-ink-faint">{component.description}</p>
                   </div>
-                  <Badge tone="emerald" dot>
+                  <Badge tone="emerald">
                     Operational
                   </Badge>
                 </div>

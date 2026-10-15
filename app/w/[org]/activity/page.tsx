@@ -96,11 +96,11 @@ async function ActivityLog({ params, searchParams }: { params: Promise<{ org: st
                 <section key={group.key} aria-labelledby={`day-${group.key}`} className="pb-2">
                   <h2
                     id={`day-${group.key}`}
-                    className="sticky top-0 z-20 -mx-4 flex items-center gap-3 bg-surface/95 px-4 py-3 text-xs font-semibold uppercase tracking-wider text-ink-faint backdrop-blur sm:-mx-5 sm:px-5"
+                    className="sticky top-0 z-20 -mx-4 flex items-center gap-3 bg-surface/95 px-4 py-3 text-xs font-medium text-ink-faint backdrop-blur sm:-mx-5 sm:px-5"
                   >
                     {group.label}
                     <span className="h-px flex-1 bg-line" aria-hidden="true" />
-                    <span className="font-normal normal-case tracking-normal">
+                    <span className="font-normal">
                       {group.items.length} {group.items.length === 1 ? "event" : "events"}
                     </span>
                   </h2>

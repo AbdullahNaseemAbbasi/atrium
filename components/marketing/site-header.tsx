@@ -1,23 +1,23 @@
 import { Suspense } from "react";
 import Link from "next/link";
-import { ArrowRight } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { getOptionalViewer } from "@/lib/data/queries/shell";
 import { Logo } from "@/components/brand/logo";
 import { buttonClasses } from "@/components/ui/button";
 import { MobileMenu, NavLinks, NavLinksView } from "./site-nav";
+import { ctaClasses } from "./primitives";
 
 export function SiteHeader() {
   return (
-    <header className="sticky top-0 z-50 px-3 pt-3 sm:px-4">
-      <div className="mx-auto flex h-16 max-w-[1200px] items-center rounded-2xl border border-white/[0.08] bg-[#0b1722]/85 pl-4 pr-2 shadow-[0_12px_40px_rgba(0,0,0,.35)] backdrop-blur-xl sm:pl-5 sm:pr-3">
+    <header className="sticky top-0 z-50 border-b border-line bg-canvas/90 backdrop-blur-md">
+      <div className="mx-auto flex h-16 w-full max-w-[1180px] items-center px-5 sm:px-8">
         <Link href="/" aria-label="Atrium home" className="flex-none">
-          <Logo size={28} />
+          <Logo size={26} />
         </Link>
         <Suspense fallback={<NavLinksView pathname={null} />}>
           <NavLinks />
         </Suspense>
-        <div className="ml-auto flex items-center gap-2">
+        <div className="ml-auto flex items-center gap-1 sm:gap-2">
           <div className="hidden items-center gap-2 md:flex">
             <Suspense fallback={<GuestActions />}>
               <ViewerActions />
@@ -38,11 +38,11 @@ export function SiteHeader() {
 
 function GuestActions({ stacked = false }: { stacked?: boolean }) {
   return (
-    <div className={cn("flex gap-2", stacked && "flex-col")}>
+    <div className={cn("flex items-center gap-2", stacked && "flex-col items-stretch")}>
       <Link href="/login" className={buttonClasses({ variant: stacked ? "outline" : "ghost", size: stacked ? "lg" : "md" })}>
         Sign in
       </Link>
-      <Link href="/signup" className={buttonClasses({ size: stacked ? "lg" : "md" })}>
+      <Link href="/signup" className={stacked ? ctaClasses("primary") : ctaClasses("primary", "h-10 px-4")}>
         Start free
       </Link>
     </div>
@@ -56,9 +56,9 @@ async function ViewerActions({ stacked = false }: { stacked?: boolean }) {
   const firstName = viewer.name.split(" ")[0];
   return (
     <div className={cn("flex items-center gap-3", stacked && "flex-col items-stretch")}>
-      <span className={cn("text-xs text-ink-faint", stacked ? "text-center" : "hidden lg:inline")}>Signed in as {firstName}</span>
-      <Link href={viewer.home} className={buttonClasses({ size: stacked ? "lg" : "md" })}>
-        Open app <ArrowRight size={15} aria-hidden="true" />
+      <span className={cn("text-sm text-ink-faint", stacked ? "text-center" : "hidden lg:inline")}>Signed in as {firstName}</span>
+      <Link href={viewer.home} className={stacked ? ctaClasses("primary") : ctaClasses("primary", "h-10 px-4")}>
+        Open the app
       </Link>
     </div>
   );

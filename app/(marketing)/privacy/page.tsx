@@ -14,7 +14,7 @@ const SECTIONS: LegalSection[] = [
     body: (
       <>
         <p>
-          This policy explains what personal information [Company legal name] (“Atrium”) collects when you use the website, a workspace
+          This policy explains what personal information [Company legal name] (&quot;Atrium&quot;) collects when you use the website, a workspace
           or a client portal, why we collect it and what choices you have.
         </p>
         <p>

@@ -516,7 +516,7 @@ export function WorkspaceWizard({ defaultTimezone, ownEmail }: { defaultTimezone
             )
           )}
           <div className="mt-7 rounded-xl border border-white/[0.06] bg-white/[0.02] p-4">
-            <p className="text-xs font-semibold uppercase tracking-[0.14em] text-ink-faint">Summary</p>
+            <p className="text-xs font-medium text-ink-faint">Summary</p>
             <dl className="mt-3 grid gap-x-6 gap-y-2 text-sm sm:grid-cols-2">
               <SummaryRow label="Workspace" value={name.trim() || "Not set"} />
               <SummaryRow label="Address" value={slug ? `/w/${slug}` : "Not set"} mono />
@@ -700,7 +700,7 @@ function PlanOption({
         </span>
       </span>
       {badge && (
-        <span className="absolute -top-2.5 right-12 rounded-full border border-cyan-300/40 bg-[#0b1f2c] px-2.5 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-cyan-200">
+        <span className="absolute -top-2.5 right-12 rounded-full border border-cyan-300/40 bg-[#0b1f2c] px-2.5 py-0.5 text-[11px] font-medium text-cyan-200">
           {badge}
         </span>
       )}

@@ -14,7 +14,7 @@ export const metadata: Metadata = {
 
 export default function NotFound() {
   return (
-    <div className="relative flex min-h-screen flex-col overflow-x-clip">
+    <div className="relative flex min-h-dvh flex-col overflow-x-clip">
       <Backdrop />
       <header className="relative mx-auto flex h-20 w-full max-w-[1200px] items-center px-4 sm:px-6 lg:px-8">
         <Link href="/" aria-label="Atrium home">

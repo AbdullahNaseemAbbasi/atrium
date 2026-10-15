@@ -6,7 +6,7 @@ import { Card } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/misc";
 import { ContactForm } from "@/components/marketing/contact-form";
 import { parseContactTopic } from "@/components/marketing/contact-topics";
-import { Container, Eyebrow, PageIntro } from "@/components/marketing/primitives";
+import { Container, PageIntro } from "@/components/marketing/primitives";
 
 export const metadata: Metadata = {
   title: "Contact",
@@ -60,7 +60,6 @@ export default function ContactPage({ searchParams }: PageProps<"/contact">) {
   return (
     <>
       <PageIntro
-        eyebrow={<Eyebrow>Contact</Eyebrow>}
         title="Talk to the Atrium team"
         description="Questions about plans, help with your workspace or a security report. A person reads every message."
         className="pb-10 sm:pb-12"

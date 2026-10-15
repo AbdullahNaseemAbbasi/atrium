@@ -39,7 +39,7 @@ export function HuePicker({
               disabled={disabled}
               onClick={() => onChange(hue)}
               className={cn(
-                "grid h-8 w-8 place-items-center rounded-full ring-offset-2 ring-offset-[#101b26] transition disabled:cursor-not-allowed disabled:opacity-50",
+                "grid h-10 w-10 place-items-center rounded-full sm:h-8 sm:w-8 ring-offset-2 ring-offset-[#101b26] transition disabled:cursor-not-allowed disabled:opacity-50",
                 selected ? "ring-2 ring-cyan-300" : "hover:ring-2 hover:ring-white/20",
               )}
               style={{ background: `linear-gradient(135deg, hsl(${hue} 70% 45%), hsl(${(hue + 40) % 360} 75% 30%))` }}

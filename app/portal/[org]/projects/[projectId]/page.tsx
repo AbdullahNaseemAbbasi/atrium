@@ -2,7 +2,7 @@ import { Suspense } from "react";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { Activity, CalendarDays, CheckCircle2, Circle, FileCheck2, Files, Flag, ListChecks, MessageSquare, ShieldCheck, Users } from "lucide-react";
-import { cn, formatBytes, formatDate } from "@/lib/utils";
+import { cn, formatBytes, formatDateRange } from "@/lib/utils";
 import { getPortalProject } from "@/lib/data/queries/portal";
 import { TASK_STATUS } from "@/lib/domain/labels";
 import { Card, CardBody, CardHeader } from "@/components/ui/card";
@@ -48,7 +48,7 @@ async function Project({ params }: { params: Promise<{ org: string; projectId: s
               <p className="mt-2 flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-ink-muted">
                 <span className="inline-flex items-center gap-1.5">
                   <CalendarDays size={14} className="text-ink-faint" aria-hidden="true" />
-                  {formatDate(project.startAt)} – {formatDate(project.dueAt)}
+                  {formatDateRange(project.startAt, project.dueAt)}
                 </span>
                 {lead && <span>Led by {lead.name}</span>}
               </p>
@@ -85,7 +85,7 @@ async function Project({ params }: { params: Promise<{ org: string; projectId: s
       <div className="grid gap-4 xl:grid-cols-[1.45fr_1fr]">
         <div className="min-w-0 space-y-4">
           <Card>
-            <CardHeader icon={Flag} title="Milestones" description="The phases of this project. Phases marked “Your sign-off” finish only after you approve their deliverables." />
+            <CardHeader icon={Flag} title="Milestones" description="The phases of this project. A phase that needs your sign-off finishes only after you approve its deliverables." />
             <CardBody>
               {data.milestones.length === 0 ? (
                 <EmptyState compact icon={Flag} title="No milestones yet" description={`${data.agencyName} will add the plan here.`} />
@@ -216,7 +216,7 @@ async function Project({ params }: { params: Promise<{ org: string; projectId: s
           </Card>
 
           <Card>
-            <CardHeader icon={ListChecks} title="Tasks" description="The work your team shares with you, soonest first. Read only." />
+            <CardHeader icon={ListChecks} title="Tasks" description={`Tasks ${data.agencyName} shares with you, soonest first. Read only.`} />
             <CardBody>
               {data.tasks.length === 0 ? (
                 <EmptyState compact icon={ListChecks} title="No shared tasks" description={`${data.agencyName} hasn't shared any tasks on this project.`} />

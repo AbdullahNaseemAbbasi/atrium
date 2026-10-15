@@ -70,7 +70,7 @@ export const HELP_ARTICLES: HelpArticle[] = [
     category: "projects",
     title: "Share a project with a client",
     body: [
-      "Open the project, choose Edit and tick “Share this project with the client”. The project needs a client before it can be shared.",
+      "Open the project, choose Edit and tick 'Share this project with the client'. The project needs a client before it can be shared.",
       "Only owners and managers can change sharing, and each change is written to the audit log. Turning sharing off removes the project from the portal straight away.",
     ],
   },
@@ -79,7 +79,7 @@ export const HELP_ARTICLES: HelpArticle[] = [
     category: "projects",
     title: "Choose which tasks the client sees",
     body: [
-      "Every task has a “Visible to the client” option. Turn it off for internal work such as QA checklists or estimates; client users only see visible tasks, and only in shared projects.",
+      "Every task has a 'Visible to the client' option. Turn it off for internal work such as QA checklists or estimates; client users only see visible tasks, and only in shared projects.",
       "Internal comments on a task are never shown in the portal, even when the task itself is visible.",
     ],
   },
@@ -209,7 +209,7 @@ export const HELP_ARTICLES: HelpArticle[] = [
     category: "account",
     title: "Reset your password",
     body: [
-      "Choose “Forgot password?” on the sign-in page and enter your email. If an account exists, a reset link is sent that works for 30 minutes.",
+      "Choose 'Forgot password?' on the sign-in page and enter your email. If an account exists, a reset link is sent that works for 30 minutes.",
       "New passwords need at least 10 characters, including a number.",
     ],
   },

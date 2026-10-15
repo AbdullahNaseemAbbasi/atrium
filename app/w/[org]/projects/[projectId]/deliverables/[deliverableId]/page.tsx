@@ -113,7 +113,7 @@ async function Deliverable({ params }: { params: Promise<{ org: string; projectI
               </div>
             </div>
             <div className="mt-5 border-t border-line pt-4">
-              <p className="flex items-center gap-1.5 text-xs font-medium uppercase tracking-wider text-ink-faint">
+              <p className="flex items-center gap-1.5 text-xs font-medium text-ink-faint">
                 <UserCheck size={13} aria-hidden="true" /> Client reviewers
               </p>
               {data.reviewers.length === 0 ? (
@@ -170,7 +170,7 @@ async function Deliverable({ params }: { params: Promise<{ org: string; projectI
           </Card>
 
           <Card>
-            <CardHeader icon={CheckCircle2} title="Approval trail" description="Recorded with reviewer, version and time." />
+            <CardHeader icon={CheckCircle2} title="Approval trail" description="Each client decision, with who made it and on which version." />
             <ol className="px-5 pb-5">
               {data.approvals.length === 0 && <li className="py-4 text-sm text-ink-muted">No client decisions yet.</li>}
               {data.approvals.map((approval) => (
@@ -187,7 +187,7 @@ async function Deliverable({ params }: { params: Promise<{ org: string; projectI
                     <p className="text-xs text-ink-faint" title={formatDateTime(approval.decidedAt)}>
                       {approval.when}
                     </p>
-                    {approval.comment && <p className="mt-1.5 text-sm text-ink-muted">“{approval.comment}”</p>}
+                    {approval.comment && <p className="mt-1.5 text-sm text-ink-muted">{approval.comment}</p>}
                   </div>
                 </li>
               ))}

@@ -98,7 +98,7 @@ export function CommandPalette({
             <Kbd>Esc</Kbd>
           </div>
           <ul id="command-results" role="listbox" className="max-h-[50vh] overflow-y-auto p-2">
-            {results.length === 0 && <li className="px-3 py-10 text-center text-sm text-ink-muted">No matches for “{query}”.</li>}
+            {results.length === 0 && <li className="px-3 py-10 text-center text-sm text-ink-muted">No matches for &quot;{query}&quot;.</li>}
             {results.map((entry, index) => {
               const meta = KIND_META[entry.kind];
               const Icon = meta.icon;
@@ -106,7 +106,7 @@ export function CommandPalette({
               return (
                 <React.Fragment key={`${entry.kind}-${entry.href}-${entry.label}`}>
                   {showHeading && (
-                    <li role="presentation" className="px-3 pb-1.5 pt-3 text-[11px] font-medium uppercase tracking-wider text-ink-faint">
+                    <li role="presentation" className="px-3 pb-1.5 pt-3 text-xs font-medium text-ink-faint">
                       {meta.label}
                     </li>
                   )}

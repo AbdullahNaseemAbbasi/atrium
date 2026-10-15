@@ -28,10 +28,10 @@ async function Onboarding() {
   return (
     <div className="mx-auto max-w-[760px]">
       <div className="text-center">
-        <p className="text-xs font-semibold uppercase tracking-[0.14em] text-cyan-300">Welcome, {state.user.firstName}</p>
+        <p className="text-sm font-medium text-cyan-300">Welcome, {state.user.firstName}</p>
         <h1 className="mt-3 text-balance text-3xl font-bold tracking-tight text-ink sm:text-4xl">Set up your workspace</h1>
         <p className="mx-auto mt-3 max-w-lg text-pretty text-ink-muted">
-          Three short steps. Your workspace is where your team runs projects; each client gets their own portal inside it.
+          This takes three steps. Your team runs projects in the workspace, and each client gets a portal inside it.
         </p>
       </div>
 

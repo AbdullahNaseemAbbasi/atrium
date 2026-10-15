@@ -122,7 +122,7 @@ export function PortalHeader({ shell }: { shell: PortalShell }) {
           >
             <Menu size={21} />
             {shell.pendingReviews > 0 && (
-              <span className="absolute right-1.5 top-1.5 h-2 w-2 rounded-full bg-amber-400 shadow-[0_0_8px_rgba(251,191,36,.8)]" aria-hidden="true" />
+              <span className="absolute right-1.5 top-1.5 h-2 w-2 rounded-full bg-amber-400" aria-hidden="true" />
             )}
           </button>
         </div>

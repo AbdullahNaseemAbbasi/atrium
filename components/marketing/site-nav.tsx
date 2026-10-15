@@ -31,14 +31,11 @@ export function NavLinksView({ pathname }: { pathname: string | null }) {
             href={link.href}
             aria-current={active ? "page" : undefined}
             className={cn(
-              "relative rounded-lg px-3 py-2 text-sm transition-colors",
-              active ? "text-cyan-300" : "text-ink-muted hover:bg-white/[0.04] hover:text-ink",
+              "rounded-md px-3 py-2 text-[0.9375rem] transition-colors",
+              active ? "text-ink underline decoration-cyan-400 decoration-2 underline-offset-[10px]" : "text-ink-muted hover:text-ink",
             )}
           >
             {link.label}
-            {active && (
-              <span className="absolute inset-x-3 -bottom-[13px] h-[2px] rounded-full bg-cyan-400 shadow-[0_0_12px_rgba(34,211,238,.9)]" aria-hidden="true" />
-            )}
           </Link>
         );
       })}

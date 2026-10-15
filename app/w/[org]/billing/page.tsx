@@ -12,7 +12,7 @@ import {
   Receipt,
   type LucideIcon,
 } from "lucide-react";
-import { cn, formatDate, formatMoney } from "@/lib/utils";
+import { cn, formatDate, formatDateRange, formatMoney } from "@/lib/utils";
 import { getBillingOverview, type BillingOverview } from "@/lib/data/queries/billing";
 import { Badge, InvoiceStatusBadge, SubscriptionStatusBadge } from "@/components/ui/badge";
 import { buttonClasses } from "@/components/ui/button";
@@ -182,9 +182,9 @@ function Usage({ data }: { data: BillingOverview }) {
                   <AlertTriangle size={12} aria-hidden="true" />
                   {meter.level === "limit"
                     ? meter.used > (meter.limit ?? 0)
-                      ? "Over the limit. New items are blocked until you upgrade or free some up."
-                      : "Limit reached. Upgrade to add more."
-                    : `Over 80% used. ${meter.percent}% of your limit.`}
+                      ? "You're over the limit. Upgrade or free some up before adding more."
+                      : "You've reached the limit. Upgrade to add more."
+                    : `${meter.percent}% of your limit is used.`}
                 </p>
               )}
             </li>
@@ -221,7 +221,7 @@ function Invoices({ data }: { data: BillingOverview }) {
                     {invoice.number} <InvoiceStatusBadge status={invoice.status} />
                   </p>
                   <p className="mt-1 text-xs text-ink-faint">
-                    {formatDate(invoice.periodStart)} – {formatDate(invoice.periodEnd)}
+                    {formatDateRange(invoice.periodStart, invoice.periodEnd)}
                   </p>
                 </div>
                 <span className="tabular-nums text-ink-secondary">{formatMoney(invoice.amountCents, invoice.currency)}</span>
@@ -253,7 +253,7 @@ function Invoices({ data }: { data: BillingOverview }) {
                   <Tr key={invoice.id}>
                     <Td className="whitespace-nowrap font-medium text-ink">{invoice.number}</Td>
                     <Td className="whitespace-nowrap">
-                      {formatDate(invoice.periodStart)} – {formatDate(invoice.periodEnd)}
+                      {formatDateRange(invoice.periodStart, invoice.periodEnd)}
                     </Td>
                     <Td className="whitespace-nowrap text-right tabular-nums text-ink-secondary">{formatMoney(invoice.amountCents, invoice.currency)}</Td>
                     <Td>

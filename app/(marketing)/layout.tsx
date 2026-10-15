@@ -4,7 +4,7 @@ import { SiteHeader } from "@/components/marketing/site-header";
 
 export default function MarketingLayout({ children }: { children: React.ReactNode }) {
   return (
-    <div className="relative flex min-h-screen flex-col overflow-x-clip">
+    <div className="relative flex min-h-dvh flex-col overflow-x-clip">
       <Backdrop />
       <SiteHeader />
       <main id="main" className="relative flex-1">

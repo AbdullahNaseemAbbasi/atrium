@@ -81,7 +81,7 @@ export function PlanComparison({
               <div className="flex items-center justify-between gap-2">
                 <h3 className="text-lg font-semibold text-ink">{plan.name}</h3>
                 {relation === "current" ? (
-                  <Badge tone="cyan" dot>
+                  <Badge tone="cyan">
                     Current plan
                   </Badge>
                 ) : plan.recommended ? (

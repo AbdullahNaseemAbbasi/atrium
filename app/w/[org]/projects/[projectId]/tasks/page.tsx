@@ -156,7 +156,7 @@ async function ProjectTasks({
                         <PriorityBadge priority={task.priority} />
                       </Td>
                       <Td className={cn("whitespace-nowrap", task.overdue && "text-red-300")}>{task.dueText}</Td>
-                      <Td className="text-xs">{task.milestone?.title ?? "—"}</Td>
+                      <Td className="text-xs">{task.milestone?.title ?? "No milestone"}</Td>
                       <Td>
                         <TaskStatusBadge status={task.status} />
                       </Td>

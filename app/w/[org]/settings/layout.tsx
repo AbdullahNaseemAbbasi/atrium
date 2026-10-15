@@ -6,7 +6,7 @@ import { SettingsNav } from "@/components/settings/settings-nav";
 export default function SettingsLayout({ children, params }: LayoutProps<"/w/[org]/settings">) {
   return (
     <>
-      <PageHeader title="Settings" description="Your profile and notifications, plus how this workspace is set up, connected and audited." />
+      <PageHeader title="Settings" description="Your profile and notifications, and the settings for this workspace." />
       <div className="grid gap-5 lg:grid-cols-[250px_minmax(0,1fr)] lg:items-start">
         <Suspense fallback={<NavSkeleton />}>
           <Nav params={params} />

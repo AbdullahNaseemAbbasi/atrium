@@ -1,7 +1,7 @@
 import { Suspense } from "react";
 import Link from "next/link";
 import { CalendarDays, Eye, EyeOff, Settings } from "lucide-react";
-import { formatDate } from "@/lib/utils";
+import { formatDateRange } from "@/lib/utils";
 import { getProjectHeader } from "@/lib/data/queries/projects";
 import { ProjectStatusBadge } from "@/components/ui/badge";
 import { AvatarStack } from "@/components/ui/avatar";
@@ -67,7 +67,7 @@ async function ProjectHeader({ params }: { params: Promise<{ org: string; projec
               )}
               <span className="inline-flex items-center gap-1.5">
                 <CalendarDays size={14} className="text-ink-faint" aria-hidden="true" />
-                {formatDate(summary.startAt)} – {formatDate(summary.dueAt)}
+                {formatDateRange(summary.startAt, summary.dueAt)}
               </span>
             </p>
           </div>

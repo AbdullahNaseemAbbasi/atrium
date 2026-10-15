@@ -71,17 +71,17 @@ async function ProjectActivity({
             description={
               data.counts.all === 0
                 ? "Uploads, comments, approvals and completed tasks are recorded here as they happen."
-                : "Try “Everything” to see the full timeline."
+                : "Switch to Everything to see the full timeline."
             }
           />
         ) : (
           <div className="space-y-8">
             {data.groups.map((group) => (
               <section key={group.key} aria-labelledby={`day-${group.key}`}>
-                <h2 id={`day-${group.key}`} className="mb-2 flex items-center gap-3 text-xs font-medium uppercase tracking-wider text-ink-faint">
+                <h2 id={`day-${group.key}`} className="mb-2 flex items-center gap-3 text-xs font-medium text-ink-faint">
                   {group.label}
                   <span className="h-px flex-1 bg-line" aria-hidden="true" />
-                  <span className="normal-case tracking-normal">
+                  <span>
                     {group.items.length} {group.items.length === 1 ? "event" : "events"}
                   </span>
                 </h2>

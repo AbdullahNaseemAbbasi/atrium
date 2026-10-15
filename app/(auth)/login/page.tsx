@@ -44,7 +44,7 @@ export default function LoginPage({ searchParams }: PageProps<"/login">) {
           Explore with a demo account
           <span className="h-px flex-1 bg-line" />
         </div>
-        <ul className="mt-4 grid gap-2 sm:grid-cols-2">
+        <ul className="mt-4 grid grid-cols-[minmax(0,1fr)] gap-2 sm:grid-cols-2 [&>li]:min-w-0">
           {DEMO_ACCOUNTS.map((account) => {
             const Icon = DEMO_ICONS[account.userId];
             return (

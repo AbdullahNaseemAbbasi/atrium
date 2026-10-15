@@ -83,7 +83,7 @@ export async function createMilestone(orgSlug: string, projectId: string, _prev:
   });
   project.updatedAt = new Date().toISOString();
   refresh();
-  return ok(`“${parsed.data.title}” added.`);
+  return ok(`Milestone "${parsed.data.title}" added.`);
 }
 
 export async function updateMilestone(orgSlug: string, milestoneId: string, _prev: ActionState, formData: FormData): Promise<ActionState> {
@@ -111,13 +111,13 @@ export async function moveMilestone(orgSlug: string, milestoneId: string, direct
   const ordered = db.milestones.filter((item) => item.projectId === milestone.projectId).sort((a, b) => a.position - b.position);
   const index = ordered.findIndex((item) => item.id === milestone.id);
   const target = direction === "up" ? index - 1 : index + 1;
-  if (target < 0 || target >= ordered.length) return fail(`“${milestone.title}” is already ${direction === "up" ? "first" : "last"}.`);
+  if (target < 0 || target >= ordered.length) return fail(`"${milestone.title}" is already ${direction === "up" ? "first" : "last"}.`);
   [ordered[index], ordered[target]] = [ordered[target], ordered[index]];
   ordered.forEach((item, position) => {
     item.position = position + 1;
   });
   refresh();
-  return ok(`Moved “${milestone.title}” ${direction}.`);
+  return ok(`Moved "${milestone.title}" ${direction}.`);
 }
 
 /**
@@ -164,7 +164,7 @@ export async function completeMilestone(orgSlug: string, milestoneId: string): P
     deduplicationKey: `milestone:${milestone.id}:completed`,
   });
   refresh();
-  return ok(`“${milestone.title}” marked complete.`);
+  return ok(`"${milestone.title}" marked complete.`);
 }
 
 export async function reopenMilestone(orgSlug: string, milestoneId: string): Promise<ActionState> {
@@ -175,5 +175,5 @@ export async function reopenMilestone(orgSlug: string, milestoneId: string): Pro
   Object.assign(milestone, { status: "in_progress", completedAt: undefined });
   project.updatedAt = new Date().toISOString();
   refresh();
-  return ok(`“${milestone.title}” reopened.`);
+  return ok(`"${milestone.title}" reopened.`);
 }

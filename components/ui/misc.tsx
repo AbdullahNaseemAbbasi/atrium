@@ -55,7 +55,7 @@ export function Breadcrumbs({ items }: { items: Crumb[] }) {
           <li key={`${item.label}-${index}`} className="flex items-center gap-1.5">
             {index > 0 && <ChevronRight size={12} aria-hidden="true" />}
             {item.href ? (
-              <Link href={item.href} className="hover:text-cyan-300">
+              <Link href={item.href} className="inline-block py-1.5 hover:text-cyan-300">
                 {item.label}
               </Link>
             ) : (
@@ -195,7 +195,7 @@ export function StatGridSkeleton({ count = 4 }: { count?: number }) {
 
 export function TableWrap({ className, children }: { className?: string; children: React.ReactNode }) {
   // `relative` keeps absolutely positioned children (sr-only labels) inside the scroller.
-  return <div className={cn("relative overflow-x-auto px-4 pb-4 sm:px-5 sm:pb-5", className)}>{children}</div>;
+  return <div className={cn("scroll-hint relative overflow-x-auto px-4 pb-4 sm:px-5 sm:pb-5", className)}>{children}</div>;
 }
 
 export function Table({ className, ...props }: React.ComponentProps<"table">) {
@@ -275,7 +275,7 @@ export function Pagination({
   return (
     <div className="flex flex-col items-center justify-between gap-3 px-4 pb-4 text-xs text-ink-faint sm:flex-row sm:px-5">
       <p>
-        Showing <span className="text-ink-secondary">{from}</span>–<span className="text-ink-secondary">{to}</span> of{" "}
+        Showing <span className="text-ink-secondary">{from}</span> to <span className="text-ink-secondary">{to}</span> of{" "}
         <span className="text-ink-secondary">{total}</span>
       </p>
       <div className="flex items-center gap-2">

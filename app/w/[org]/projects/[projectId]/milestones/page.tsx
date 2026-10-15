@@ -157,14 +157,14 @@ async function Milestones({ params }: { params: Promise<{ org: string; projectId
 
                     <div className="mt-4 flex flex-col gap-3 border-t border-line pt-3 sm:flex-row sm:items-center sm:justify-between">
                       {done ? (
-                        <p className="text-sm text-emerald-300/90">Complete. Everything in this phase is done{milestone.approvalRequired ? " and signed off" : ""}.</p>
+                        <p className="text-sm text-emerald-300/90">Everything in this phase is done{milestone.approvalRequired ? " and signed off" : ""}.</p>
                       ) : milestone.blockers.length > 0 ? (
                         <p id={blockerId} className="text-sm text-amber-200/90">
                           <span className="text-ink-muted">Before it can be completed: </span>
                           {milestone.blockers.join(" · ")}
                         </p>
                       ) : (
-                        <p className="text-sm text-ink-muted">Nothing blocking. Ready to mark complete.</p>
+                        <p className="text-sm text-ink-muted">Nothing is blocking this milestone. You can mark it complete.</p>
                       )}
                       {data.canManage && (
                         <div className="flex flex-none items-center gap-2">

@@ -10,31 +10,42 @@ function toDate(value: string | Date) {
   return typeof value === "string" ? parseISO(value) : value;
 }
 
+/** Shown in place of a missing or invalid date. */
+export const NO_DATE = "Not set";
+
 /** "Apr 28, 2026" */
 export function formatDate(value?: string | Date | null) {
-  if (!value) return "—";
+  if (!value) return NO_DATE;
   const date = toDate(value);
-  return isValid(date) ? format(date, "MMM d, yyyy") : "—";
+  return isValid(date) ? format(date, "MMM d, yyyy") : NO_DATE;
 }
 
 /** "Apr 28" */
 export function formatShortDate(value?: string | Date | null) {
-  if (!value) return "—";
+  if (!value) return NO_DATE;
   const date = toDate(value);
-  return isValid(date) ? format(date, "MMM d") : "—";
+  return isValid(date) ? format(date, "MMM d") : NO_DATE;
 }
 
 /** "Apr 28, 2026 · 14:05" */
 export function formatDateTime(value?: string | Date | null) {
-  if (!value) return "—";
+  if (!value) return NO_DATE;
   const date = toDate(value);
-  return isValid(date) ? format(date, "MMM d, yyyy · HH:mm") : "—";
+  return isValid(date) ? format(date, "MMM d, yyyy · HH:mm") : NO_DATE;
+}
+
+/** "Aug 28, 2026 to Oct 28, 2026". Either end may be missing. */
+export function formatDateRange(start?: string | Date | null, end?: string | Date | null) {
+  if (!start && !end) return "No dates set";
+  if (!start) return `Due ${formatDate(end)}`;
+  if (!end) return `From ${formatDate(start)}`;
+  return `${formatDate(start)} to ${formatDate(end)}`;
 }
 
 /** "3 hours ago". `now` is passed in so callers stay deterministic. */
 export function formatRelative(value: string | Date, now: Date) {
   const date = toDate(value);
-  if (!isValid(date)) return "—";
+  if (!isValid(date)) return NO_DATE;
   if (Math.abs(now.getTime() - date.getTime()) < 45_000) return "just now";
   return formatDistanceStrict(date, now, { addSuffix: true });
 }

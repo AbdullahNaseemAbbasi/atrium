@@ -121,7 +121,7 @@ export function TaskDrawer({
                           size="sm"
                           disabled={deleting}
                           onClick={() => {
-                            if (!window.confirm(`Delete “${task.title}”? This can't be undone.`)) return;
+                            if (!window.confirm(`Delete "${task.title}"? This can't be undone.`)) return;
                             startDelete(async () => {
                               await deleteTask(orgSlug, task.id);
                               toast.success("Task deleted");

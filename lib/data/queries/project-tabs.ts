@@ -27,7 +27,12 @@ export async function getProjectMilestones(orgSlug: string, projectId: string) {
       status: milestone.status,
       approvalRequired: milestone.approvalRequired,
       dueAt: milestone.dueAt ?? null,
-      dueText: milestone.status === "completed" ? `Completed ${formatDate(milestone.completedAt ?? milestone.dueAt)}` : dueLabel(milestone.dueAt, now),
+      dueText:
+        milestone.status === "completed"
+          ? milestone.completedAt || milestone.dueAt
+            ? `Completed ${formatDate(milestone.completedAt ?? milestone.dueAt)}`
+            : "Completed"
+          : dueLabel(milestone.dueAt, now),
       overdue,
       progress: view.progress,
       taskCount: view.taskCount,

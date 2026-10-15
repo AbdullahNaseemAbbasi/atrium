@@ -4,7 +4,7 @@ import { Check, Minus } from "lucide-react";
 import { formatBytes } from "@/lib/utils";
 import { PLAN_ORDER, PLANS, type Plan } from "@/lib/billing/plans";
 import { PricingPlans } from "@/components/marketing/pricing-plans";
-import { Container, CtaBand, Eyebrow, FaqList, PageIntro, SectionHeading, type FaqItem } from "@/components/marketing/primitives";
+import { Container, CtaBand, FaqList, PageIntro, SectionHeading, type FaqItem } from "@/components/marketing/primitives";
 
 export const metadata: Metadata = {
   title: "Pricing",
@@ -92,7 +92,6 @@ export default function PricingPage() {
   return (
     <>
       <PageIntro
-        eyebrow={<Eyebrow>Pricing</Eyebrow>}
         title="Simple plans that grow with your client list"
         description="Every plan includes client portals, versioned deliverables and a full approval history. Pay for more projects, portals, seats and storage when you need them."
       />
@@ -117,7 +116,7 @@ export default function PricingPage() {
               <caption className="sr-only">Plan comparison</caption>
               <thead>
                 <tr className="border-b border-line">
-                  <th scope="col" className="w-[40%] px-5 py-5 text-left text-xs font-medium uppercase tracking-wider text-ink-faint">
+                  <th scope="col" className="w-[40%] px-5 py-5 text-left text-sm font-medium text-ink-faint">
                     Feature
                   </th>
                   {PLAN_ORDER.map((key) => (
@@ -166,7 +165,7 @@ function Group({ group }: { group: (typeof FEATURE_GROUPS)[number] }) {
 function GroupRow({ title }: { title: string }) {
   return (
     <tr className="bg-white/[0.02]">
-      <th scope="colgroup" colSpan={4} className="px-5 py-3 text-left text-xs font-semibold uppercase tracking-wider text-cyan-300/90">
+      <th scope="colgroup" colSpan={4} className="px-5 py-3 text-left text-sm font-semibold text-cyan-300">
         {title}
       </th>
     </tr>

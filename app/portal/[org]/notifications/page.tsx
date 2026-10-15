@@ -69,7 +69,7 @@ async function Notifications({
             title={data.filter === "unread" ? "No unread notifications" : "No notifications yet"}
             description={
               data.filter === "unread"
-                ? "You've read everything. Nice."
+                ? "You've read everything."
                 : "You'll hear from us here when there's work to review or a reply on one of your comments."
             }
           />

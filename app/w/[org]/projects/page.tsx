@@ -67,7 +67,7 @@ async function Projects({ params, searchParams }: { params: Promise<{ org: strin
     <>
       <PageHeader
         title="Projects"
-        description={data.scopeNote ?? "Every client engagement and internal project in one place."}
+        description={data.scopeNote ?? "Client work and internal projects."}
         actions={
           data.canCreate && (
             <Link href={`${data.base}/projects/new`} className={buttonClasses({ size: "lg" })}>
@@ -134,7 +134,7 @@ async function Projects({ params, searchParams }: { params: Promise<{ org: strin
         </Card>
       ) : (
         <>
-          <ul className="mt-4 grid gap-4 md:grid-cols-2 2xl:grid-cols-3">
+          <ul className="mt-4 grid grid-cols-1 gap-4 md:grid-cols-2 2xl:grid-cols-3">
             {data.page.items.map((project) => (
               <li key={project.id}>
                 <ProjectCard project={project} href={`${data.base}/projects/${project.id}`} />

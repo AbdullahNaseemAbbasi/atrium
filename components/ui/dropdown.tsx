@@ -52,7 +52,7 @@ export function DropdownItem({
 }
 
 export function DropdownLabel({ className, ...props }: React.ComponentProps<typeof DropdownMenu.Label>) {
-  return <DropdownMenu.Label className={cn("px-3 pb-1 pt-2 text-[11px] font-medium uppercase tracking-wider text-ink-faint", className)} {...props} />;
+  return <DropdownMenu.Label className={cn("px-3 pb-1 pt-2 text-xs font-medium text-ink-faint", className)} {...props} />;
 }
 
 export function DropdownSeparator() {

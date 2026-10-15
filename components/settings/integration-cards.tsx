@@ -82,7 +82,7 @@ function IntegrationCard({ orgSlug, item, canManage }: { orgSlug: string; item: 
           <div className="flex flex-wrap items-center gap-2">
             <h3 className="font-semibold text-ink">{item.name}</h3>
             {connected ? (
-              <Badge tone="emerald" dot>
+              <Badge tone="emerald">
                 Connected
               </Badge>
             ) : (

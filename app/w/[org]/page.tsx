@@ -56,8 +56,8 @@ export default function DashboardPage({ params, searchParams }: PageProps<"/w/[o
     <Suspense fallback={<DashboardSkeleton />}>
       <FlashToast
         messages={{
-          welcome: "Your workspace is ready. Start with a project or invite your team.",
-          joined: "You have joined the workspace.",
+          welcome: "Your workspace is ready. Create a project or invite your team to get started.",
+          joined: "You joined the workspace.",
         }}
       />
       <Dashboard params={params} searchParams={searchParams} />
@@ -82,8 +82,8 @@ async function Dashboard({
         <Card>
           <EmptyState
             icon={CreditCard}
-            title="Billing lives in one place"
-            description="As a billing manager you can see the plan, payment method, usage and invoices. Project data stays private to the delivery team."
+            title="You have billing access"
+            description="As a billing manager you can see the plan, payment method, usage and invoices. Projects are only visible to the delivery team."
             action={
               <Link href={`${data.base}/billing`} className={buttonClasses()}>
                 Open billing
@@ -101,33 +101,33 @@ async function Dashboard({
     <>
       <PageHeader
         title="Dashboard"
-        description={`Welcome back, ${data.firstName}! Here's what's happening across ${data.orgName}.`}
+        description={`Welcome back, ${data.firstName}. Here is what needs attention at ${data.orgName}.`}
         actions={<RangeSelect value={data.range} />}
       />
 
       <section aria-label="Quick actions" className="grid gap-3 md:grid-cols-2 xl:grid-cols-4">
         {data.can.createProject && (
-          <QuickAction active href={`${data.base}/projects/new`} icon={Plus} title="New project" subtitle="Start a new project" />
+          <QuickAction active href={`${data.base}/projects/new`} icon={Plus} title="New project" subtitle="Pick a client and a due date" />
         )}
-        {data.can.addClient && <QuickAction href={`${data.base}/clients/new`} icon={Users} title="Add client" subtitle="Bring in a new client" />}
-        {data.can.invite && <QuickAction href={`${data.base}/team/invite`} icon={UserPlus} title="Invite team member" subtitle="Grow your team" />}
+        {data.can.addClient && <QuickAction href={`${data.base}/clients/new`} icon={Users} title="Add client" subtitle="Add a company and its main contact" />}
+        {data.can.invite && <QuickAction href={`${data.base}/team/invite`} icon={UserPlus} title="Invite team member" subtitle="Send an email invitation" />}
         {data.can.reports ? (
-          <QuickAction href={`${data.base}/reports`} icon={BarChart3} title="View reports" subtitle="See insights and data" />
+          <QuickAction href={`${data.base}/reports`} icon={BarChart3} title="View reports" subtitle="Review turnaround and project health" />
         ) : (
-          <QuickAction href={`${data.base}/approvals`} icon={FileCheck2} title="Approvals" subtitle="Follow client reviews" />
+          <QuickAction href={`${data.base}/approvals`} icon={FileCheck2} title="Approvals" subtitle="Work waiting on clients" />
         )}
         {!data.can.createProject && (
-          <QuickAction href={`${data.base}/tasks?scope=mine`} icon={CheckSquare} title="My tasks" subtitle="Everything assigned to you" />
+          <QuickAction href={`${data.base}/tasks?scope=mine`} icon={CheckSquare} title="My tasks" subtitle="Tasks assigned to you" />
         )}
       </section>
 
-      <section aria-label="Key metrics" className="mt-4 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+      <section aria-label="Workspace numbers" className="mt-4 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
         <StatCard
           icon={Folder}
           label="Active projects"
           value={String(data.stats.active.value)}
           delta={{ value: data.stats.active.delta, period, upIsGood: true }}
-          caption="Started and in planning, progress or review."
+          caption="Projects in planning, in progress or in review."
           trend={data.stats.active.trend}
         />
         <StatCard
@@ -213,7 +213,7 @@ function RecentProjects({ data }: { data: TeamDashboard }) {
       <CardHeader
         icon={Folder}
         title="Recent projects"
-        description="Progress, deadlines and status of your most active work."
+        description="The projects updated most recently."
         action={
           <Link href={`${data.base}/projects`} className={buttonClasses({ variant: "secondary", size: "sm" })}>
             View all projects →
@@ -224,7 +224,7 @@ function RecentProjects({ data }: { data: TeamDashboard }) {
         <EmptyState
           icon={FolderPlus}
           title="No projects yet"
-          description="Create your first project to start tracking milestones, tasks and client approvals."
+          description="Create a project to plan milestones and tasks and send work to your client for approval."
           action={
             data.can.createProject ? (
               <Link href={`${data.base}/projects/new`} className={buttonClasses()}>
@@ -306,11 +306,11 @@ function ReviewQueue({ data }: { data: TeamDashboard }) {
         <EmptyState compact icon={Inbox} title="Nothing waiting on clients" description="Submitted deliverables appear here until the client decides." />
       ) : (
         <TableWrap>
-          <Table className="min-w-[720px] text-xs">
+          <Table className="min-w-[520px] text-xs lg:min-w-[720px]">
             <THead>
               <Th>Deliverable</Th>
-              <Th>Project</Th>
-              <Th>Client</Th>
+              <Th className="hidden lg:table-cell">Project</Th>
+              <Th className="hidden lg:table-cell">Client</Th>
               <Th>Submitted</Th>
               <Th>Review status</Th>
               <Th>
@@ -323,9 +323,12 @@ function ReviewQueue({ data }: { data: TeamDashboard }) {
                   <Td className="py-3 font-medium text-ink">
                     {item.title}
                     <span className="ml-1.5 text-ink-faint">v{item.version}</span>
+                    <span className="mt-0.5 block font-normal text-ink-faint lg:hidden">
+                      {item.projectName} · {item.clientName}
+                    </span>
                   </Td>
-                  <Td className="py-3">{item.projectName}</Td>
-                  <Td className="py-3">{item.clientName}</Td>
+                  <Td className="hidden py-3 lg:table-cell">{item.projectName}</Td>
+                  <Td className="hidden py-3 lg:table-cell">{item.clientName}</Td>
                   <Td className="whitespace-nowrap py-3">
                     {formatDate(item.submittedAt)}
                     {item.status === "in_review" && item.waitingDays > 2 && (
@@ -365,7 +368,7 @@ function RecentActivity({ data }: { data: TeamDashboard }) {
       <CardHeader icon={Activity} title="Recent activity" description={`What changed across the workspace in the last ${data.range} days.`} />
       <div className="px-5 pb-5">
         {data.activity.length === 0 ? (
-          <EmptyState compact icon={Activity} title="Quiet period" description="No activity in this time range. Try a longer range." />
+          <EmptyState compact icon={Activity} title="No recent activity" description="Nothing happened in this time range. Try a longer one." />
         ) : (
           <ol className="relative">
             <span className="absolute bottom-4 left-[17px] top-4 w-px bg-gradient-to-b from-cyan-400/40 to-transparent" aria-hidden="true" />
@@ -407,12 +410,12 @@ function WorkspaceOverview({ data }: { data: TeamDashboard }) {
   const storagePercent = percent(overview.storageUsed, overview.storageLimit);
   return (
     <Card className="mt-4">
-      <div className="flex flex-col gap-5 p-5 xl:flex-row xl:items-center">
-        <div className="flex items-center gap-3 xl:w-[220px]">
+      <div className="flex flex-col gap-5 p-5 2xl:flex-row 2xl:items-center">
+        <div className="flex items-center gap-3 2xl:w-[200px] 2xl:flex-none">
           <IconBox icon={Users} />
           <h2 className="font-semibold text-ink">Workspace overview</h2>
         </div>
-        <div className="grid flex-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="grid min-w-0 flex-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
           <OverviewItem
             icon={Users}
             label="Team members"
@@ -444,7 +447,7 @@ function WorkspaceOverview({ data }: { data: TeamDashboard }) {
             </div>
           </div>
         </div>
-        <div className="flex flex-wrap gap-3">
+        <div className="flex flex-none flex-wrap gap-3">
           {data.can.manageTeam && (
             <Link href={`${data.base}/team`} className={buttonClasses({ size: "lg", className: "px-4" })}>
               Manage team

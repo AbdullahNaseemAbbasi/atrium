@@ -56,7 +56,7 @@ export function MilestoneDialog({
         )}
       </DialogTrigger>
       <DialogContent
-        title={milestone ? `Edit “${milestone.title}”` : "New milestone"}
+        title={milestone ? `Edit "${milestone.title}"` : "New milestone"}
         description={milestone ? "Changes show on the client portal straight away." : "A phase of the project. Link tasks and deliverables to it afterwards."}
       >
         <MilestoneForm
@@ -241,7 +241,7 @@ export function CompleteMilestoneButton({
       className={cn(blocked && "cursor-not-allowed")}
       onClick={() => {
         const who = clientName ? ` ${clientName} will see it as done.` : "";
-        if (!window.confirm(`Mark “${title}” complete?${who}`)) return;
+        if (!window.confirm(`Mark "${title}" complete?${who}`)) return;
         run(() => completeMilestone(orgSlug, milestoneId));
       }}
     >
@@ -258,7 +258,7 @@ export function ReopenMilestoneButton({ orgSlug, milestoneId, title }: { orgSlug
       size="sm"
       disabled={pending}
       onClick={() => {
-        if (!window.confirm(`Reopen “${title}”? It goes back to In progress.`)) return;
+        if (!window.confirm(`Reopen "${title}"? It goes back to In progress.`)) return;
         run(() => reopenMilestone(orgSlug, milestoneId));
       }}
     >

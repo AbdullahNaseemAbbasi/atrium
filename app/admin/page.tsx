@@ -55,7 +55,7 @@ async function Overview() {
       <FlashToast messages={{ reset: "Demo data restored to the original seed." }} />
       <PageHeader
         title="Platform health"
-        description={`Signed in as ${data.adminName}. Operators see workspace metadata and system health, never client project content.`}
+        description={`Signed in as ${data.adminName}. Operators can see workspace metadata and system health. Client project content stays hidden.`}
         actions={<ResetDemoButton />}
       />
 

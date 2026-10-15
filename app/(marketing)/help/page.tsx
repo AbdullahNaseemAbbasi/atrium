@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { HelpCenter } from "@/components/marketing/help-center";
-import { Container, CtaBand, Eyebrow, PageIntro } from "@/components/marketing/primitives";
+import { Container, CtaBand, PageIntro } from "@/components/marketing/primitives";
 
 export const metadata: Metadata = {
   title: "Help centre",
@@ -11,7 +11,6 @@ export default function HelpPage() {
   return (
     <>
       <PageIntro
-        eyebrow={<Eyebrow>Help centre</Eyebrow>}
         title="How can we help?"
         description="Short answers about setting up your workspace, sharing work with clients, approvals, roles and billing."
         className="pb-10 sm:pb-12"

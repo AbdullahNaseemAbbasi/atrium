@@ -16,9 +16,9 @@ export function Backdrop() {
 
 export function AppFrame({ children }: { children: React.ReactNode }) {
   return (
-    <div className="relative min-h-screen">
+    <div className="relative min-h-dvh">
       <Backdrop />
-      <div className="relative mx-auto flex min-h-screen max-w-[1600px] flex-col px-4 sm:px-6 xl:px-8">{children}</div>
+      <div className="relative mx-auto flex min-h-dvh max-w-[1600px] flex-col px-4 sm:px-6 xl:px-8">{children}</div>
     </div>
   );
 }
@@ -35,9 +35,8 @@ export function AppFooter() {
         <Link href="/contact" className="hover:text-ink-secondary">Contact support</Link>
         <Link href="/privacy" className="hover:text-ink-secondary">Privacy policy</Link>
         <Link href="/terms" className="hover:text-ink-secondary">Terms of service</Link>
-        <Link href="/status" className="flex items-center gap-2 hover:text-ink-secondary">
+        <Link href="/status" className="hover:text-ink-secondary">
           System status
-          <span className="h-2 w-2 rounded-full bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,.8)]" aria-label="All systems operational" />
         </Link>
       </nav>
     </footer>

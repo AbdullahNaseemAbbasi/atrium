@@ -110,7 +110,7 @@ function RequestChangesDialog(props: DecisionProps) {
               defaultValue={state?.values?.comment}
               aria-invalid={Boolean(error)}
               aria-describedby={error ? "changes-comment-error" : undefined}
-              placeholder="e.g. The headline is too long. Try something shorter and use “Book a demo” on the main button."
+              placeholder="e.g. The headline is too long. Try something shorter and use 'Book a demo' on the main button."
               autoFocus
             />
           </Field>

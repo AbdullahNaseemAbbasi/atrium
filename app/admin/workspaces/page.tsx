@@ -38,7 +38,7 @@ async function Workspaces({ searchParams }: { searchParams: Promise<Record<strin
           action={<SearchInput placeholder="Search by name or URL…" className="sm:w-72" />}
         />
         {data.rows.length === 0 ? (
-          <EmptyState icon={SearchX} title="No workspaces match" description={`Nothing matches “${data.q}”. Try part of the name or URL.`} />
+          <EmptyState icon={SearchX} title="No workspaces match" description={`Nothing matches "${data.q}". Try part of the name or URL.`} />
         ) : (
           <TableWrap>
             <Table className="min-w-[900px]">

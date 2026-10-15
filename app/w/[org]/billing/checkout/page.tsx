@@ -71,7 +71,7 @@ async function Checkout({
         <div className="flex items-center gap-2.5 border-b border-amber-500/25 bg-amber-500/[0.08] px-5 py-3 text-sm text-amber-100">
           <FlaskConical size={16} className="flex-none text-amber-300" aria-hidden="true" />
           <span>
-            <strong className="font-semibold text-amber-200">TEST MODE.</strong> This checkout imitates the payment provider&apos;s hosted page. No card is
+            <strong className="font-semibold text-amber-200">Test mode.</strong> This checkout imitates the payment provider&apos;s hosted page. No card is
             charged and no card details are collected.
           </span>
         </div>
@@ -89,7 +89,7 @@ function OrderSummary({ data }: { data: CheckoutSummary }) {
   const period = data.interval === "year" ? "year" : "month";
   return (
     <section aria-labelledby="summary-title" className="p-5 sm:p-7">
-      <p className="text-xs uppercase tracking-wider text-ink-faint">Atrium · {data.orgName}</p>
+      <p className="text-xs font-medium text-ink-faint">Atrium · {data.orgName}</p>
       <h2 id="summary-title" className="mt-2 text-xl font-semibold text-ink">
         {data.plan.name} plan
       </h2>
@@ -160,7 +160,7 @@ function Payment({ data }: { data: CheckoutSummary }) {
           <div>
             <dt className="text-xs text-ink-faint">Card (test card, read only)</dt>
             <dd className="mt-1 overflow-hidden rounded-xl border border-line bg-white/[0.02]">
-              <div className="flex items-center gap-2.5 border-b border-line px-3.5 py-2.5 font-mono tracking-wider text-ink-secondary">
+              <div className="flex items-center gap-2.5 border-b border-line px-3.5 py-2.5 font-mono text-ink-secondary">
                 <CreditCard size={16} className="flex-none text-ink-faint" aria-hidden="true" />
                 4242 4242 4242 4242
               </div>

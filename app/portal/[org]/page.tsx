@@ -17,7 +17,7 @@ export const metadata: Metadata = { title: "Overview" };
 export default function PortalOverviewPage({ params }: PageProps<"/portal/[org]">) {
   return (
     <Suspense fallback={<OverviewSkeleton />}>
-      <FlashToast messages={{ joined: "Welcome. You can now review and approve work here." }} />
+      <FlashToast messages={{ joined: "Welcome. Your shared projects are below." }} />
       <Overview params={params} />
     </Suspense>
   );
@@ -35,7 +35,7 @@ async function Overview({ params }: { params: Promise<{ org: string }> }) {
         description={
           reviewCount > 0
             ? data.canApprove
-              ? `${data.agencyName} is waiting on your decision for ${reviewCount} ${reviewCount === 1 ? "deliverable" : "deliverables"}. Everything else is on track below.`
+              ? `${data.agencyName} is waiting on your decision for ${reviewCount} ${reviewCount === 1 ? "deliverable" : "deliverables"}.`
               : `${reviewCount} ${reviewCount === 1 ? "deliverable is" : "deliverables are"} out for approval. You can open them and leave comments.`
             : `Here's where your work with ${data.agencyName} stands today.`
         }
@@ -74,8 +74,8 @@ async function Overview({ params }: { params: Promise<{ org: string }> }) {
             <EmptyState
               compact
               icon={CheckCircle2}
-              title="You're all caught up"
-              description={`Nothing is waiting for you. We'll notify you as soon as ${data.agencyName} sends new work.`}
+              title="Nothing needs your review"
+              description={`You'll get a notification when ${data.agencyName} sends new work.`}
             />
           ) : (
             <ReviewList items={data.reviews} base={data.base} canApprove={data.canApprove} />
@@ -116,12 +116,12 @@ async function Overview({ params }: { params: Promise<{ org: string }> }) {
             </div>
           )}
           <Card className="mt-4">
-            <CardHeader icon={Users} title={`Your team at ${data.agencyName}`} description="Reach out to the lead of each project directly." />
+            <CardHeader icon={Users} title={`Your team at ${data.agencyName}`} description="Email a project lead directly." />
             <CardBody>
               {data.contacts.length === 0 ? (
                 <p className="py-4 text-sm text-ink-muted">Your project leads will appear here.</p>
               ) : (
-                <ul className="grid gap-x-6 gap-y-1 md:grid-cols-2">
+                <ul className="grid grid-cols-1 gap-x-6 gap-y-1 md:grid-cols-2">
                   {data.contacts.map((contact) => (
                     <li key={contact.user.id} className="flex items-center gap-3 rounded-xl py-2.5">
                       <Avatar user={contact.user} size="md" />

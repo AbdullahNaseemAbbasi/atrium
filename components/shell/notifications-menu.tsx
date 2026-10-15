@@ -43,7 +43,7 @@ export function NotificationsMenu({
       >
         <Bell size={19} />
         {unread > 0 && (
-          <span className="absolute right-1.5 top-1.5 grid h-4 min-w-4 place-items-center rounded-full bg-red-500 px-1 text-[10px] font-semibold text-white shadow-[0_0_10px_rgba(239,68,68,.6)]">
+          <span className="absolute right-1.5 top-1.5 grid h-4 min-w-4 place-items-center rounded-full bg-red-500 px-1 text-[10px] font-semibold text-white">
             {unread > 9 ? "9+" : unread}
           </span>
         )}
@@ -57,7 +57,7 @@ export function NotificationsMenu({
           <div className="flex items-center justify-between border-b border-line px-4 py-3">
             <div>
               <p className="font-semibold text-ink">Notifications</p>
-              <p className="text-xs text-ink-faint">{unread > 0 ? `${unread} unread` : "You're all caught up"}</p>
+              <p className="text-xs text-ink-faint">{unread > 0 ? `${unread} unread` : "Nothing unread"}</p>
             </div>
             {unread > 0 && (
               <button

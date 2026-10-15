@@ -94,7 +94,7 @@ export function TaskCalendarView({
                   >
                     {day.dayOfMonth}
                   </span>
-                  {day.isToday && <span className="text-[10px] font-medium uppercase tracking-wider text-cyan-300">Today</span>}
+                  {day.isToday && <span className="text-[11px] font-medium text-cyan-300">Today</span>}
                 </div>
                 <ul className="space-y-1">
                   {withLinks(shown).map((task) => (

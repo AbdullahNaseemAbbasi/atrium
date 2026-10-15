@@ -19,7 +19,7 @@ export default function ProjectOverviewPage({ params }: PageProps<"/w/[org]/proj
   return (
     <Suspense
       fallback={
-        <div className="grid gap-4 xl:grid-cols-[1.4fr_1fr]">
+        <div className="grid grid-cols-1 gap-4 xl:grid-cols-[1.4fr_1fr]">
           <CardSkeleton lines={6} />
           <CardSkeleton lines={6} />
         </div>
@@ -43,7 +43,7 @@ async function Overview({ params }: { params: Promise<{ org: string; projectId: 
   const data = await getProjectOverview(org, projectId);
 
   return (
-    <div className="grid gap-4 xl:grid-cols-[1.4fr_1fr]">
+    <div className="grid grid-cols-1 gap-4 xl:grid-cols-[1.4fr_1fr]">
       <div className="space-y-4">
         <Card>
           <CardHeader
@@ -84,7 +84,8 @@ async function Overview({ params }: { params: Promise<{ org: string; projectId: 
                           )}
                         </div>
                         <p className="mt-1 text-xs text-ink-faint">
-                          Due {formatDate(milestone.dueAt)} · {milestone.doneTasks}/{milestone.taskCount} tasks · {milestone.deliverables.length} deliverables
+                          {milestone.dueAt ? `Due ${formatDate(milestone.dueAt)}` : "No due date"} · {milestone.doneTasks}/{milestone.taskCount} tasks ·{" "}
+                          {milestone.deliverables.length} {milestone.deliverables.length === 1 ? "deliverable" : "deliverables"}
                         </p>
                         {!done && (
                           <div className="mt-2.5 flex items-center gap-3">
@@ -116,7 +117,7 @@ async function Overview({ params }: { params: Promise<{ org: string; projectId: 
             }
           />
           <ul className="px-5 pb-5">
-            {data.upcoming.length === 0 && <li className="py-6 text-center text-sm text-ink-muted">Every task is done. Nice work.</li>}
+            {data.upcoming.length === 0 && <li className="py-6 text-center text-sm text-ink-muted">All tasks are done.</li>}
             {data.upcoming.map((task) => (
               <li key={task.id} className="flex items-center gap-3 border-b border-white/[0.05] py-3 last:border-0">
                 {task.assignee ? <Avatar user={task.assignee} size="sm" /> : <span className="h-8 w-8 rounded-full border border-dashed border-line-strong" aria-hidden="true" />}
@@ -152,7 +153,7 @@ async function Overview({ params }: { params: Promise<{ org: string; projectId: 
           <ul className="mt-4 grid grid-cols-2 gap-x-4 gap-y-2.5 text-sm">
             {data.byStatus.map((item) => (
               <li key={item.status} className="flex items-center gap-2">
-                <span className={cn("h-2 w-2 rounded-full", STATUS_BAR[item.status])} aria-hidden="true" />
+                <span className={cn("h-2.5 w-2.5 rounded-[3px]", STATUS_BAR[item.status])} aria-hidden="true" />
                 <span className="text-ink-muted">{TASK_STATUS[item.status].label}</span>
                 <span className="ml-auto tabular-nums text-ink">{item.count}</span>
               </li>
@@ -193,7 +194,7 @@ async function Overview({ params }: { params: Promise<{ org: string; projectId: 
         <Card>
           <CardHeader icon={Activity} title="Recent activity" />
           <ul className="px-5 pb-5">
-            {data.activity.length === 0 && <li className="py-6 text-center text-sm text-ink-muted">Nothing yet.</li>}
+            {data.activity.length === 0 && <li className="py-6 text-center text-sm text-ink-muted">No activity yet.</li>}
             {data.activity.map((item) => (
               <li key={item.id} className="flex gap-3 py-2.5 text-sm">
                 {item.actor && <Avatar user={item.actor} size="xs" className="mt-0.5" />}

@@ -18,7 +18,7 @@ export function ArchiveProjectButton({ orgSlug, projectId, name, clientName }: {
           <Archive size={16} /> Archive project
         </Button>
       </DialogTrigger>
-      <DialogContent title={`Archive “${name}”?`} size="sm">
+      <DialogContent title={`Archive ${name}?`} size="sm">
         <div className="space-y-3 text-sm text-ink-muted">
           <p>
             The status changes to <span className="text-ink-secondary">Cancelled</span> and the project leaves your active counts and plan limit.

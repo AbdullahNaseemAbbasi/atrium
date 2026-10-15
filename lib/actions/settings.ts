@@ -87,7 +87,7 @@ export async function updateWorkspace(orgSlug: string, _prev: ActionState, formD
   if (!org) return fail("Workspace not found.");
   const next = { ...parsed.data, website: parsed.data.website || undefined };
   const changed = (Object.keys(next) as (keyof typeof next)[]).filter((key) => (org[key] ?? "") !== (next[key] ?? ""));
-  if (changed.length === 0) return ok("Nothing to save. Everything already matches.");
+  if (changed.length === 0) return ok("No changes to save.");
 
   const metadata: Record<string, string> = { fields: changed.join(", ") };
   if (changed.includes("name")) metadata.previousName = org.name;

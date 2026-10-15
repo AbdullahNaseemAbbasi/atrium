@@ -24,7 +24,7 @@ export function CommentThread({
   canChooseVisibility,
   defaultVisibility = "client",
   canPost = true,
-  emptyText = "No comments yet. Start the conversation.",
+  emptyText = "No comments yet.",
   placeholder = "Write a comment…",
 }: {
   comments: ThreadComment[];

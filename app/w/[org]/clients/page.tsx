@@ -49,7 +49,7 @@ async function Clients({ params, searchParams }: { params: Promise<{ org: string
     <>
       <PageHeader
         title="Clients"
-        description="The companies you work for, their portal users and every project you run for them."
+        description="The companies you work for. Open one to see its portal users and projects."
         actions={
           data.canManage && (
             <Link href={`${data.base}/clients/new`} className={buttonClasses({ size: "lg" })}>

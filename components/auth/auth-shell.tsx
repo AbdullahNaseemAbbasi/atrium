@@ -16,22 +16,22 @@ export function AuthShell({
   footer?: React.ReactNode;
 }) {
   return (
-    <div className="relative min-h-screen">
+    <div className="relative min-h-dvh">
       <Backdrop />
-      <div className="relative mx-auto grid min-h-screen max-w-[1400px] lg:grid-cols-[1fr_1.05fr]">
+      <div className="relative mx-auto grid min-h-dvh max-w-[1400px] lg:grid-cols-[1fr_1.05fr]">
         <aside className="hidden flex-col justify-between p-10 lg:flex">
           <Link href="/" aria-label="Atrium home" className="w-fit">
             <Logo />
           </Link>
           <div className="max-w-md">
             <p className="text-3xl font-semibold leading-tight text-ink">
-              One place for your clients to review work, approve it and see what happens next.
+              A private portal where your clients review and approve your work.
             </p>
             <ul className="mt-8 space-y-4 text-sm text-ink-secondary">
               {[
-                "Private, versioned deliverables with signed download links",
-                "Approval decisions recorded with reviewer, version and time",
-                "Every workspace isolated from every other",
+                "Every deliverable keeps its versions, and downloads use links that expire.",
+                "Each approval records who decided, on which version and when.",
+                "Workspaces are kept fully separate from each other.",
               ].map((item) => (
                 <li key={item} className="flex items-start gap-3">
                   <CheckCircle2 size={18} className="mt-0.5 flex-none text-cyan-300" aria-hidden="true" />

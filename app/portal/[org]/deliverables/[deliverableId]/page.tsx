@@ -120,7 +120,7 @@ function DecisionCard({ data }: { data: Data }) {
   if (deliverable.status === "in_review") {
     return (
       <Card className="border-amber-400/25 p-5 shadow-[0_0_40px_rgba(251,191,36,0.06)]">
-        <p className="flex items-center gap-2 text-xs font-medium uppercase tracking-wider text-amber-300">
+        <p className="flex items-center gap-2 text-xs font-medium text-amber-300">
           <Clock3 size={14} aria-hidden="true" /> {data.role === "approver" ? "Waiting for your decision" : "Waiting for approval"}
         </p>
         {data.canDecide ? (
@@ -175,7 +175,7 @@ function DecisionCard({ data }: { data: Data }) {
             ) : (
               <p className="mt-1 text-sm text-ink-muted">This deliverable is signed off.</p>
             )}
-            {latest?.comment && <p className="mt-2 text-sm text-ink-secondary">“{latest.comment}”</p>}
+            {latest?.comment && <p className="mt-2 text-sm text-ink-secondary">{latest.comment}</p>}
             <p className="mt-3 text-xs text-ink-faint">If anything changes, {data.agencyName} will send a new version for review.</p>
           </div>
         </div>
@@ -195,7 +195,7 @@ function DecisionCard({ data }: { data: Data }) {
                 {latest.byYou ? "You" : (latest.by?.name ?? "Your approver")} asked for changes on version {latest.version} {latest.when}.
               </p>
             )}
-            {latest?.comment && <p className="mt-2 text-sm text-ink-secondary">“{latest.comment}”</p>}
+            {latest?.comment && <p className="mt-2 text-sm text-ink-secondary">{latest.comment}</p>}
             <p className="mt-3 text-xs text-ink-faint">{data.agencyName} is working on a new version. You&apos;ll get a notification when it&apos;s ready.</p>
           </div>
         </div>
@@ -256,7 +256,7 @@ function VersionHistory({ data }: { data: Data }) {
 function DecisionTrail({ data }: { data: Data }) {
   return (
     <Card>
-      <CardHeader icon={UserCheck} title="Decision trail" description="Who decided what, on which version, and when." />
+      <CardHeader icon={UserCheck} title="Decision trail" description="Each approval and change request, with the version and date." />
       <ol className="px-4 pb-4 sm:px-5 sm:pb-5">
         {data.decisions.length === 0 && (
           <li className="flex items-center gap-2 py-3 text-sm text-ink-muted">
@@ -279,7 +279,7 @@ function DecisionTrail({ data }: { data: Data }) {
                   {decision.when}
                 </time>
               </p>
-              {decision.comment && <p className="mt-1.5 text-sm text-ink-muted">“{decision.comment}”</p>}
+              {decision.comment && <p className="mt-1.5 text-sm text-ink-muted">{decision.comment}</p>}
             </div>
           </li>
         ))}

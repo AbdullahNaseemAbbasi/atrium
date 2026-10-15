@@ -15,14 +15,6 @@ import { PriorityBadge } from "@/components/ui/badge";
 
 export type BoardTask = TaskRow & { dueText: string };
 
-const COLUMN_ACCENT: Record<TaskStatus, string> = {
-  todo: "bg-slate-400",
-  in_progress: "bg-cyan-400",
-  in_review: "bg-violet-400",
-  blocked: "bg-red-400",
-  done: "bg-emerald-400",
-};
-
 /**
  * Kanban board. Cards can be dragged between columns (or moved with the
  * status menu for keyboard users); the move shows instantly and is confirmed
@@ -54,7 +46,7 @@ export function TaskBoard({
       applyMove({ id, status });
       try {
         await setTaskStatus(orgSlug, id, status);
-        if (status === "done") toast.success(`“${task.title}” completed`);
+        if (status === "done") toast.success(`${task.title} marked as done`);
       } catch {
         toast.error("Couldn't move the task. Please try again.");
       }
@@ -88,10 +80,7 @@ export function TaskBoard({
               )}
             >
               <header className="flex items-center justify-between px-1.5 pb-3 pt-1">
-                <h3 className="flex items-center gap-2 text-sm font-medium text-ink-secondary">
-                  <span className={cn("h-2 w-2 rounded-full", COLUMN_ACCENT[status])} aria-hidden="true" />
-                  {TASK_STATUS[status].label}
-                </h3>
+                <h3 className="text-sm font-medium text-ink-secondary">{TASK_STATUS[status].label}</h3>
                 <span className="rounded-md bg-white/[0.06] px-1.5 py-0.5 text-[11px] tabular-nums text-ink-faint">{column.length}</span>
               </header>
               <ul className="flex flex-1 flex-col gap-2.5">

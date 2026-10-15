@@ -75,7 +75,7 @@ async function Approvals({
         />
         <CardBody>
           {data.pending.length === 0 ? (
-            <EmptyState compact icon={CheckCircle2} title="Nothing waiting" description={`You're up to date. ${data.agencyName} will notify you when the next version is ready.`} />
+            <EmptyState compact icon={CheckCircle2} title="Nothing waiting" description={`${data.agencyName} will notify you when the next version is ready.`} />
           ) : (
             <ReviewList items={data.pending} base={data.base} canApprove={data.canApprove} />
           )}
@@ -124,7 +124,7 @@ async function Approvals({
                         )}
                       </Td>
                       <Td className="max-w-[280px]">
-                        {row.comment ? <span className="line-clamp-2 text-ink-secondary">“{row.comment}”</span> : <span className="text-ink-faint">No comment</span>}
+                        {row.comment ? <span className="line-clamp-2 text-ink-secondary">{row.comment}</span> : <span className="text-ink-faint">No comment</span>}
                       </Td>
                       <Td className="whitespace-nowrap">
                         <time dateTime={row.decidedAt} title={formatDateTime(row.decidedAt)}>

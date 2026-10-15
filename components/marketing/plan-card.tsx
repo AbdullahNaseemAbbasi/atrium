@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Check, Sparkles } from "lucide-react";
+import { Check } from "lucide-react";
 import { cn, formatMoney } from "@/lib/utils";
 import { monthlyEquivalent, type Plan } from "@/lib/billing/plans";
 import type { BillingInterval } from "@/lib/data/types";
@@ -20,21 +20,19 @@ export function PlanCard({ plan, interval = "month", headingLevel = "h3" }: { pl
   return (
     <div
       className={cn(
-        "relative flex flex-col rounded-2xl border p-6 sm:p-7",
+        "relative flex flex-col rounded-xl border p-6 sm:p-7",
         plan.recommended
-          ? "border-cyan-400/50 bg-gradient-to-b from-cyan-500/[0.12] to-[#0e1c28]/90 shadow-[0_0_50px_rgba(34,211,238,.14)]"
+          ? "border-cyan-400/50 bg-surface"
           : "border-line bg-surface/80",
       )}
     >
       {plan.recommended && (
-        <span className="absolute -top-3 left-6 inline-flex items-center gap-1.5 rounded-full border border-cyan-300/40 bg-[#0b1f2c] px-3 py-1 text-[11px] font-semibold uppercase tracking-wider text-cyan-200">
-          <Sparkles size={12} aria-hidden="true" /> Recommended
-        </span>
+        <p className="mb-2 text-sm font-medium text-cyan-300">Recommended</p>
       )}
       <Heading className="text-lg font-semibold text-ink">{plan.name}</Heading>
       <p className="mt-1.5 min-h-[40px] text-sm text-ink-muted">{plan.tagline}</p>
       <div className="mt-6 flex items-baseline gap-1.5">
-        <span className="text-4xl font-bold tracking-tight text-ink tabular-nums">{free ? "Free" : formatMoney(perMonth)}</span>
+        <span className="text-4xl font-semibold text-ink tabular-nums">{free ? "Free" : formatMoney(perMonth)}</span>
         {!free && <span className="text-sm text-ink-faint">/ month</span>}
       </div>
       <p className="mt-1.5 min-h-[20px] text-xs text-ink-faint">

@@ -16,7 +16,7 @@ export default function GlobalError({ error, retry }: { error: Error & { digest?
     <html lang="en" className="h-full antialiased">
       <body className="min-h-full bg-canvas font-sans text-ink">
         <title>Something went wrong · Atrium</title>
-        <main className="flex min-h-screen items-center justify-center px-4 py-12">
+        <main className="flex min-h-dvh items-center justify-center px-4 py-12">
           <div className="w-full max-w-md rounded-2xl border border-white/10 bg-[#101b26] p-8 text-center shadow-[0_16px_50px_rgba(0,0,0,.4)]">
             <svg width="40" height="40" viewBox="0 0 32 32" fill="none" className="mx-auto" aria-hidden="true">
               <path

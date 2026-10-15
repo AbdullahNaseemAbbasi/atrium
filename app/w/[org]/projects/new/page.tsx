@@ -46,7 +46,7 @@ async function NewProject({
           {!data.limit.allowed && (
             <FormMessage className="mb-6">
               Your {data.planName} plan allows {data.limit.limit} active projects and you have {data.limit.used}. New projects can still be
-              created as “On hold” or “Completed”, or{" "}
+              created as On hold or Completed, or{" "}
               <Link href={`${data.base}/billing`} className="underline">
                 upgrade your plan
               </Link>
@@ -69,12 +69,12 @@ async function NewProject({
         <aside className="space-y-4">
           <Card className="p-5">
             <div className="flex items-center gap-2 text-sm font-semibold text-ink">
-              <Lightbulb size={17} className="text-amber-300" aria-hidden="true" /> Tips for a smooth project
+              <Lightbulb size={17} className="text-amber-300" aria-hidden="true" /> Tips
             </div>
             <ul className="mt-4 space-y-3 text-sm text-ink-muted">
               <li>Keep the project private while you plan. Share it with the client once the first milestone is ready.</li>
-              <li>Mark milestones as “approval required” when the client must sign off before work moves on.</li>
-              <li>Tasks are internal by default in your workflow. Tick “visible to client” for the ones they should follow.</li>
+              <li>Turn on Requires client approval for milestones the client must sign off before work moves on.</li>
+              <li>New tasks are visible to the client. Untick that box on tasks only your team should see.</li>
             </ul>
           </Card>
           <Card className="p-5 text-sm text-ink-muted">

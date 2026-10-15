@@ -131,6 +131,17 @@ body {
     backdrop-filter: blur(24px);
   }
 
+  /* Horizontal scrollers (wide tables on phones): a soft shadow on the edge
+     that has more content, so people can tell the table scrolls. The
+     "local" layers cover the shadows once you reach that edge. */
+  .scroll-hint {
+    background:
+      linear-gradient(to right, rgb(16 27 38) 30%, rgb(16 27 38 / 0)) left center / 28px 100% no-repeat local,
+      linear-gradient(to left, rgb(16 27 38) 30%, rgb(16 27 38 / 0)) right center / 28px 100% no-repeat local,
+      radial-gradient(farthest-side at 0 50%, rgb(0 0 0 / 0.6), transparent) left center / 14px 100% no-repeat scroll,
+      radial-gradient(farthest-side at 100% 50%, rgb(0 0 0 / 0.6), transparent) right center / 14px 100% no-repeat scroll;
+  }
+
   .skeleton {
     border-radius: var(--radius-md);
     background: linear-gradient(
@@ -161,6 +172,19 @@ body {
   .prose-atrium ul {
     list-style: disc;
     padding-left: 1.25rem;
+  }
+}
+
+/*
+ * iOS Safari zooms into any form control under 16px when it is focused.
+ * On touch screens keep controls at 16px or larger instead of disabling
+ * zoom (which would hurt accessibility). Unlayered so it beats utilities.
+ */
+@media (pointer: coarse) {
+  input:not([type="checkbox"]):not([type="radio"]),
+  select,
+  textarea {
+    font-size: max(16px, 1em);
   }
 }
 

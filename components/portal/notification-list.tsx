@@ -80,7 +80,7 @@ export function NotificationList({ orgSlug, items }: { orgSlug: string; items: N
               </span>
               {item.unread && (
                 <span className="mt-2 flex-none">
-                  <span className="block h-2.5 w-2.5 rounded-full bg-cyan-400 shadow-[0_0_8px_rgba(34,211,238,.8)]" />
+                  <span className="block h-2.5 w-2.5 rounded-full bg-cyan-400" />
                   <span className="sr-only">Unread</span>
                 </span>
               )}

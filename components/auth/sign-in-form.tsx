@@ -19,7 +19,7 @@ export function SignInForm({ next }: { next?: string }) {
           name="email"
           type="email"
           autoComplete="email"
-          placeholder="you@company.com"
+          placeholder="you@studio.example"
           defaultValue={state?.values?.email}
           aria-invalid={Boolean(errors.email)}
           aria-describedby={errors.email ? "email-error" : undefined}

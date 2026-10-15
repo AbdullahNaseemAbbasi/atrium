@@ -100,13 +100,13 @@ export function NotificationItem({ orgSlug, item }: { orgSlug: string; item: Not
       <div className="relative z-10 flex flex-none items-center gap-2 self-center">
         {!read ? (
           <>
-            <span className="h-2 w-2 rounded-full bg-cyan-400 shadow-[0_0_8px_rgba(34,211,238,.8)]" aria-label="Unread" />
+            <span className="h-2 w-2 rounded-full bg-cyan-400" aria-label="Unread" />
             <Button
               variant="ghost"
               size="icon-sm"
               disabled={pending}
               onClick={markRead}
-              aria-label={`Mark “${item.title}” as read`}
+              aria-label={`Mark ${item.title} as read`}
               title="Mark as read"
               className="text-ink-faint hover:text-cyan-300"
             >

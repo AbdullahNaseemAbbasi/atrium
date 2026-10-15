@@ -25,7 +25,7 @@ export default function ApprovalsPage({ params, searchParams }: PageProps<"/w/[o
 
 const TAB_COPY: Record<ApprovalTab, { hint: string; empty: { title: string; description: string } }> = {
   waiting: {
-    hint: `Submitted work the client hasn't decided on. Anything over ${WAITING_WARNING_DAYS} days is flagged so you can nudge them.`,
+    hint: `Submitted work the client hasn't decided on. Anything over ${WAITING_WARNING_DAYS} days is flagged so you can follow up.`,
     empty: { title: "Nothing waiting on clients", description: "When you send a deliverable for review, it waits here until the client approves or asks for changes." },
   },
   changes: {
@@ -63,7 +63,7 @@ async function Approvals({ params, searchParams }: { params: Promise<{ org: stri
 
   return (
     <>
-      <PageHeader title="Approvals" description="Where every deliverable stands with your clients, and what needs a nudge." />
+      <PageHeader title="Approvals" description="The review status of everything you've sent to clients, and which items have waited too long." />
 
       <section aria-label="Approval metrics" className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
         <StatCard icon={Clock3} label="Waiting on client" value={String(data.stats.waiting)} caption={data.stats.waiting ? `Oldest sent ${data.stats.oldest} ${data.stats.oldest === 1 ? "day" : "days"} ago.` : "Nothing in review right now."} />
@@ -71,7 +71,7 @@ async function Approvals({ params, searchParams }: { params: Promise<{ org: stri
           icon={AlertTriangle}
           label={`Waiting over ${WAITING_WARNING_DAYS} days`}
           value={String(data.stats.overdue)}
-          caption="Worth a reminder to the approver."
+          caption={data.stats.overdue > 0 ? "Consider sending the approver a reminder." : "Nothing has waited that long."}
           danger={data.stats.overdue > 0}
         />
         <StatCard icon={RotateCcw} label="Changes requested" value={String(data.counts.changes)} caption={`${data.stats.changes30} in the last 30 days.`} />

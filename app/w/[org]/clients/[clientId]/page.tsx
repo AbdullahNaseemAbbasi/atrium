@@ -97,7 +97,7 @@ async function ClientOverview({ params }: { params: Promise<{ org: string; clien
         <div className="min-w-0 space-y-4">
           <ProjectsCard data={data} />
           <Card>
-            <CardHeader icon={Activity} title="Activity" description="What the client sees on their portal, and what stays internal." />
+            <CardHeader icon={Activity} title="Activity" description="Recent events for this client. Internal ones are marked and never reach the portal." />
             <ClientActivity items={data.activity} />
           </Card>
         </div>

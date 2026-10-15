@@ -253,7 +253,7 @@ function AuditTableRow({ row }: { row: AuditRow }) {
         <p className="text-ink-secondary">{row.summary}</p>
         <MetadataChips row={row} />
       </Td>
-      <Td className="whitespace-nowrap align-top font-mono text-xs">{row.ip ?? <span className="text-ink-faint">—</span>}</Td>
+      <Td className="whitespace-nowrap align-top font-mono text-xs">{row.ip ?? <span className="text-ink-faint">Not recorded</span>}</Td>
     </Tr>
   );
 }

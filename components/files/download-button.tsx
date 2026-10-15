@@ -36,7 +36,7 @@ export function DownloadButton({
           try {
             const result = await requestDownload(orgSlug, objectId, kind);
             window.location.assign(result.url);
-            toast.success(`Downloading ${result.fileName}`, { description: `Secure link valid for ${result.expiresInSeconds} seconds.` });
+            toast.success(`Downloading ${result.fileName}`, { description: `The link works for ${result.expiresInSeconds} seconds.` });
           } catch {
             toast.error("You no longer have access to this file.");
           }

@@ -68,7 +68,7 @@ async function Projects({
             description={
               data.counts.all === 0
                 ? `${data.agencyName} hasn't shared a project with you yet. You'll get a notification when they do.`
-                : "No projects match this filter. Try “All”."
+                : "No projects match this filter. Choose All to see every project."
             }
           />
         </Card>

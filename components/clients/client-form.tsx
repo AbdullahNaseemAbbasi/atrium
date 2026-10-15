@@ -170,7 +170,7 @@ export function ClientForm({
               <p className="text-xs text-ink-faint">Shown on project tiles and the portal</p>
             </div>
           </div>
-          <div role="radiogroup" aria-label="Brand colour" className="grid flex-1 grid-cols-7 gap-2 sm:flex sm:flex-wrap">
+          <div role="radiogroup" aria-label="Brand colour" className="grid flex-1 grid-cols-5 gap-2.5 sm:flex sm:flex-wrap sm:gap-2">
             {hues.map((value, index) => {
               const selected = value === hue;
               return (

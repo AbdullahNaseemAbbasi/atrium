@@ -14,11 +14,11 @@ const SECTIONS: LegalSection[] = [
     body: (
       <>
         <p>
-          These terms are an agreement between you and [Company legal name], a company registered in [jurisdiction] (“Atrium”, “we”).
+          These terms are an agreement between you and [Company legal name], a company registered in [jurisdiction] (&quot;Atrium&quot;, &quot;we&quot;).
           They apply when you create an account, use a workspace or open a client portal.
         </p>
         <p>
-          If you accept these terms on behalf of a business, you confirm that you have authority to bind that business, and “you”
+          If you accept these terms on behalf of a business, you confirm that you have authority to bind that business, and &quot;you&quot;
           means the business.
         </p>
       </>

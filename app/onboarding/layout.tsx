@@ -12,9 +12,9 @@ export const instant = false;
 
 export default function OnboardingLayout({ children }: { children: React.ReactNode }) {
   return (
-    <div className="relative min-h-screen overflow-x-clip">
+    <div className="relative min-h-dvh overflow-x-clip">
       <Backdrop />
-      <div className="relative mx-auto flex min-h-screen max-w-[980px] flex-col px-4 sm:px-6">
+      <div className="relative mx-auto flex min-h-dvh max-w-[980px] flex-col px-4 sm:px-6">
         <header className="flex h-20 items-center justify-between gap-4">
           <Link href="/" aria-label="Atrium home" className="flex-none">
             <Logo size={28} />

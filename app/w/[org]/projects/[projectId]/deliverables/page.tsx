@@ -63,14 +63,14 @@ async function Deliverables({
             title={data.status === "all" ? "No deliverables yet" : "Nothing in this state"}
             description={
               data.status === "all"
-                ? "Upload designs, documents or videos. Each upload keeps its full version history and client decisions."
+                ? "Upload designs, documents or videos. Each one keeps its versions and the client's decisions."
                 : "Pick another filter to see more."
             }
             action={data.status === "all" && data.canUpload ? <NewDeliverableButton orgSlug={data.orgSlug} projectId={data.projectId} milestones={data.milestones} /> : undefined}
           />
         </Card>
       ) : (
-        <ul className="grid gap-3 lg:grid-cols-2">
+        <ul className="grid grid-cols-1 gap-3 lg:grid-cols-2">
           {data.rows.map((item) => (
             <li key={item.id}>
               <Link
@@ -80,7 +80,7 @@ async function Deliverables({
                 <FileTypeIcon mimeType={item.latestVersion.mimeType} fileName={item.latestVersion.fileName} />
                 <div className="min-w-0 flex-1">
                   <div className="flex items-start justify-between gap-3">
-                    <h2 className="truncate font-medium text-ink">{item.title}</h2>
+                    <h2 className="min-w-0 truncate font-medium text-ink">{item.title}</h2>
                     <DeliverableStatusBadge status={item.status} />
                   </div>
                   <p className="mt-1 truncate text-xs text-ink-faint">
@@ -96,7 +96,7 @@ async function Deliverables({
                   </div>
                   {item.lastDecision?.decision === "changes_requested" && item.status === "changes_requested" && item.lastDecision.comment && (
                     <p className="mt-3 line-clamp-2 rounded-lg border border-red-500/15 bg-red-500/[0.05] px-3 py-2 text-xs text-red-200/90">
-                      “{item.lastDecision.comment}” — {item.lastDecision.by?.name}
+                      {item.lastDecision.comment} · {item.lastDecision.by?.name}
                     </p>
                   )}
                 </div>

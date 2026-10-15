@@ -102,6 +102,25 @@ and every form shows inline field errors. Copy is short, specific and
 human (no "Unlock the power of…", no emoji). Synthetic data only;
 emails use the `.example` domain.
 
+### Keep it from looking machine-made
+
+The owner reviews every screen for things that make a product look
+AI-generated. Don't add:
+
+- em dashes or en dashes in copy (use a period, comma, colon or "to");
+- curly quotes (use straight quotes, or no quotes);
+- ALL-CAPS labels with letter spacing (use sentence case);
+- pill badges above headings, gradient text, glowing dots or pulsing
+  status lights, macOS window dots on screenshots or mockups;
+- rows of identical icon-in-a-box feature cards on public pages (use plain
+  headings with text, real screenshots and varied layouts);
+- copy with stock words (seamless, effortless, streamline, empower, unlock,
+  robust, key, crucial), "X, not Y" constructions, forced groups of three,
+  or exclamation marks. Say the specific thing.
+
+Single-column grids on phones should be `grid-cols-1` (it means
+`minmax(0, 1fr)`), otherwise wide content inside can push the page sideways.
+
 ### Mobile overflow rule
 
 Any element with `overflow-x-auto` (table scrollers, tab bars, boards) must

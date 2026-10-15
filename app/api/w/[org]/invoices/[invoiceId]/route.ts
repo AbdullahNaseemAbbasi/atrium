@@ -2,7 +2,7 @@ import { can } from "@/lib/auth/permissions";
 import { getPlan } from "@/lib/billing/plans";
 import { getDb } from "@/lib/data/store";
 import { attachmentHeaders, notFoundResponse, routeTeamContext } from "@/lib/export/route-auth";
-import { formatDate, formatMoney } from "@/lib/utils";
+import { formatDate, formatDateRange, formatMoney } from "@/lib/utils";
 
 const escapeHtml = (value: string) =>
   value.replace(/[&<>"']/g, (char) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[char]!);
@@ -26,7 +26,7 @@ export async function GET(_request: Request, context: RouteContext<"/api/w/[org]
   const rows: [string, string][] = [
     ["Invoice number", invoice.number],
     ["Issued", formatDate(invoice.issuedAt)],
-    ["Billing period", `${formatDate(invoice.periodStart)} – ${formatDate(invoice.periodEnd)}`],
+    ["Billing period", formatDateRange(invoice.periodStart, invoice.periodEnd)],
     ["Billed to", ctx.org.name],
     ["Plan", subscription ? `Atrium ${getPlan(subscription.planKey).name}` : "Atrium"],
     ["Status", invoice.status === "paid" ? "Paid" : invoice.status === "open" ? "Open" : invoice.status === "void" ? "Void" : "Uncollectible"],
@@ -52,7 +52,7 @@ export async function GET(_request: Request, context: RouteContext<"/api/w/[org]
 </style>
 </head>
 <body>
-<div class="test">TEST MODE · No real payment was taken</div>
+<div class="test">Test mode · No real payment was taken</div>
 <h1>Receipt ${escapeHtml(invoice.number)}</h1>
 <p class="muted">Atrium · Client portal software</p>
 <table>

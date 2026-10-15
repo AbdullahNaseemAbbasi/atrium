@@ -162,7 +162,7 @@ export function DangerZone({ workspaceName, isOwner }: { workspaceName: string; 
             Database rows and every stored file are permanently deleted. Paid invoices are kept for tax records.
           </RetentionStep>
         </div>
-        <Field label={`Type “${workspaceName}” to confirm`} htmlFor="confirmName" className="sm:max-w-sm">
+        <Field label={`Type "${workspaceName}" to confirm`} htmlFor="confirmName" className="sm:max-w-sm">
           <Input
             id="confirmName"
             value={typed}

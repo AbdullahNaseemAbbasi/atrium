@@ -50,7 +50,7 @@ async function Reports({ params }: { params: Promise<{ org: string }> }) {
         actions={<span className="text-xs text-ink-faint">Updated {formatDateTime(data.generatedAt)}</span>}
       />
 
-      <section aria-label="Key metrics" className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+      <section aria-label="Summary" className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
         <StatCard
           icon={CheckSquare}
           label="Tasks completed"
@@ -62,17 +62,17 @@ async function Reports({ params }: { params: Promise<{ org: string }> }) {
         <StatCard
           icon={Clock3}
           label="Review turnaround"
-          value={kpis.turnaround.value === null ? "—" : days(kpis.turnaround.value)}
+          value={kpis.turnaround.value === null ? "No data" : days(kpis.turnaround.value)}
           caption={
             kpis.turnaround.decisions > 0
-              ? `Median from submit to client decision, ${kpis.turnaround.decisions} decisions.`
+              ? `Median time from sending work to the client's decision, across ${kpis.turnaround.decisions} decisions.`
               : "No client decisions yet."
           }
         />
         <StatCard
           icon={CheckCheck}
           label="First-pass approval"
-          value={kpis.firstPass.rate === null ? "—" : `${kpis.firstPass.rate}%`}
+          value={kpis.firstPass.rate === null ? "No data" : `${kpis.firstPass.rate}%`}
           caption={
             kpis.firstPass.decided > 0
               ? `${kpis.firstPass.firstPass} of ${kpis.firstPass.decided} deliverables approved on version 1.`
@@ -83,7 +83,7 @@ async function Reports({ params }: { params: Promise<{ org: string }> }) {
           icon={AlertTriangle}
           label="At risk or late"
           value={String(kpis.atRisk.value)}
-          caption={`Of ${kpis.atRisk.of} open projects. Rule in the health table.`}
+          caption={`Out of ${kpis.atRisk.of} open projects. The rules are under the health table.`}
           danger={kpis.atRisk.value > 0}
         />
       </section>
@@ -149,7 +149,7 @@ function Workload({ data }: { data: ReportsData }) {
       howTo={<>Tasks that are not done, grouped by assignee. Overdue means still open with a due date before today. Unassigned tasks get their own row.</>}
       chart={
         open === 0 ? (
-          <EmptyState compact icon={Inbox} title="No open tasks" description="Everyone is clear. New tasks show up here by assignee." />
+          <EmptyState compact icon={Inbox} title="No open tasks" description="No one has open work. New tasks show up here, grouped by assignee." />
         ) : (
           <BarList
             label="Open tasks by team member"
@@ -211,7 +211,7 @@ function Turnaround({ data }: { data: ReportsData }) {
         <ChartTable
           caption="Median review turnaround by client"
           columns={["Client", "Median days", "Decisions"]}
-          rows={data.byClient.map((row) => [row.clientName, row.medianDays?.toFixed(1) ?? "—", row.decisions])}
+          rows={data.byClient.map((row) => [row.clientName, row.medianDays?.toFixed(1) ?? "No data", row.decisions])}
         />
       }
     />
@@ -314,7 +314,7 @@ function ProjectHealth({ data }: { data: ReportsData }) {
                     </div>
                     <div>
                       <dt className="flex justify-between text-ink-faint">
-                        Time elapsed <span className="tabular-nums text-ink-secondary">{row.elapsed === null ? "—" : `${row.elapsed}%`}</span>
+                        Time elapsed <span className="tabular-nums text-ink-secondary">{row.elapsed === null ? "No dates" : `${row.elapsed}%`}</span>
                       </dt>
                       <dd className="mt-1.5 h-1.5 overflow-hidden rounded-full bg-white/[0.06]">
                         <div className="h-full rounded-full bg-slate-400/70" style={{ width: `${row.elapsed ?? 0}%` }} />
@@ -376,7 +376,7 @@ function ProjectHealth({ data }: { data: ReportsData }) {
                         )}
                       </Td>
                       <Td className="text-right tabular-nums">
-                        {row.gap === null ? "—" : <span className="text-ink-secondary">{row.gap > 0 ? `+${row.gap}` : row.gap < 0 ? `−${Math.abs(row.gap)}` : "0"} pts</span>}
+                        {row.gap === null ? "No dates" : <span className="text-ink-secondary">{row.gap > 0 ? `+${row.gap}` : row.gap < 0 ? `−${Math.abs(row.gap)}` : "0"} pts</span>}
                       </Td>
                       <Td className="whitespace-nowrap">
                         <span className="text-ink-secondary">{formatDate(row.dueAt)}</span>

@@ -103,7 +103,7 @@ export function HelpCenter() {
                     className={cn(
                       "group flex h-full w-full flex-col rounded-2xl border p-5 text-left transition",
                       active
-                        ? "border-cyan-400/50 bg-cyan-500/[0.08] shadow-[0_0_24px_rgba(34,211,238,.12)]"
+                        ? "border-cyan-400/50 bg-cyan-500/[0.08] "
                         : "border-line bg-surface/70 hover:border-cyan-400/25 hover:bg-surface-hover",
                     )}
                   >
@@ -145,7 +145,7 @@ export function HelpCenter() {
           <div className="flex items-center gap-3">
             <p className="text-sm text-ink-faint" aria-live="polite">
               {results.length} article{results.length === 1 ? "" : "s"}
-              {searching ? ` for “${query.trim()}”` : ""}
+              {searching ? ` for "${query.trim()}"` : ""}
             </p>
             {category !== "all" && (
               <button type="button" onClick={() => setCategory("all")} className={buttonClasses({ variant: "outline", size: "xs" })}>
@@ -160,7 +160,7 @@ export function HelpCenter() {
             <EmptyState
               icon={Search}
               title="No articles match that search"
-              description="Try a shorter or different word, such as “invite”, “approve” or “limit”. Or ask us and we'll answer directly."
+              description="Try a shorter or different word, such as invite, approve or limit. Or ask us and we'll answer directly."
               action={
                 <>
                   <button type="button" onClick={() => { setQuery(""); setCategory("all"); }} className={buttonClasses({ variant: "outline" })}>
@@ -177,7 +177,7 @@ export function HelpCenter() {
           <div className="mt-5 space-y-8">
             {grouped.map((group) => (
               <section key={group.key} aria-labelledby={`group-${group.key}`}>
-                <h3 id={`group-${group.key}`} className="mb-3 text-xs font-semibold uppercase tracking-[0.14em] text-cyan-300/90">
+                <h3 id={`group-${group.key}`} className="mb-3 text-sm font-semibold text-cyan-300/90">
                   {group.title}
                 </h3>
                 <div className="divide-y divide-white/[0.06] rounded-2xl border border-line bg-surface/60">

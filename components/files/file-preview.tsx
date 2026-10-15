@@ -40,9 +40,6 @@ function MockupArt() {
     <svg viewBox="0 0 640 360" className="h-full w-full" aria-hidden="true">
       <rect x="70" y="30" width="500" height="300" rx="14" fill="#0f1f2c" stroke="rgba(255,255,255,0.08)" />
       <rect x="70" y="30" width="500" height="34" rx="14" fill="#132636" />
-      <circle cx="92" cy="47" r="5" fill="#f87171" opacity="0.7" />
-      <circle cx="108" cy="47" r="5" fill="#fbbf24" opacity="0.7" />
-      <circle cx="124" cy="47" r="5" fill="#34d399" opacity="0.7" />
       <rect x="100" y="90" width="210" height="18" rx="5" fill="#e2e8f0" opacity="0.85" />
       <rect x="100" y="118" width="170" height="18" rx="5" fill="#e2e8f0" opacity="0.6" />
       <rect x="100" y="150" width="230" height="8" rx="4" fill="#94a3b8" opacity="0.5" />

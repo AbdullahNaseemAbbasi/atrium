@@ -84,7 +84,7 @@ async function Invite({ params }: { params: Promise<{ org: string }> }) {
             <ul className="mt-3 space-y-2 text-sm text-ink-muted">
               <li>Owners can invite any role, including other owners.</li>
               <li>Managers can invite team members.</li>
-              <li>Client contacts are invited from their client page, not here.</li>
+              <li>Client contacts are invited from their client page.</li>
             </ul>
           </Card>
         </aside>

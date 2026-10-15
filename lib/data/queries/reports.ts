@@ -196,7 +196,7 @@ export type Health = "on_track" | "at_risk" | "late" | "not_started";
 export const AT_RISK_GAP = 15;
 
 export interface HealthResult {
-  /** Share of the schedule that has passed, 0–100. Null without both dates. */
+  /** Share of the schedule that has passed, 0 to 100. Null without both dates. */
   elapsed: number | null;
   /** progress − elapsed, in percentage points. */
   gap: number | null;
@@ -205,7 +205,7 @@ export interface HealthResult {
 
 /**
  * Project health:
- * - Time elapsed = (now − start) ÷ (due − start), clamped to 0–100%.
+ * - Time elapsed = (now − start) ÷ (due − start), clamped to 0 to 100%.
  * - Late = the due date has passed and the project isn't completed.
  * - Not started = the start date is still in the future.
  * - At risk = progress trails time elapsed by more than 15 percentage points.

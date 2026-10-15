@@ -43,7 +43,7 @@ const RETENTION: { title: string; body: string }[] = [
   },
   {
     title: "Billing records",
-    body: "Invoices are kept for 7 years after the workspace is deleted, because tax law requires it. Card details are held by the payment provider, never by Atrium.",
+    body: "Invoices are kept for 7 years after the workspace is deleted, because tax law requires it. Atrium never stores card details. The payment provider holds them.",
   },
   {
     title: "Deleting the workspace",

@@ -26,7 +26,7 @@ test.describe("client approval journey", () => {
     const app = await team.newPage();
     await app.goto("/w/kinetic/projects/prj_seo/deliverables/dlv_calendar");
     await expect(app.getByText("Daniel Reed").first()).toBeVisible();
-    await expect(app.getByText("“Approved, thanks.”")).toBeVisible();
+    await expect(app.getByText("Approved, thanks.", { exact: true })).toBeVisible();
     await team.close();
   });
 });

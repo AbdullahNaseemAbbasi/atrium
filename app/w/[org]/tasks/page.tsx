@@ -96,8 +96,8 @@ async function Tasks({ params, searchParams }: { params: Promise<{ org: string }
         title="Tasks"
         description={
           filters.scope === "mine"
-            ? "Everything assigned to you, across every project you work on."
-            : (data.scopeNote ?? "Every task across your projects, in one list, board or calendar.")
+            ? "Tasks assigned to you in all your projects."
+            : (data.scopeNote ?? "Tasks from all your projects, as a list, board or calendar.")
         }
         actions={newTask}
       />

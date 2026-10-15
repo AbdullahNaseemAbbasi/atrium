@@ -131,8 +131,8 @@ export function WorkspaceHeader({ shell }: { shell: WorkspaceShell }) {
             className="hidden items-center gap-2 rounded-xl px-3 py-2 text-sm text-ink-muted transition hover:bg-white/5 hover:text-ink lg:flex"
           >
             <CircleHelp size={18} aria-hidden="true" />
-            <span className="hidden 2xl:inline">Help & Support</span>
-            <span className="sr-only 2xl:hidden">Help & Support</span>
+            <span className="hidden 2xl:inline">Help and support</span>
+            <span className="sr-only 2xl:hidden">Help and support</span>
           </Link>
 
           <UserMenu shell={shell} />
@@ -314,7 +314,7 @@ function MobileNav({
             ))}
           </nav>
           <div className="border-t border-line pt-4">
-            <p className="px-1 text-[11px] uppercase tracking-wider text-ink-faint">Switch workspace</p>
+            <p className="px-1 text-xs font-medium text-ink-faint">Switch workspace</p>
             <div className="mt-2 space-y-1">
               {shell.switcher.map((entry) => (
                 <Link

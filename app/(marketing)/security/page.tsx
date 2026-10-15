@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { Building2, CreditCard, EyeOff, FlaskConical, KeyRound, LockKeyhole, Mail, ScrollText, UserCog, type LucideIcon } from "lucide-react";
 import { buttonClasses } from "@/components/ui/button";
-import { CheckList, Container, CtaBand, Eyebrow, PageIntro } from "@/components/marketing/primitives";
+import { CheckList, Container, CtaBand, PageIntro } from "@/components/marketing/primitives";
 
 export const metadata: Metadata = {
   title: "Security",
@@ -28,7 +28,7 @@ const TOPICS: Topic[] = [
     points: [
       "Every page, query and server action checks your membership and role before it reads or writes anything.",
       "IDs sent from the browser are never trusted: the record is loaded and its workspace is compared with yours first.",
-      "A project, file or client from another workspace returns “not found” rather than “forbidden”, so IDs can't be used to discover what exists.",
+      "A project, file or client from another workspace returns a not-found page instead of an access-denied page, so IDs can't be used to discover what exists.",
       "The access rules are pure functions with their own automated tests, so a change that weakens them shows up as a failing test.",
     ],
   },
@@ -109,7 +109,6 @@ export default function SecurityPage() {
   return (
     <>
       <PageIntro
-        eyebrow={<Eyebrow>Security</Eyebrow>}
         title="Built so one client never sees another client's work"
         description="Agencies hold other companies' unreleased work. This page explains, in plain terms, how Atrium keeps it where it belongs, and where the demo build still differs from production."
       />
@@ -117,7 +116,7 @@ export default function SecurityPage() {
       <Container className="grid gap-10 pb-8 lg:grid-cols-[220px_1fr]">
         <nav aria-label="On this page" className="hidden lg:block">
           <div className="sticky top-28">
-            <p className="text-xs font-semibold uppercase tracking-[0.14em] text-ink-faint">On this page</p>
+            <p className="text-sm font-medium text-ink-secondary">On this page</p>
             <ul className="mt-4 space-y-1 border-l border-line">
               {[...TOPICS, { id: "demo", title: "About this demo" }, { id: "report", title: "Reporting an issue" }].map((topic) => (
                 <li key={topic.id}>

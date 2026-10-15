@@ -43,7 +43,7 @@ export interface UsageMeter {
   label: string;
   used: number;
   limit: number | null;
-  /** 0–100, capped. Unlimited limits report 0. */
+  /** 0 to 100, capped. Unlimited limits report 0. */
   percent: number;
   /** ok ≤ 80%, warning above 80%, limit at or over the cap. */
   level: MeterLevel;

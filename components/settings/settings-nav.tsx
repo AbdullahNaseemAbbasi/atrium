@@ -41,7 +41,7 @@ export function SettingsNav({ sections, billingHref }: { sections: SettingsNavSe
       <nav aria-label="Settings sections" className="card sticky top-[96px] hidden p-2 lg:block">
         {groups.map(({ group, items }) => (
           <div key={group} className="py-1.5">
-            <p className="px-3 pb-1.5 pt-1 text-[11px] font-medium uppercase tracking-wider text-ink-faint">{group}</p>
+            <p className="px-3 pb-1.5 pt-1 text-xs font-medium text-ink-faint">{group}</p>
             <ul className="space-y-0.5">
               {items.map((item) => {
                 const active = pathname === item.href || pathname.startsWith(`${item.href}/`);

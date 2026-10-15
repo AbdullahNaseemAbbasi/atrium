@@ -38,8 +38,8 @@ async function Notifications({ params, searchParams }: { params: Promise<{ org: 
         title="Notifications"
         description={
           data.counts.unread > 0
-            ? `${data.counts.unread} unread in ${data.orgName}. Reviews, comments and assignments that involve you.`
-            : `You're all caught up in ${data.orgName}.`
+            ? `${data.counts.unread} unread in ${data.orgName}.`
+            : `No unread notifications in ${data.orgName}.`
         }
         actions={<MarkAllReadButton orgSlug={data.orgSlug} unread={data.counts.unread} />}
       />
@@ -63,8 +63,8 @@ async function Notifications({ params, searchParams }: { params: Promise<{ org: 
             data.filter === "unread" && data.counts.all > 0 ? (
               <EmptyState
                 icon={CheckCheck}
-                title="You're all caught up"
-                description="Nothing unread. Older notifications are still under All."
+                title="No unread notifications"
+                description="Older notifications are still under All."
                 action={
                   <Link href={href("all")} className={buttonClasses({ variant: "secondary" })}>
                     Show all notifications
@@ -75,7 +75,7 @@ async function Notifications({ params, searchParams }: { params: Promise<{ org: 
               <EmptyState
                 icon={BellOff}
                 title="No notifications yet"
-                description="You'll hear here when a client reviews work, someone mentions you or a task is assigned to you."
+                description="You'll be notified here when a client reviews your work, someone mentions you or you're assigned a task."
                 action={
                   <Link href={data.base} className={buttonClasses({ variant: "secondary" })}>
                     Back to dashboard
@@ -88,7 +88,7 @@ async function Notifications({ params, searchParams }: { params: Promise<{ org: 
               <div className="px-2 pb-2 sm:px-3">
                 {data.groups.map((group) => (
                   <section key={group.key} aria-labelledby={`ntf-day-${group.key}`}>
-                    <h2 id={`ntf-day-${group.key}`} className="flex items-center gap-3 px-3 pb-1.5 pt-4 text-xs font-semibold uppercase tracking-wider text-ink-faint">
+                    <h2 id={`ntf-day-${group.key}`} className="flex items-center gap-3 px-3 pb-1.5 pt-4 text-xs font-medium text-ink-faint">
                       {group.label}
                       <span className="h-px flex-1 bg-line" aria-hidden="true" />
                     </h2>
@@ -130,7 +130,7 @@ async function Notifications({ params, searchParams }: { params: Promise<{ org: 
             </dl>
           </Card>
           <Card className="p-5 text-sm text-ink-muted">
-            <p className="font-semibold text-ink">Only what involves you</p>
+            <p className="font-semibold text-ink">What you&apos;re notified about</p>
             <p className="mt-2">
               You get notified when a client decides on work you sent, someone comments on your tasks, or work is assigned to you. Similar
               updates within ten minutes are bundled into one.

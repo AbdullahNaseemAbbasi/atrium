@@ -1,6 +1,5 @@
 import * as React from "react";
-import { Scale } from "lucide-react";
-import { Container, Eyebrow } from "./primitives";
+import { Container } from "./primitives";
 
 export interface LegalSection {
   id: string;
@@ -22,31 +21,21 @@ export function LegalDocument({
 }) {
   return (
     <Container className="pb-24 pt-14 sm:pt-20">
-      <header className="mx-auto max-w-3xl text-center">
-        <div className="flex justify-center">
-          <Eyebrow icon={Scale}>{eyebrow}</Eyebrow>
-        </div>
-        <h1 className="mt-5 text-4xl font-bold tracking-tight text-ink sm:text-5xl">{title}</h1>
-        <p className="mt-4 text-sm text-ink-faint">Draft version · not yet in effect</p>
+      <header className="mx-auto max-w-5xl">
+        <p className="text-sm text-ink-faint">{eyebrow}</p>
+        <h1 className="mt-3 text-4xl font-semibold text-ink sm:text-5xl">{title}</h1>
+        <p className="mt-4 text-sm text-ink-faint">Draft version, not yet in effect</p>
       </header>
 
-      <div
-        role="note"
-        className="mx-auto mt-10 flex max-w-3xl flex-col gap-3 rounded-2xl border border-amber-500/25 bg-amber-500/[0.06] px-5 py-4 text-sm text-amber-100/90 sm:flex-row sm:items-start"
-      >
-        <span className="mt-0.5 w-fit flex-none whitespace-nowrap rounded-md border border-amber-400/30 bg-amber-500/10 px-2 py-0.5 text-[11px] font-semibold uppercase tracking-wider text-amber-200">
-          Placeholder for legal review
-        </span>
-        <p className="leading-relaxed">
-          This text outlines the structure and intent of the document. It has not been reviewed by a lawyer and is not a binding
-          agreement. Items in [square brackets] still need real details.
-        </p>
-      </div>
+      <p role="note" className="mx-auto mt-8 max-w-5xl border-l-2 border-amber-400/60 pl-4 text-sm leading-relaxed text-amber-100/90">
+        Placeholder for legal review. This text sets out the structure and intent of the document. A lawyer hasn&apos;t reviewed it
+        and it isn&apos;t a binding agreement. Items in [square brackets] still need real details.
+      </p>
 
       <div className="mx-auto mt-12 grid max-w-5xl gap-10 lg:grid-cols-[220px_1fr]">
         <nav aria-label="Sections" className="hidden lg:block">
           <div className="sticky top-28">
-            <p className="text-xs font-semibold uppercase tracking-[0.14em] text-ink-faint">Contents</p>
+            <p className="text-sm font-medium text-ink-secondary">Contents</p>
             <ol className="mt-4 space-y-1 border-l border-line">
               {sections.map((section, index) => (
                 <li key={section.id}>
