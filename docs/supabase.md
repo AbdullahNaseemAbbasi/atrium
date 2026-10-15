@@ -15,10 +15,15 @@ from `lib/data/seed.ts` through `pnpm seed`.
 4. Apply the schema: `supabase db push`. It creates the tables, RLS
    policies, Realtime publication entries and the `avatars` and
    `project-files` buckets.
-5. In Authentication > URL configuration, set the site URL and redirect
-   URLs for each environment. `supabase/config.toml` holds the local values
-   (`http://localhost:3000`) and turns email confirmation off so demo
-   sign-ups can sign in at once.
+5. Push the auth settings: `supabase config push` shows a diff and asks
+   before changing anything (answer `n` to only look; an empty answer means
+   yes). `supabase/config.toml` turns email confirmation off, because the
+   default Supabase mailer only emails the project's team members, so public
+   demo sign-ups could never confirm. Use a custom SMTP provider and turn
+   confirmation back on for a real launch.
+6. In Authentication > URL configuration, set the site URL and redirect
+   URLs for each deployed environment (the config holds the local
+   `http://localhost:3000` values). Password reset links use them.
 
 ## 2. Environment variables
 

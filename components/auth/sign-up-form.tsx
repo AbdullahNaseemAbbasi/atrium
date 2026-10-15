@@ -1,16 +1,18 @@
 "use client";
 
-import { useActionState } from "react";
+import { useActionState, type ReactNode } from "react";
 import Link from "next/link";
 import { signUp } from "@/lib/actions/auth";
 import { Checkbox, Field, FormMessage, Input } from "@/components/ui/form";
 import { SubmitButton } from "@/components/ui/interactive";
 import { PasswordField, SIGN_UP_RULES } from "./password-field";
 
-export function SignUpForm({ next }: { next?: string }) {
+/** `nextField` is the streamed hidden `next` input (see NextField); the inputs never re-render under it. */
+export function SignUpForm({ nextField }: { nextField?: ReactNode }) {
   const [state, action] = useActionState(signUp, null);
   const errors = state?.fieldErrors ?? {};
   const values = state?.values ?? {};
+  const next = typeof values.next === "string" && values.next ? values.next : undefined;
   const emailTaken = Boolean(errors.email?.some((message) => message.toLowerCase().includes("already")));
 
   return (
@@ -28,8 +30,7 @@ export function SignUpForm({ next }: { next?: string }) {
           )}
         </FormMessage>
       )}
-      {/* Kept for flows that come back to an invitation; the action redirects to onboarding today. */}
-      <input type="hidden" name="next" value={next ?? ""} />
+      {nextField}
       <Field label="Full name" htmlFor="name" error={errors.name} required>
         <Input
           id="name"

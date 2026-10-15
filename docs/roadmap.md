@@ -10,7 +10,7 @@ Mapped to the brief's milestones (S1 to S8).
 | S4 | Private deliverables, versions, comments, approval workflow, notifications | Done on Supabase (real uploads, live notifications) |
 | S5 | Plans, checkout test mode, webhook verification, usage enforcement | Done as a simulated test-mode checkout with an idempotent webhook processor; real Stripe test keys in phase 2 |
 | S6 | Client portal polish, dashboards, accessibility, responsive layouts | Done; accessibility pass to repeat after phase 2 |
-| S7 | Cross-tenant security tests, E2E tests, logging, performance review | Done: 92 unit tests, 30 Playwright tests (security, approval journey, mobile layout); structured logging arrives with the Supabase phase |
+| S7 | Cross-tenant security tests, E2E tests, logging, performance review | Done: 94 unit tests, 30 Playwright tests (run on both backends) (security, approval journey, mobile layout); structured logging arrives with the Supabase phase |
 | S8 | CI/CD, deployment, seed/demo accounts, screenshots, diagram, walkthrough | CI workflow, demo accounts and screenshots done; deployment and a recorded walkthrough next |
 
 ## Phase 2: Supabase and Stripe
@@ -23,6 +23,7 @@ Mapped to the brief's milestones (S1 to S8).
 | Storage: signed uploads with progress, signed downloads, image previews, profile photos | Done |
 | Realtime: live refresh of workspace and portal screens, notification toasts | Done |
 | Scheduled demo reset (`/api/cron/reset-demo`) | Done (needs a scheduler on the host) |
+| E2E suite on Supabase (`pnpm test:e2e:supabase`), sign-up and onboarding checked on the hosted project | Done |
 | Stripe test mode: Checkout, customer portal, Stripe signatures on the existing processor | Next |
 | Transactional email (invites, review requests, digests) through a provider adapter | Next |
 | Deployment with the Supabase keys | Next |

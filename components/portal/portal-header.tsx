@@ -72,7 +72,7 @@ export function PortalHeader({ shell }: { shell: PortalShell }) {
   return (
     <header className="sticky top-0 z-50 pt-3">
       <div className="flex h-[70px] items-center rounded-2xl border border-white/[0.08] bg-[#0b1722]/95 px-3 shadow-xl backdrop-blur-xl sm:px-4 lg:px-6">
-        <Link href={shell.base} className="flex min-w-0 flex-none items-center gap-3" aria-label={`${shell.client.name} portal home`}>
+        <Link href={shell.base} className="flex min-w-0 max-w-[260px] shrink items-center gap-3 lg:max-w-[240px] xl:max-w-[300px]" aria-label={`${shell.client.name} portal home`}>
           <LogoMark size={24} className="hidden flex-none drop-shadow-[0_0_14px_rgba(34,211,238,.45)] sm:block" />
           <span className="hidden h-7 w-px bg-line-strong sm:block" aria-hidden="true" />
           <BrandTile name={shell.client.name} hue={shell.client.hue} />
@@ -82,7 +82,7 @@ export function PortalHeader({ shell }: { shell: PortalShell }) {
           </span>
         </Link>
 
-        <nav aria-label="Portal" className="ml-10 hidden h-full items-center gap-1 lg:flex">
+        <nav aria-label="Portal" className="ml-6 hidden h-full flex-none items-center gap-1 lg:flex xl:ml-10">
           {nav.map((item) => {
             const active = isActive(pathname, item, shell.base);
             return (
@@ -106,7 +106,7 @@ export function PortalHeader({ shell }: { shell: PortalShell }) {
           })}
         </nav>
 
-        <div className="ml-auto flex items-center gap-1.5 sm:gap-2">
+        <div className="ml-auto flex flex-none items-center gap-1.5 sm:gap-2">
           <NotificationsMenu
             orgSlug={shell.org.slug}
             unread={shell.notifications.unread}

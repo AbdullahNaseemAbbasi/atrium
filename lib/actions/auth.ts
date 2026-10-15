@@ -4,6 +4,7 @@ import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { z } from "zod";
 import { homePathFor } from "@/lib/auth/context";
+import { safeNext } from "@/lib/auth/safe-next";
 import { createSession, destroySession } from "@/lib/auth/session";
 import { DEMO_ACCOUNTS, DEMO_PASSWORD } from "@/lib/data/seed";
 import { getDb, newId, saveDb } from "@/lib/data/store";
@@ -20,10 +21,6 @@ const signInSchema = z.object({
 const WRONG_CREDENTIALS = "That email and password don't match an account.";
 
 /** Only allow same-site relative redirects after sign-in. */
-function safeNext(next: string | undefined) {
-  if (!next || !next.startsWith("/") || next.startsWith("//")) return null;
-  return next;
-}
 
 /* ---------- Supabase helpers ---------- */
 

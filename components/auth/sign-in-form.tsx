@@ -1,18 +1,19 @@
 "use client";
 
-import { useActionState } from "react";
+import { useActionState, type ReactNode } from "react";
 import Link from "next/link";
 import { signIn } from "@/lib/actions/auth";
 import { Field, FormMessage, Input } from "@/components/ui/form";
 import { SubmitButton } from "@/components/ui/interactive";
 
-export function SignInForm({ next }: { next?: string }) {
+/** `nextField` is the streamed hidden `next` input (see NextField); the inputs never re-render under it. */
+export function SignInForm({ nextField }: { nextField?: ReactNode }) {
   const [state, action] = useActionState(signIn, null);
   const errors = state?.fieldErrors ?? {};
   return (
     <form action={action} className="space-y-5" noValidate>
       {state && !state.ok && !state.fieldErrors && <FormMessage>{state.message}</FormMessage>}
-      <input type="hidden" name="next" value={next ?? ""} />
+      {nextField}
       <Field label="Work email" htmlFor="email" error={errors.email}>
         <Input
           id="email"

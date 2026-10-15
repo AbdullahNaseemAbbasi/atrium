@@ -118,8 +118,9 @@ With a Supabase project: fill in the Supabase variables, run
 | `pnpm build && pnpm start` | Production build and server (set `SESSION_SECRET`, or `ATRIUM_DEMO=true` for a demo deploy) |
 | `pnpm lint` | ESLint |
 | `pnpm typecheck` | Route type generation + `tsc --noEmit` |
-| `pnpm test` | Unit tests (92): tenant isolation, roles, client boundaries, review state machine, KPI formulas, billing webhooks, CSV escaping, reports, upload tickets, photo checks |
+| `pnpm test` | Unit tests (94): tenant isolation, roles, client boundaries, review state machine, KPI formulas, billing webhooks, CSV escaping, reports, upload tickets, photo checks, open-redirect guard |
 | `pnpm test:e2e` | Playwright against a production build in memory mode (30): sign-in, project and task creation, the client approval journey, cross-tenant and role checks, mobile layout |
+| `pnpm test:e2e:supabase` | The same 30 tests against a server on Supabase (real Auth and Postgres; reset the demo before and after) |
 | `pnpm seed` | Loads the demo users, photos and workspaces into Supabase |
 
 On Supabase the demo resets with `pnpm seed`, from `/admin` → Reset demo

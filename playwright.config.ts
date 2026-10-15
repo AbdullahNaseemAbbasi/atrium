@@ -2,10 +2,13 @@ import { defineConfig, devices } from "@playwright/test";
 
 /**
  * End-to-end tests run against a production build on its own port, so they
- * never touch the data of a running dev server. They force the in-memory
- * backend (even when .env.local has Supabase keys), so the shared Supabase
- * demo data is never changed by a test run, and every boot starts from the
- * same seed.
+ * never touch the data of a running dev server. By default they force the
+ * in-memory backend (even when .env.local has Supabase keys), so the shared
+ * Supabase demo data is never changed by a test run, and every boot starts
+ * from the same seed.
+ *
+ * `pnpm test:e2e:supabase` runs the same suite on Supabase instead
+ * (playwright.supabase.config.ts).
  */
 const PORT = 3200;
 export const E2E_SESSION_SECRET = "e2e-session-secret-at-least-32-characters-long";

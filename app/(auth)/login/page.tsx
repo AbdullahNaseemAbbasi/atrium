@@ -3,6 +3,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { ArrowRight, Briefcase, CreditCard, Eye, ShieldCheck, User, UserCheck, Users } from "lucide-react";
 import { AuthShell } from "@/components/auth/auth-shell";
+import { NextField } from "@/components/auth/next-field";
 import { SignInForm } from "@/components/auth/sign-in-form";
 import { FormMessage } from "@/components/ui/form";
 import { signInAsDemo } from "@/lib/actions/auth";
@@ -34,9 +35,16 @@ export default function LoginPage({ searchParams }: PageProps<"/login">) {
         </>
       }
     >
-      <Suspense fallback={<SignInForm />}>
-        <LoginForm searchParams={searchParams} />
+      <Suspense fallback={null}>
+        <LoginNotices searchParams={searchParams} />
       </Suspense>
+      <SignInForm
+        nextField={
+          <Suspense fallback={null}>
+            <NextField searchParams={searchParams} />
+          </Suspense>
+        }
+      />
 
       <div className="mt-8">
         <div className="flex items-center gap-3 text-xs text-ink-faint">
@@ -77,9 +85,9 @@ export default function LoginPage({ searchParams }: PageProps<"/login">) {
   );
 }
 
-async function LoginForm({ searchParams }: { searchParams: Promise<Record<string, string | string[] | undefined>> }) {
+/** Messages from the URL. The form itself is static so typing never gets wiped by streaming. */
+async function LoginNotices({ searchParams }: { searchParams: Promise<Record<string, string | string[] | undefined>> }) {
   const query = await searchParams;
-  const next = typeof query.next === "string" ? query.next : undefined;
   return (
     <>
       {query.signedOut && (
@@ -88,7 +96,7 @@ async function LoginForm({ searchParams }: { searchParams: Promise<Record<string
         </FormMessage>
       )}
       {query.error === "demo" && <FormMessage className="mb-5">That demo account isn&apos;t available.</FormMessage>}
-      <SignInForm next={next} />
+      {query.error === "link" && <FormMessage className="mb-5">That link has expired or was already used. Request a new one.</FormMessage>}
     </>
   );
 }

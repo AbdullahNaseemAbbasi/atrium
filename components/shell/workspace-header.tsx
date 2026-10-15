@@ -76,7 +76,7 @@ export function WorkspaceHeader({ shell }: { shell: WorkspaceShell }) {
 
         <OrgSwitcher current={shell.org} entries={shell.switcher} />
 
-        <nav aria-label="Primary" className="ml-6 hidden h-full items-center gap-1 xl:flex">
+        <nav aria-label="Primary" className="ml-4 hidden h-full flex-none items-center gap-0.5 xl:flex 2xl:ml-6 2xl:gap-1">
           {shell.nav.map((item) => {
             const Icon = NAV_ICONS[item.key];
             const active = isActive(pathname, item.href, shell.base);
@@ -86,7 +86,7 @@ export function WorkspaceHeader({ shell }: { shell: WorkspaceShell }) {
                 href={item.href}
                 aria-current={active ? "page" : undefined}
                 className={cn(
-                  "relative flex h-full items-center gap-2 px-3 text-sm transition-colors 2xl:px-4",
+                  "relative flex h-full items-center gap-2 px-2.5 text-sm transition-colors 2xl:px-4",
                   active ? "text-cyan-300" : "text-ink-muted hover:text-ink",
                 )}
               >
@@ -100,7 +100,7 @@ export function WorkspaceHeader({ shell }: { shell: WorkspaceShell }) {
           })}
         </nav>
 
-        <div className="ml-auto flex items-center gap-1.5 sm:gap-2">
+        <div className="ml-auto flex flex-none items-center gap-1.5 sm:gap-2">
           <button
             type="button"
             onClick={() => setPaletteOpen(true)}
@@ -164,7 +164,7 @@ export function OrgSwitcher({
   const router = useRouter();
   return (
     <Dropdown>
-      <DropdownTrigger className="ml-4 hidden max-w-[220px] items-center gap-2.5 rounded-xl border border-white/[0.08] bg-white/[0.035] px-3 py-2 text-sm text-ink-secondary transition hover:border-white/15 hover:bg-white/[0.05] md:flex lg:ml-7">
+      <DropdownTrigger className="ml-4 hidden min-w-0 max-w-[220px] items-center gap-2.5 rounded-xl border border-white/[0.08] bg-white/[0.035] px-3 py-2 text-sm text-ink-secondary transition hover:border-white/15 hover:bg-white/[0.05] md:flex lg:ml-7 xl:max-w-[170px] 2xl:max-w-[220px]">
         <Building2 size={17} className="flex-none text-ink-muted" aria-hidden="true" />
         <span className="truncate">{current.name}</span>
         <ChevronDown size={15} className="flex-none text-ink-faint" aria-hidden="true" />
