@@ -159,6 +159,26 @@ body {
     backdrop-filter: blur(24px);
   }
 
+  /* Page background: an aurora along the top (cyan on the left, violet in the
+     middle, blue on the right), indigo and teal low down, over a navy wash
+     that darkens toward the bottom. Static on purpose: cards blur what's
+     behind them, so a moving background would make every card repaint. */
+  .backdrop-light {
+    background:
+      radial-gradient(60% 50% at 8% -8%, rgb(34 211 238 / 0.18), transparent 70%),
+      radial-gradient(40% 32% at 55% -10%, rgb(139 92 246 / 0.10), transparent 70%),
+      radial-gradient(50% 45% at 96% -4%, rgb(59 130 246 / 0.16), transparent 70%),
+      radial-gradient(45% 40% at -5% 100%, rgb(99 102 241 / 0.10), transparent 70%),
+      radial-gradient(55% 45% at 85% 108%, rgb(20 184 166 / 0.11), transparent 70%),
+      linear-gradient(180deg, #0a1a28 0%, var(--color-canvas) 45%, #050e15 100%);
+  }
+
+  /* Fine grain over the gradients so they don't show bands on 8-bit screens. */
+  .backdrop-grain {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+    opacity: 0.035;
+  }
+
   /* Horizontal scrollers (wide tables on phones): a soft shadow on the edge
      that has more content, so people can tell the table scrolls. The
      "local" layers cover the shadows once you reach that edge. */

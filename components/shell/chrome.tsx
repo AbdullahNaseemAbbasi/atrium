@@ -2,14 +2,12 @@ import Link from "next/link";
 import { Logo } from "@/components/brand/logo";
 import { Skeleton } from "@/components/ui/misc";
 
-/** Fixed ambient glow + faint grid behind every app screen. */
+/** Fixed background behind every screen: layered light over the navy canvas (see .backdrop-light in globals.css). */
 export function Backdrop() {
   return (
     <div className="pointer-events-none fixed inset-0 overflow-hidden" aria-hidden="true">
-      <div className="absolute -left-32 top-20 h-[500px] w-[500px] rounded-full bg-cyan-500/[0.06] blur-[120px]" />
-      <div className="absolute right-0 top-0 h-[420px] w-[420px] rounded-full bg-blue-600/[0.05] blur-[110px]" />
-      <div className="absolute bottom-0 left-1/3 h-[380px] w-[380px] rounded-full bg-sky-500/[0.035] blur-[120px]" />
-      <div className="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.012)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.012)_1px,transparent_1px)] bg-[size:40px_40px]" />
+      <div className="backdrop-light absolute inset-0" />
+      <div className="backdrop-grain absolute inset-0" />
     </div>
   );
 }
