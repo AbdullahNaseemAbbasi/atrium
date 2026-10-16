@@ -43,8 +43,8 @@ export function AppFooter() {
 
 export function HeaderSkeleton() {
   return (
-    <div className="sticky top-0 z-50 pt-3">
-      <div className="flex h-[70px] items-center gap-4 rounded-2xl border border-white/[0.08] bg-[#0b1722]/95 px-4 lg:px-6">
+    <div className="sticky top-0 z-50">
+      <div className="flex h-[70px] items-center gap-4 rounded-b-2xl border border-t-0 border-white/[0.08] bg-[#0b1722]/95 px-4 lg:px-6">
         <Logo />
         <Skeleton className="ml-6 hidden h-10 w-40 md:block" />
         <div className="ml-6 hidden gap-3 xl:flex">

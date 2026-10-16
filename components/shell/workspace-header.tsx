@@ -68,15 +68,15 @@ export function WorkspaceHeader({ shell }: { shell: WorkspaceShell }) {
   const [mobileOpen, setMobileOpen] = React.useState(false);
 
   return (
-    <header className="sticky top-0 z-50 pt-3">
-      <div className="flex h-[70px] items-center rounded-2xl border border-white/[0.08] bg-[#0b1722]/95 px-3 shadow-xl backdrop-blur-xl sm:px-4 lg:px-6">
+    <header className="sticky top-0 z-50">
+      <div className="flex h-[70px] items-center rounded-b-2xl border border-t-0 border-white/[0.08] bg-[#0b1722]/95 px-3 shadow-xl backdrop-blur-xl sm:px-4 lg:px-6">
         <Link href={shell.base} aria-label="Atrium dashboard" className="flex-none">
           <Logo className="[&>span:last-child]:hidden sm:[&>span:last-child]:inline" />
         </Link>
 
         <OrgSwitcher current={shell.org} entries={shell.switcher} />
 
-        <nav aria-label="Primary" className="ml-4 hidden h-full flex-none items-center gap-0.5 xl:flex 2xl:ml-6 2xl:gap-1">
+        <nav aria-label="Primary" className="ml-4 hidden h-full flex-none items-center gap-0.5 xl:flex 2xl:ml-6">
           {shell.nav.map((item) => {
             const Icon = NAV_ICONS[item.key];
             const active = isActive(pathname, item.href, shell.base);
@@ -86,7 +86,7 @@ export function WorkspaceHeader({ shell }: { shell: WorkspaceShell }) {
                 href={item.href}
                 aria-current={active ? "page" : undefined}
                 className={cn(
-                  "relative flex h-full items-center gap-2 px-2.5 text-sm transition-colors 2xl:px-4",
+                  "relative flex h-full items-center gap-2 px-2.5 text-sm transition-colors 2xl:px-3",
                   active ? "text-cyan-300" : "text-ink-muted hover:text-ink",
                 )}
               >
@@ -104,10 +104,10 @@ export function WorkspaceHeader({ shell }: { shell: WorkspaceShell }) {
           <button
             type="button"
             onClick={() => setPaletteOpen(true)}
-            className="hidden w-[260px] items-center gap-2 rounded-xl border border-white/[0.08] bg-white/[0.025] px-3.5 py-2.5 text-left text-sm text-ink-faint transition hover:border-white/15 2xl:flex"
+            className="hidden w-[200px] items-center gap-2 rounded-xl border border-white/[0.08] bg-white/[0.025] px-3.5 py-2.5 text-left text-sm text-ink-faint transition hover:border-white/15 2xl:flex"
           >
             <Search size={17} aria-hidden="true" />
-            <span className="flex-1">Search projects, tasks, clients…</span>
+            <span className="flex-1 truncate">Search…</span>
             <Kbd>Ctrl K</Kbd>
           </button>
           <button
@@ -128,11 +128,11 @@ export function WorkspaceHeader({ shell }: { shell: WorkspaceShell }) {
 
           <Link
             href="/help"
+            title="Help and support"
             className="hidden items-center gap-2 rounded-xl px-3 py-2 text-sm text-ink-muted transition hover:bg-white/5 hover:text-ink lg:flex"
           >
             <CircleHelp size={18} aria-hidden="true" />
-            <span className="hidden 2xl:inline">Help and support</span>
-            <span className="sr-only 2xl:hidden">Help and support</span>
+            <span className="sr-only">Help and support</span>
           </Link>
 
           <UserMenu shell={shell} />

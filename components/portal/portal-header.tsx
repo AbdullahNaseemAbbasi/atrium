@@ -70,8 +70,8 @@ export function PortalHeader({ shell }: { shell: PortalShell }) {
   const nav = navFor(shell);
 
   return (
-    <header className="sticky top-0 z-50 pt-3">
-      <div className="flex h-[70px] items-center rounded-2xl border border-white/[0.08] bg-[#0b1722]/95 px-3 shadow-xl backdrop-blur-xl sm:px-4 lg:px-6">
+    <header className="sticky top-0 z-50">
+      <div className="flex h-[70px] items-center rounded-b-2xl border border-t-0 border-white/[0.08] bg-[#0b1722]/95 px-3 shadow-xl backdrop-blur-xl sm:px-4 lg:px-6">
         <Link href={shell.base} className="flex min-w-0 max-w-[260px] shrink items-center gap-3 lg:max-w-[240px] xl:max-w-[300px]" aria-label={`${shell.client.name} portal home`}>
           <LogoMark size={24} className="hidden flex-none drop-shadow-[0_0_14px_rgba(34,211,238,.45)] sm:block" />
           <span className="hidden h-7 w-px bg-line-strong sm:block" aria-hidden="true" />
@@ -283,8 +283,8 @@ function MobileNav({
 
 export function PortalHeaderSkeleton() {
   return (
-    <div className="sticky top-0 z-50 pt-3">
-      <div className="flex h-[70px] items-center gap-3 rounded-2xl border border-white/[0.08] bg-[#0b1722]/95 px-4 lg:px-6">
+    <div className="sticky top-0 z-50">
+      <div className="flex h-[70px] items-center gap-3 rounded-b-2xl border border-t-0 border-white/[0.08] bg-[#0b1722]/95 px-4 lg:px-6">
         <Skeleton className="h-9 w-9 rounded-lg" />
         <div className="space-y-1.5">
           <Skeleton className="h-4 w-24" />
