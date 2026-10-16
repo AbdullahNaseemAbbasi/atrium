@@ -74,11 +74,21 @@ async function generateWithGemini({ system, prompt }: AiRequest): Promise<AiResu
       return { text, provider: "gemini", model };
     } catch (error) {
       lastError = error;
-      if (error instanceof ApiError && [429, 500, 503].includes(error.status)) continue;
+      if (handsOver(error)) continue;
       break;
     }
   }
   throw toUnavailable(lastError);
+}
+
+/**
+ * Worth asking the next model: busy (503), over quota (429), failing (500),
+ * cancelled or timed out upstream (499, 504), or no answer in time. A bad key
+ * or a rejected request would fail on every model, and an empty draft is final.
+ */
+function handsOver(error: unknown) {
+  if (error instanceof ApiError) return [429, 499, 500, 503, 504].includes(error.status);
+  return !(error instanceof AiUnavailableError);
 }
 
 /* ---------- Claude ---------- */
@@ -121,7 +131,7 @@ function toUnavailable(error: unknown): AiUnavailableError {
     error instanceof ApiError ? error.status : error instanceof Anthropic.APIError ? (error.status ?? 0) : 0;
   console.error("[atrium] AI request failed", status || "", error instanceof Error ? error.message : error);
   if (status === 429) return new AiUnavailableError("quota", "The AI service has reached its limit for now. Try again later.");
-  if (status >= 500 || error instanceof Anthropic.APIConnectionTimeoutError) {
+  if (status >= 500 || status === 499 || error instanceof Anthropic.APIConnectionTimeoutError) {
     return new AiUnavailableError("busy", "The AI service is busy. Try again in a minute.");
   }
   return new AiUnavailableError("failed", "The AI couldn't write a draft right now. Try again in a moment.");

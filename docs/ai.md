@@ -20,9 +20,10 @@ the comment box and the person edits and posts it. The update can be copied.
   effort, with server-side refusal fallback enabled.
 - **Gemini** otherwise, when `GEMINI_API_KEY` is set (free tier):
   `gemini-3.6-flash` with minimal thinking, then `gemini-3.5-flash`, then
-  `gemini-3.5-flash-lite`. A model that is busy (503), over its quota (429)
-  or failing (500) hands over to the next one. Free-tier quotas are per
-  model, so the chain also spreads the load.
+  `gemini-3.5-flash-lite`. A model that is busy (503), over its quota (429),
+  failing (500), cancelled or timed out upstream (499, 504) or silent past
+  the timeout hands over to the next one. Free-tier quotas are per model, so
+  the chain also spreads the load.
 - No key: the AI buttons don't render and the actions refuse.
 
 Keys are read only on the server and never reach the browser. One attempt
